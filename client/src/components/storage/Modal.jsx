@@ -20,11 +20,14 @@ const Modal = ({ isOpen, onClose, children }) => {
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50">
-      <div ref={modalRef} className="bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto">
+    <div 
+      className={`fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4 z-50 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+    >
+      <div 
+        ref={modalRef} 
+        className={`bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+      >
         <div className="p-4">
           <button 
             onClick={onClose}

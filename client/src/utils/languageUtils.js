@@ -1,4 +1,6 @@
 import { languages } from 'prismjs';
+import 'prismjs/components/prism-jsx';
+import 'prismjs/components/prism-tsx';
 import 'prismjs/components/prism-markup';
 import 'prismjs/components/prism-css';
 import 'prismjs/components/prism-clike';
@@ -21,6 +23,11 @@ import 'prismjs/components/prism-powershell';
 import 'prismjs/components/prism-php';
 
 export const getLanguageForPrism = (lang) => {
+  if (typeof lang !== 'string') {
+    console.warn(`Invalid language type: ${typeof lang}. Expected a string.`);
+    return 'plaintext';
+  }
+
   const lowercaseLang = lang.toLowerCase();
   switch (lowercaseLang) {
     case 'html':
@@ -30,19 +37,18 @@ export const getLanguageForPrism = (lang) => {
     case 'sh':
     case 'shell':
       return languages.bash;
-    case 'js':
+    case 'react':
+    case 'jsx':
+      return languages.jsx;
+    case 'node.js':
+    case 'node':
       return languages.javascript;
-    case 'ts':
-      return languages.typescript;
-    case 'python':
-    case 'py':
-      return languages.python;
-    case 'rb':
-      return languages.ruby;
+    case 'c#':
     case 'cs':
+    case 'csharp':
       return languages.csharp;
-    case 'cpp':
     case 'c++':
+    case 'cpp':
       return languages.cpp;
     default:
       return languages[lowercaseLang] || languages.plaintext;
@@ -50,7 +56,7 @@ export const getLanguageForPrism = (lang) => {
 };
 
 export const getSupportedLanguages = () => [
-  'Markup', 'CSS', 'C-like', 'JavaScript', 'TypeScript', 'Python', 'Java', 
+  'Markup', 'CSS', 'JavaScript', 'TypeScript', 'Python', 'Java', 
   'C', 'C++', 'C#', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Scala', 
   'SQL', 'Bash', 'PowerShell', 'PHP', 'HTML', 'XML', 'SVG'
 ];

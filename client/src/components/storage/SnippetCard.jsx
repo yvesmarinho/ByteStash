@@ -17,14 +17,8 @@ const SnippetCard = ({ snippet, viewMode, onOpen, onDelete, onEdit }) => {
     onEdit(snippet);
   };
 
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteSnippet(snippet.id);
-      onDelete(snippet.id);
-    } catch (error) {
-      console.error('Error deleting snippet:', error);
-      // Handle error (e.g., show error message to user)
-    }
+  const handleDeleteConfirm = () => {
+    onDelete(snippet.id);
     setIsDeleteModalOpen(false);
   };
 
@@ -52,7 +46,7 @@ const SnippetCard = ({ snippet, viewMode, onOpen, onDelete, onEdit }) => {
         <p className="text-sm text-gray-400 mb-2">{snippet.language}</p>
         <p className="text-sm text-gray-300 mb-3 line-clamp-2 min-h-[3em]">{snippet.description ? snippet.description : 'No description available'}</p>
         <CodeBlock code={snippet.code} language={snippet.language} isPreview={true} />
-        {snippet.code.split('\n').length > 3 && (
+        {snippet.code.split('\n').length > 4 && (
           <p className="text-xs text-gray-500 mt-2">Click to view full snippet...</p>
         )}
       </div>

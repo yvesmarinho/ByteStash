@@ -1,11 +1,14 @@
 import React from 'react';
 import SnippetStorage from './components/storage/SnippetStorage';
+import { ToastProvider } from './components/toast/Toast';
 
 function App() {
   return (
-    <div className="App">
-      <SnippetStorage />
-    </div>
+    <ToastProvider>
+      <div className="App">
+        <SnippetStorage />
+      </div>
+    </ToastProvider>
   );
 }
 

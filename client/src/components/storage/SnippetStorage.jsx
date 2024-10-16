@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Search, Grid, List, Plus, ChevronDown } from 'lucide-react';
 import SnippetCard from './SnippetCard';
 import SnippetModal from './SnippetModal';
 import EditSnippetModal  from './EditSnippetModal';
-import { deleteSnippet, fetchSnippets } from '../../api/snippets';
+import { createSnippet, deleteSnippet, editSnippet, fetchSnippets } from '../../api/snippets';
+import { useToast } from '../toast/Toast';
 
 const SnippetStorage = () => {
   const [snippets, setSnippets] = useState([]);
@@ -14,20 +15,28 @@ const SnippetStorage = () => {
   const [selectedSnippet, setSelectedSnippet] = useState(null);
   const [isEditSnippetModalOpen, setIsEditSnippetModalOpen] = useState(false);
   const [snippetToEdit, setSnippetToEdit] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { addToast } = useToast();
+
+  const loadSnippets = useCallback(async () => {
+    if (!isLoading) return;
+    
+    try {
+      const fetchedSnippets = await fetchSnippets();
+      setSnippets(fetchedSnippets);
+      setFilteredSnippets(fetchedSnippets);
+      addToast('Snippets loaded successfully', 'success');
+    } catch (error) {
+      console.error('Failed to fetch snippets:', error);
+      addToast('Failed to load snippets. Please try again.', 'error');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isLoading, addToast]);
 
   useEffect(() => {
-    const loadSnippets = async () => {
-      try {
-        const fetchedSnippets = await fetchSnippets();
-        setSnippets(fetchedSnippets);
-        setFilteredSnippets(fetchedSnippets);
-      } catch (error) {
-        console.error('Failed to fetch snippets:', error);
-        // Handle error (e.g., show error message to user)
-      }
-    };
     loadSnippets();
-  }, []);
+  }, [loadSnippets]);
 
   useEffect(() => {
     const filtered = snippets.filter(snippet => 
@@ -58,13 +67,27 @@ const SnippetStorage = () => {
     setIsEditSnippetModalOpen(false);
   };
 
-  const handleSnippetSubmit = (updatedSnippet) => {
-    if (snippetToEdit) {
-      setSnippets(prevSnippets => prevSnippets.map(s => s.id === updatedSnippet.id ? updatedSnippet : s));
-    } else {
-      setSnippets(prevSnippets => [...prevSnippets, updatedSnippet]);
+  const handleSnippetSubmit = async (snippetData) => {
+    try {
+      let updatedSnippetData;
+      if (snippetToEdit) {
+        // Editing an existing snippet
+        updatedSnippetData = await editSnippet(snippetToEdit.id, snippetData);
+        setSnippets(prevSnippets =>
+          prevSnippets.map(s => s.id === updatedSnippetData.id ? updatedSnippetData : s)
+        );
+        addToast('Snippet updated successfully', 'success');
+      } else {
+        // Creating a new snippet
+        updatedSnippetData = await createSnippet(snippetData);
+        setSnippets(prevSnippets => [...prevSnippets, updatedSnippetData]);
+        addToast('New snippet created successfully', 'success');
+      }
+      closeEditSnippetModal();
+    } catch (error) {
+      console.error('Error saving snippet:', error);
+      addToast(snippetToEdit ? 'Failed to update snippet' : 'Failed to create snippet', 'error');
     }
-    closeEditSnippetModal();
   };
 
   const handleDeleteSnippet = async (id) => {
@@ -74,9 +97,10 @@ const SnippetStorage = () => {
       if (selectedSnippet && selectedSnippet.id === id) {
         closeSnippet();
       }
+      addToast('Snippet deleted successfully', 'success');
     } catch (error) {
       console.error('Failed to delete snippet:', error);
-      // Handle error (e.g., show error message to user)
+      addToast('Failed to delete snippet. Please try again.', 'error');
     }
   };
 
@@ -126,7 +150,7 @@ const SnippetStorage = () => {
         </button>
         <button
           className="p-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors duration-200 flex items-center"
-          onClick={openEditSnippetModal}
+          onClick={() => openEditSnippetModal(null)}
         >
           <Plus size={20} className="mr-2" />
           <span>New Snippet</span>

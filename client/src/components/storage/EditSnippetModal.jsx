@@ -1,12 +1,10 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import Modal from './Modal';
-import Editor from 'react-simple-code-editor';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
-import { highlight } from 'prismjs';
-import { getLanguageForPrism, getSupportedLanguages } from '../../utils/languageUtils';
-import { createSnippet, editSnippet } from '../../api/snippets';
+import { getSupportedLanguages } from '../../utils/languageUtils';
+import DynamicCodeEditor from './DynamicCodeEditor';
 
 const CustomDropdown = ({ options, value, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -106,61 +104,48 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
   const [description, setDescription] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState('');
+  const [key, setKey] = useState(0);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const supportedLanguages = useMemo(() => getSupportedLanguages(), []);
   
   useEffect(() => {
     if (isOpen) {
       if (snippetToEdit) {
-        setTitle(snippetToEdit.title);
-        setLanguage(snippetToEdit.language);
+        setTitle(snippetToEdit.title || '');
+        setLanguage(snippetToEdit.language || '');
         setDescription(snippetToEdit.description || '');
-        setCode(snippetToEdit.code);
+        setCode(snippetToEdit.code || '');
       } else {
-        // Reset all fields when opening for a new snippet
         setTitle('');
         setLanguage('');
         setDescription('');
         setCode('');
       }
       setError('');
+      setKey(prevKey => prevKey + 1);
     }
   }, [isOpen, snippetToEdit]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setError('');
+    if (isSubmitting) return;
+
+    setIsSubmitting(true);
+    const snippetData = {
+      title,
+      language,
+      description,
+      code
+    };
 
     try {
-      let updatedSnippet;
-      if (snippetToEdit) {
-        updatedSnippet = await editSnippet(snippetToEdit.id, { title, language, description, code });
-      } else {
-        updatedSnippet = await createSnippet({ title, language, description, code });
-      }
-      onSubmit(updatedSnippet);
-      onClose();
+      onSubmit(snippetData);
     } catch (error) {
-      console.error('Failed to save snippet:', error);
-      setError('Failed to save snippet. Please try again.');
-    }
-  };
-
-  const handleKeyDown = (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-    }
-  };
-
-  const highlightWithFallback = (code) => {
-    if (!language) {
-      return code; // Return unhighlighted code if no language is selected
-    }
-    try {
-      return highlight(code, getLanguageForPrism(language));
-    } catch (error) {
-      console.warn(`Failed to highlight for language: ${language}`, error);
-      return code; // Fallback to unhighlighted code
+      setError('An error occurred while saving the snippet. Please try again.');
+      console.error('Error saving snippet:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -170,7 +155,7 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
         {snippetToEdit ? 'Edit Snippet' : 'Add New Snippet'}
       </h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
-      <form onSubmit={handleSubmit} onKeyDown={handleKeyDown} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-300">Title</label>
           <input
@@ -205,21 +190,13 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
           <div className="mt-1 rounded-md bg-gray-800 border border-gray-600 overflow-hidden">
-            <Editor
-              value={code}
-              onValueChange={code => setCode(code)}
-              highlight={highlightWithFallback}
-              padding={10}
-              style={{
-                fontFamily: '"Fira code", "Fira Mono", monospace',
-                fontSize: 13,
-                backgroundColor: '#1e1e1e',
-                color: '#d4d4d4',
-                height: '200px',
-                overflowY: 'auto',
-              }}
-              required
-            />
+          <DynamicCodeEditor
+            key={key}
+            code={code}
+            onValueChange={setCode}
+            language={language}
+            required
+          />
           </div>
         </div>
         <div className="flex justify-end">
@@ -232,9 +209,10 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm disabled:bg-blue-400"
+            disabled={isSubmitting}
           >
-            {snippetToEdit ? 'Save Changes' : 'Add Snippet'}
+            {isSubmitting ? 'Saving...' : (snippetToEdit ? 'Save Changes' : 'Add Snippet')}
           </button>
         </div>
       </form>
