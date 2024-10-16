@@ -1,6 +1,6 @@
 {
-  "short_name": "React App",
-  "name": "Create React App Sample",
+  "short_name": "ByteStash",
+  "name": "ByteStash is a code snippet storage solution",
   "icons": [
     {
       "src": "favicon.ico",
