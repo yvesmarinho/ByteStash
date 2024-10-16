@@ -1,0 +1,32 @@
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "5000:5000"
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - PGUSER=bytestash
+      - PGHOST=db
+      - PGPASSWORD=bytestash-password123
+      - PGDATABASE=snippets_db
+      - PGPORT=5432
+      - OUTPUT_DIR=/data/snippets
+    volumes:
+      - ./data:/data/snippets
+    depends_on:
+      - db
+
+  db:
+    image: postgres:13-alpine
+    environment:
+      - POSTGRES_USER=bytestash
+      - POSTGRES_PASSWORD=bytestash-password123
+      - POSTGRES_DB=snippets_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
