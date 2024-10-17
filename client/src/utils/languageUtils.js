@@ -22,6 +22,8 @@ import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
 import 'prismjs/components/prism-php';
 
+let customLanguages = new Set();
+
 export const getLanguageForPrism = (lang) => {
   if (typeof lang !== 'string') {
     console.warn(`Invalid language type: ${typeof lang}. Expected a string.`);
@@ -55,13 +57,38 @@ export const getLanguageForPrism = (lang) => {
   }
 };
 
-export const getSupportedLanguages = () => [
+const defaultLanguages = [
   'Markup', 'CSS', 'JavaScript', 'TypeScript', 'Python', 'Java', 
   'C', 'C++', 'C#', 'Ruby', 'Go', 'Rust', 'Swift', 'Kotlin', 'Scala', 
   'SQL', 'Bash', 'PowerShell', 'PHP', 'HTML', 'XML', 'SVG'
 ];
 
+export const getSupportedLanguages = () => {
+  return [...defaultLanguages, ...customLanguages];
+};
+
+export const addCustomLanguage = (lang) => {
+  const existingLanguage = getSupportedLanguages().find(l => l.toLowerCase() === lang.toLowerCase());
+  if (existingLanguage) {
+    return existingLanguage;
+  }
+  customLanguages.add(lang);
+  return lang;
+};
+
+export const removeCustomLanguage = (lang) => {
+  if (lang === null) {
+    // Remove all custom languages
+    customLanguages.clear();
+  } else {
+    customLanguages.delete(lang);
+  }
+};
+
 export const getLanguageLabel = (lang) => {
-  const capitalizedLang = lang.charAt(0).toUpperCase() + lang.slice(1);
-  return capitalizedLang.replace(/(\w+)script/i, '$1Script');
+  const existingLanguage = getSupportedLanguages().find(l => l.toLowerCase() === lang.toLowerCase());
+  if (existingLanguage) {
+    return existingLanguage;
+  }
+  return lang.charAt(0).toUpperCase() + lang.slice(1).replace(/(\w+)script/i, '$1Script');
 };

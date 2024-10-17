@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Modal from './Modal';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
@@ -6,20 +6,21 @@ import 'prismjs/themes/prism.css';
 import { getSupportedLanguages } from '../../utils/languageUtils';
 import DynamicCodeEditor from './DynamicCodeEditor';
 
-const CustomDropdown = ({ options, value, onChange }) => {
+const CustomDropdown = ({ options, value, onChange, maxLength }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
-  const dropdownRef = React.useRef(null);
-  const inputRef = React.useRef(null);
+  const [internalValue, setInternalValue] = useState(value || '');
+  const dropdownRef = useRef(null);
+  const inputRef = useRef(null);
 
   useEffect(() => {
-    setSearchTerm(value || '');
+    setInternalValue(value || '');
   }, [value]);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
         setIsOpen(false);
+        matchCaseAndUpdate();
       }
     };
 
@@ -27,22 +28,28 @@ const CustomDropdown = ({ options, value, onChange }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [options, internalValue]);
 
-  const filteredOptions = (options || []).filter(option =>
-    option.toLowerCase().includes((searchTerm || '').toLowerCase())
-  );
+  const matchCaseAndUpdate = () => {
+    const match = options.find(option => 
+      option.toLowerCase() === internalValue.toLowerCase()
+    );
+    if (match) {
+      setInternalValue(match);
+      onChange(match);
+    } else {
+      onChange(internalValue);
+    }
+  };
 
   const handleInputChange = (e) => {
-    const newValue = e.target.value;
-    setSearchTerm(newValue);
-    onChange(newValue);
-    setIsOpen(true);
+    const newValue = e.target.value.slice(0, maxLength);
+    setInternalValue(newValue);
   };
 
   const handleOptionClick = (option) => {
+    setInternalValue(option);
     onChange(option);
-    setSearchTerm(option);
     setIsOpen(false);
   };
 
@@ -53,15 +60,21 @@ const CustomDropdown = ({ options, value, onChange }) => {
     }
   };
 
+  const handleInputBlur = () => {
+    matchCaseAndUpdate();
+  };
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
-      if (searchTerm && !filteredOptions.includes(searchTerm)) {
-        onChange(searchTerm); // Add custom entry
-        setIsOpen(false);
-      }
+      setIsOpen(false);
+      matchCaseAndUpdate();
     }
   };
+
+  const filteredOptions = options.filter(option =>
+    option.toLowerCase().includes(internalValue.toLowerCase())
+  );
 
   return (
     <div className="relative" ref={dropdownRef}>
@@ -69,11 +82,13 @@ const CustomDropdown = ({ options, value, onChange }) => {
         ref={inputRef}
         type="text"
         className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
-        value={searchTerm}
+        value={internalValue}
         onChange={handleInputChange}
         onFocus={handleInputFocus}
+        onBlur={handleInputBlur}
         onKeyDown={handleKeyDown}
         placeholder="Select or type a language"
+        maxLength={maxLength}
       />
       {isOpen && (
         <ul className="absolute z-10 mt-1 w-full bg-gray-700 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto">
@@ -83,13 +98,14 @@ const CustomDropdown = ({ options, value, onChange }) => {
                 key={index}
                 className="px-4 py-2 hover:bg-gray-600 cursor-pointer text-white text-sm"
                 onClick={() => handleOptionClick(option)}
+                onMouseDown={(e) => e.preventDefault()}
               >
                 {option}
               </li>
             ))
           ) : (
             <li className="px-4 py-2 text-gray-400 text-sm italic">
-              Press Enter to add "{searchTerm}" as a custom language
+              No matching languages found
             </li>
           )}
         </ul>
@@ -106,14 +122,15 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
   const [error, setError] = useState('');
   const [key, setKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [supportedLanguages, setSupportedLanguages] = useState([]);
 
-  const supportedLanguages = useMemo(() => getSupportedLanguages(), []);
-  
   useEffect(() => {
     if (isOpen) {
+      setSupportedLanguages(getSupportedLanguages());
+
       if (snippetToEdit) {
-        setTitle(snippetToEdit.title || '');
-        setLanguage(snippetToEdit.language || '');
+        setTitle(snippetToEdit.title?.slice(0, 255) || '');
+        setLanguage(snippetToEdit.language?.slice(0, 50) || '');
         setDescription(snippetToEdit.description || '');
         setCode(snippetToEdit.code || '');
       } else {
@@ -127,14 +144,18 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
     }
   }, [isOpen, snippetToEdit]);
 
+  const handleLanguageChange = (newLanguage) => {
+    setLanguage(newLanguage);
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (isSubmitting) return;
 
     setIsSubmitting(true);
     const snippetData = {
-      title,
-      language,
+      title: title.slice(0, 255),
+      language: language.slice(0, 50),
       description,
       code
     };
@@ -156,26 +177,35 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
       </h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Title input */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-300">Title</label>
           <input
             type="text"
             id="title"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => setTitle(e.target.value.slice(0, 100))}
             className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
             required
-            placeholder="Enter the title of the snippet"
+            placeholder="Enter the title of the snippet (max 100 characters)"
+            maxLength={100}
           />
+          <p className="text-sm text-gray-400 mt-1">{title.length}/100 characters</p>
         </div>
+        
+        {/* Language dropdown */}
         <div>
           <label htmlFor="language" className="block text-sm font-medium text-gray-300">Language</label>
           <CustomDropdown
             options={supportedLanguages}
             value={language}
-            onChange={setLanguage}
+            onChange={handleLanguageChange}
+            maxLength={50}
           />
+          <p className="text-sm text-gray-400 mt-1">{language.length}/50 characters</p>
         </div>
+        
+        {/* Description textarea */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-300">Description</label>
           <textarea
@@ -187,6 +217,8 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
             placeholder="Write a short description of the snippet"
           ></textarea>
         </div>
+        
+        {/* Code editor */}
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
           <div className="mt-1 rounded-md bg-gray-800 border border-gray-600 overflow-hidden">
@@ -199,6 +231,8 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
           />
           </div>
         </div>
+        
+        {/* Submit and Cancel buttons */}
         <div className="flex justify-end">
           <button
             type="button"

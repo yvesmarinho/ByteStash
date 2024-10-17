@@ -36,4 +36,4 @@ RUN mkdir -p ${OUTPUT_DIR}
 
 EXPOSE 5000
 
-CMD ["node", "index.js"]
+CMD ["node", "src/app.js"]

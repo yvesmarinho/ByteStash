@@ -1,5 +1,5 @@
-import React, { createContext, useContext, useState } from 'react';
-import { X } from 'lucide-react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { X, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
 
 const ToastContext = createContext();
 
@@ -8,7 +8,7 @@ export const useToast = () => useContext(ToastContext);
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = 'info', duration = 5000) => {
+  const addToast = (message, type = 'info', duration = 3000) => {
     const id = Date.now();
     setToasts(prevToasts => [...prevToasts, { id, message, type, duration }]);
     setTimeout(() => removeToast(id), duration);
@@ -21,7 +21,7 @@ export const ToastProvider = ({ children }) => {
   return (
     <ToastContext.Provider value={{ addToast, removeToast }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div className="fixed bottom-4 right-4 z-50 space-y-2">
         {toasts.map(toast => (
           <Toast key={toast.id} {...toast} onClose={() => removeToast(toast.id)} />
         ))}
@@ -33,7 +33,7 @@ export const ToastProvider = ({ children }) => {
 const Toast = ({ message, type, duration, onClose }) => {
   const [progress, setProgress] = useState(100);
 
-  React.useEffect(() => {
+  useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prevProgress => {
         if (prevProgress <= 0) {
@@ -47,23 +47,55 @@ const Toast = ({ message, type, duration, onClose }) => {
     return () => clearInterval(interval);
   }, [duration]);
 
-  const bgColor = {
-    info: 'bg-blue-500',
-    success: 'bg-green-500',
-    error: 'bg-red-500',
-    warning: 'bg-yellow-500',
+  const toastConfig = {
+    info: {
+      icon: Info,
+      bgColor: 'bg-blue-500',
+      borderColor: 'border-blue-600',
+      textColor: 'text-blue-50',
+    },
+    success: {
+      icon: CheckCircle,
+      bgColor: 'bg-green-500',
+      borderColor: 'border-green-600',
+      textColor: 'text-green-50',
+    },
+    error: {
+      icon: AlertCircle,
+      bgColor: 'bg-red-500',
+      borderColor: 'border-red-600',
+      textColor: 'text-red-50',
+    },
+    warning: {
+      icon: AlertTriangle,
+      bgColor: 'bg-yellow-500',
+      borderColor: 'border-yellow-600',
+      textColor: 'text-yellow-50',
+    },
   }[type];
 
+  const Icon = toastConfig.icon;
+
   return (
-    <div className={`${bgColor} text-white p-4 rounded-lg shadow-lg mb-2 relative overflow-hidden`}>
-      <button onClick={onClose} className="absolute top-2 right-2">
+    <div className={`${toastConfig.bgColor} ${toastConfig.textColor} p-4 rounded-lg shadow-lg relative overflow-hidden border-l-4 ${toastConfig.borderColor} flex items-center max-w-md`}>
+      <div className="mr-3">
+        <Icon size={24} />
+      </div>
+      <div className="flex-grow mr-8">
+        <p className="font-semibold">{message}</p>
+      </div>
+      <button 
+        onClick={onClose}
+        className="absolute top-0 right-0 h-full px-4 flex items-center justify-center hover:bg-black hover:bg-opacity-10 transition-colors duration-200"
+      >
         <X size={16} />
       </button>
-      <p>{message}</p>
       <div 
-        className="absolute bottom-0 left-0 h-1 bg-white bg-opacity-50"
+        className="absolute bottom-0 left-0 h-1 bg-white bg-opacity-30"
         style={{ width: `${progress}%`, transition: 'width 100ms linear' }}
       />
     </div>
   );
 };
+
+export default ToastProvider;

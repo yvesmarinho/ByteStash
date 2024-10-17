@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Trash2, Clock } from 'lucide-react';
+import { formatDistanceToNow } from 'date-fns';
 import CodeBlock from './CodeBlock';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-import { deleteSnippet } from '../../api/snippets';
 
 const SnippetCard = ({ snippet, viewMode, onOpen, onDelete, onEdit }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -20,6 +20,16 @@ const SnippetCard = ({ snippet, viewMode, onOpen, onDelete, onEdit }) => {
   const handleDeleteConfirm = () => {
     onDelete(snippet.id);
     setIsDeleteModalOpen(false);
+  };
+
+  const getRelativeTime = (updatedAt) => {
+    try {
+      const date = new Date(updatedAt);
+      return formatDistanceToNow(date, { addSuffix: true });
+    } catch (error) {
+      console.error('Error formatting date:', error);
+      return 'Unknown time';
+    }
   };
 
   return (
@@ -42,9 +52,17 @@ const SnippetCard = ({ snippet, viewMode, onOpen, onDelete, onEdit }) => {
         >
           <Pencil size={18} className="text-gray-400 hover:text-blue-500" />
         </button>
-        <h3 className="text-xl font-bold mb-2 text-gray-200">{snippet.title}</h3>
-        <p className="text-sm text-gray-400 mb-2">{snippet.language}</p>
-        <p className="text-sm text-gray-300 mb-3 line-clamp-2 min-h-[3em]">{snippet.description ? snippet.description : 'No description available'}</p>
+        <h3 className="text-xl font-bold mb-2 text-gray-200 truncate" title={snippet.title}>
+          {snippet.title}
+        </h3>
+        <p className="text-sm text-gray-400 mb-2 truncate">{snippet.language}</p>
+        <p className="text-sm text-gray-300 mb-2 line-clamp-1 min-h-[1em] break-words">
+          {snippet.description ? snippet.description : 'No description available'}
+        </p>
+        <div className="flex items-center text-xs text-gray-500 mb-3">
+          <Clock size={14} className="mr-1" />
+          <span>Updated {getRelativeTime(snippet.updated_at)}</span>
+        </div>
         <CodeBlock code={snippet.code} language={snippet.language} isPreview={true} />
         {snippet.code.split('\n').length > 4 && (
           <p className="text-xs text-gray-500 mt-2">Click to view full snippet...</p>
