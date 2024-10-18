@@ -1,32 +1,29 @@
+import { Snippet } from '../types/types';
+
 const API_URL = '/api/snippets';
 
-export const fetchSnippets = async () => {
+export const fetchSnippets = async (): Promise<Snippet[]> => {
   try {
     const response = await fetch(API_URL);
     if (!response.ok) {
       throw new Error('Failed to fetch snippets');
     }
     const data = await response.json();
-    return data; // Return the fetched snippets instead of setting state directly
+    return data;
   } catch (error) {
     console.error('Error fetching snippets:', error);
-    throw error; // Re-throw the error for the caller to handle
+    throw error;
   }
 };
 
-export const createSnippet = async (snippet) => {
+export const createSnippet = async (snippet: Omit<Snippet, 'id' | 'updated_at'>): Promise<Snippet> => {
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title: snippet.title,
-        language: snippet.language,
-        description: snippet.description,
-        code: snippet.code
-      }),
+      body: JSON.stringify(snippet),
     });
 
     if (!response.ok) {
@@ -34,14 +31,14 @@ export const createSnippet = async (snippet) => {
     }
 
     const createdSnippet = await response.json();
-    return createdSnippet; // Return the created snippet
+    return createdSnippet;
   } catch (error) {
     console.error('Error creating snippet:', error);
     throw error;
   }
 };
 
-export const deleteSnippet = async (id) => {
+export const deleteSnippet = async (id: string): Promise<string> => {
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
@@ -51,27 +48,22 @@ export const deleteSnippet = async (id) => {
       throw new Error('Failed to delete snippet');
     }
 
-    await response.json(); // Consume the response body
-    return id; // Return the deleted snippet id
+    await response.json();
+    return id;
   } catch (error) {
     console.error('Error deleting snippet:', error);
     throw error;
   }
 };
 
-export const editSnippet = async (id, snippet) => {
+export const editSnippet = async (id: string, snippet: Omit<Snippet, 'id' | 'updated_at'>): Promise<Snippet> => {
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        title: snippet.title,
-        language: snippet.language,
-        description: snippet.description,
-        code: snippet.code
-      }),
+      body: JSON.stringify(snippet),
     });
 
     if (!response.ok) {

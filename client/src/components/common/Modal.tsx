@@ -1,12 +1,13 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
+import { ModalProps } from '../../types/types';
 
-const Modal = ({ isOpen, onClose, children }) => {
-  const modalRef = useRef();
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+  const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (modalRef.current && !modalRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modalRef.current && !modalRef.current.contains(event.target as Node)) {
         onClose();
       }
     };

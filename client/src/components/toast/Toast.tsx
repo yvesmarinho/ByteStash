@@ -1,20 +1,27 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { X, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
+import { ToastProviderProps, ToastContextType, ToastProps } from '../../types/types';
 
-const ToastContext = createContext();
+const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
-export const useToast = () => useContext(ToastContext);
+export const useToast = () => {
+  const context = useContext(ToastContext);
+  if (context === undefined) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  return context;
+};
 
-export const ToastProvider = ({ children }) => {
-  const [toasts, setToasts] = useState([]);
+export const ToastProvider: React.FC<ToastProviderProps> = ({ children }) => {
+  const [toasts, setToasts] = useState<ToastProps[]>([]);
 
-  const addToast = (message, type = 'info', duration = 3000) => {
+  const addToast = (message: string, type: 'info' | 'success' | 'error' | 'warning' = 'info', duration = 3000) => {
     const id = Date.now();
-    setToasts(prevToasts => [...prevToasts, { id, message, type, duration }]);
+    setToasts(prevToasts => [...prevToasts, { id, message, type, duration, onClose: () => removeToast(id) }]);
     setTimeout(() => removeToast(id), duration);
   };
 
-  const removeToast = (id) => {
+  const removeToast = (id: number) => {
     setToasts(prevToasts => prevToasts.filter(toast => toast.id !== id));
   };
 
@@ -30,7 +37,7 @@ export const ToastProvider = ({ children }) => {
   );
 };
 
-const Toast = ({ message, type, duration, onClose }) => {
+const Toast: React.FC<ToastProps> = ({ message, type, duration, onClose }) => {
   const [progress, setProgress] = useState(100);
 
   useEffect(() => {

@@ -2,19 +2,20 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 import { getLanguageForPrism } from '../../utils/languageUtils';
+import { DynamicCodeEditorProps } from '../../types/types';
 
-const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expandable = false }) => {
+const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode, language, onValueChange, expandable = false }) => {
   const [code, setCode] = useState(initialCode);
   const [editorHeight, setEditorHeight] = useState('400px');
-  const textareaRef = useRef(null);
-  const highlighterRef = useRef(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlighterRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     setCode(initialCode);
     adjustHeight();
   }, [initialCode]);
 
-  const handleChange = (e) => {
+  const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
     setCode(newCode);
     onValueChange(newCode);
@@ -29,10 +30,10 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
     }
   };
   
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
-      if (e.target.selectionStart === e.target.selectionEnd) {
+      if (e.currentTarget.selectionStart === e.currentTarget.selectionEnd) {
         insertText('\t');
       } else {
         indentSelection();
@@ -46,8 +47,10 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
     }
   };
 
-  const insertText = (text) => {
+  const insertText = (text: string) => {
     const textarea = textareaRef.current;
+    if (!textarea) return;
+
     const { selectionStart, selectionEnd } = textarea;
     const newCode = 
       code.substring(0, selectionStart) + 
@@ -64,6 +67,8 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
 
   const indentSelection = () => {
     const textarea = textareaRef.current;
+    if (!textarea) return;
+
     const { selectionStart, selectionEnd } = textarea;
     const selectedText = code.substring(selectionStart, selectionEnd);
     const lines = selectedText.split('\n');
@@ -86,6 +91,8 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
 
   const unindentSelection = () => {
     const textarea = textareaRef.current;
+    if (!textarea) return;
+
     const { selectionStart, selectionEnd } = textarea;
     const selectedText = code.substring(selectionStart, selectionEnd);
     const lines = selectedText.split('\n');
@@ -123,7 +130,7 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
   const lineHeight = '20px';
   const padding = '1rem';
 
-  const commonStyles = {
+  const commonStyles: React.CSSProperties = {
     boxSizing: 'border-box',
     margin: 0,
     border: 0,
@@ -141,7 +148,7 @@ const DynamicCodeEditor = ({ code: initialCode, language, onValueChange, expanda
   };
 
   // Ensure empty lines are preserved
-  const processCodeForHighlighter = (code) => {
+  const processCodeForHighlighter = (code: string): string => {
     return code.split('\n').map(line => line || ' ').join('\n');
   };
 

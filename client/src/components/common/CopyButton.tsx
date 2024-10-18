@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import { Copy, Check } from 'lucide-react';
+import { CopyButtonProps } from '../../types/types';
 
-const CopyButton = ({ text }) => {
+const CopyButton: React.FC<CopyButtonProps> = ({ text }) => {
   const [isCopied, setIsCopied] = useState(false);
 
-  const handleCopy = async (e) => {
+  const handleCopy = async (e: React.MouseEvent) => {
     e.stopPropagation();
     try {
       await navigator.clipboard.writeText(text);

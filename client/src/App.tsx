@@ -1,15 +1,15 @@
 import React from 'react';
-import SnippetStorage from './components/storage/SnippetStorage';
+import SnippetStorage from './components/snippets/SnippetStorage';
 import { ToastProvider } from './components/toast/Toast';
 
-function App() {
+const App: React.FC = () => {
   return (
     <ToastProvider>
-      <div className="App">
+      <div className="min-h-screen bg-gray-900">
         <SnippetStorage />
       </div>
     </ToastProvider>
   );
-}
+};
 
 export default App;

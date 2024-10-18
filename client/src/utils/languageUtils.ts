@@ -22,9 +22,13 @@ import 'prismjs/components/prism-bash';
 import 'prismjs/components/prism-powershell';
 import 'prismjs/components/prism-php';
 
-let customLanguages = new Set();
+let customLanguages = new Set<string>();
 
-export const getLanguageForPrism = (lang) => {
+function isLanguagesRecord(obj: any): obj is Record<string, string> {
+    return typeof obj === 'object' && obj !== null;
+}
+
+export const getLanguageForPrism = (lang: string): string => {
   if (typeof lang !== 'string') {
     console.warn(`Invalid language type: ${typeof lang}. Expected a string.`);
     return 'plaintext';
@@ -35,25 +39,28 @@ export const getLanguageForPrism = (lang) => {
     case 'html':
     case 'xml':
     case 'svg':
-      return languages.markup;
+      return 'markup';
     case 'sh':
     case 'shell':
-      return languages.bash;
+      return 'bash';
     case 'react':
     case 'jsx':
-      return languages.jsx;
+      return 'jsx';
     case 'node.js':
     case 'node':
-      return languages.javascript;
+      return 'javascript';
     case 'c#':
     case 'cs':
     case 'csharp':
-      return languages.csharp;
+      return 'csharp';
     case 'c++':
     case 'cpp':
-      return languages.cpp;
+      return 'cpp';
     default:
-      return languages[lowercaseLang] || languages.plaintext;
+        if (isLanguagesRecord(languages) && lowercaseLang in languages) {
+            return languages[lowercaseLang];
+        }
+        return 'plaintext';
   }
 };
 
@@ -63,11 +70,11 @@ const defaultLanguages = [
   'SQL', 'Bash', 'PowerShell', 'PHP', 'HTML', 'XML', 'SVG'
 ];
 
-export const getSupportedLanguages = () => {
-  return [...defaultLanguages, ...customLanguages];
+export const getSupportedLanguages = (): string[] => {
+    return [...defaultLanguages, ...customLanguages];
 };
 
-export const addCustomLanguage = (lang) => {
+export const addCustomLanguage = (lang: string): string => {
   const existingLanguage = getSupportedLanguages().find(l => l.toLowerCase() === lang.toLowerCase());
   if (existingLanguage) {
     return existingLanguage;
@@ -76,7 +83,7 @@ export const addCustomLanguage = (lang) => {
   return lang;
 };
 
-export const removeCustomLanguage = (lang) => {
+export const removeCustomLanguage = (lang: string | null): void => {
   if (lang === null) {
     // Remove all custom languages
     customLanguages.clear();
@@ -85,7 +92,7 @@ export const removeCustomLanguage = (lang) => {
   }
 };
 
-export const getLanguageLabel = (lang) => {
+export const getLanguageLabel = (lang: string): string => {
   const existingLanguage = getSupportedLanguages().find(l => l.toLowerCase() === lang.toLowerCase());
   if (existingLanguage) {
     return existingLanguage;

@@ -1,7 +1,8 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { DeleteConfirmationModalProps } from '../../types/types';
 
-const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, snippetTitle }) => {
+const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ isOpen, onClose, onConfirm, snippetTitle }) => {
   if (!isOpen) return null;
 
   return (
@@ -35,6 +36,6 @@ const DeleteConfirmationModal = ({ isOpen, onClose, onConfirm, snippetTitle }) =
       </div>
     </div>
   );
-};
+}
 
 export default DeleteConfirmationModal;

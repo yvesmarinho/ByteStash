@@ -1,24 +1,32 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Modal from './Modal';
+import Modal from '../common/Modal';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
 import { getSupportedLanguages } from '../../utils/languageUtils';
 import DynamicCodeEditor from './DynamicCodeEditor';
+import { EditSnippetModalProps } from '../../types/types';
 
-const CustomDropdown = ({ options, value, onChange, maxLength }) => {
+interface CustomDropdownProps {
+  options: string[];
+  value: string;
+  onChange: (value: string) => void;
+  maxLength: number;
+}
+
+const CustomDropdown: React.FC<CustomDropdownProps> = ({ options, value, onChange, maxLength }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [internalValue, setInternalValue] = useState(value || '');
-  const dropdownRef = useRef(null);
-  const inputRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setInternalValue(value || '');
   }, [value]);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         matchCaseAndUpdate();
       }
@@ -42,12 +50,12 @@ const CustomDropdown = ({ options, value, onChange, maxLength }) => {
     }
   };
 
-  const handleInputChange = (e) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value.slice(0, maxLength);
     setInternalValue(newValue);
   };
 
-  const handleOptionClick = (option) => {
+  const handleOptionClick = (option: string) => {
     setInternalValue(option);
     onChange(option);
     setIsOpen(false);
@@ -64,7 +72,7 @@ const CustomDropdown = ({ options, value, onChange, maxLength }) => {
     matchCaseAndUpdate();
   };
 
-  const handleKeyDown = (e) => {
+  const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       setIsOpen(false);
@@ -114,7 +122,7 @@ const CustomDropdown = ({ options, value, onChange, maxLength }) => {
   );
 };
 
-const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
+const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('');
   const [description, setDescription] = useState('');
@@ -122,7 +130,7 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
   const [error, setError] = useState('');
   const [key, setKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [supportedLanguages, setSupportedLanguages] = useState([]);
+  const [supportedLanguages, setSupportedLanguages] = useState<string[]>([]);
 
   useEffect(() => {
     if (isOpen) {
@@ -144,11 +152,11 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
     }
   }, [isOpen, snippetToEdit]);
 
-  const handleLanguageChange = (newLanguage) => {
+  const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -177,7 +185,6 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
       </h2>
       {error && <p className="text-red-500 mb-4">{error}</p>}
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Title input */}
         <div>
           <label htmlFor="title" className="block text-sm font-medium text-gray-300">Title</label>
           <input
@@ -193,7 +200,6 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
           <p className="text-sm text-gray-400 mt-1">{title.length}/100 characters</p>
         </div>
         
-        {/* Language dropdown */}
         <div>
           <label htmlFor="language" className="block text-sm font-medium text-gray-300">Language</label>
           <CustomDropdown
@@ -205,7 +211,6 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
           <p className="text-sm text-gray-400 mt-1">{language.length}/50 characters</p>
         </div>
         
-        {/* Description textarea */}
         <div>
           <label htmlFor="description" className="block text-sm font-medium text-gray-300">Description</label>
           <textarea
@@ -213,12 +218,11 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
-            rows="3"
+            rows={3}
             placeholder="Write a short description of the snippet"
           ></textarea>
         </div>
         
-        {/* Code editor */}
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
           <div className="mt-1 rounded-md bg-gray-800 border border-gray-600 overflow-hidden">
@@ -227,12 +231,10 @@ const EditSnippetModal = ({ isOpen, onClose, onSubmit, snippetToEdit }) => {
             code={code}
             onValueChange={setCode}
             language={language}
-            required
           />
           </div>
         </div>
         
-        {/* Submit and Cancel buttons */}
         <div className="flex justify-end">
           <button
             type="button"
