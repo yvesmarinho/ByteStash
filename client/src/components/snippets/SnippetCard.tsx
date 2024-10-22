@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Pencil, Trash2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { fromZonedTime } from 'date-fns-tz';
 import CodeBlock from './CodeBlock';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
@@ -35,7 +36,11 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   const getRelativeTime = (updatedAt: string): string => {
     try {
       const date = new Date(updatedAt);
-      return formatDistanceToNow(date, { addSuffix: true });
+      const localDate = fromZonedTime(date, 'Africa/Abidjan');
+      return formatDistanceToNow(localDate, { 
+        addSuffix: true,
+        includeSeconds: true 
+      });
     } catch (error) {
       console.error('Error formatting date:', error);
       return 'Unknown time';
