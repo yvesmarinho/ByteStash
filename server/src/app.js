@@ -8,21 +8,34 @@ const app = express();
 const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
-app.use(express.static(path.join(__dirname, '../client/build')));
+app.use(express.static(path.join(__dirname, '../../client/build')));
 
 app.use('/api/snippets', snippetRoutes);
 
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+  res.sendFile(path.join(__dirname, '../../client/build', 'index.html'));
 });
 
-initializeDatabase()
-  .then(() => {
-    app.listen(port, () => {
-      console.log(`Server running on port ${port}`);
+async function startServer() {
+  try {
+    await initializeDatabase();
+    return new Promise((resolve) => {
+      const server = app.listen(port, () => {
+        console.log(`Server running on port ${port}`);
+        resolve(server);
+      });
     });
-  })
-  .catch((error) => {
-    console.error('Failed to initialize database. Exiting.', error);
+  } catch (error) {
+    console.error('Failed to initialize database:', error);
+    throw error;
+  }
+}
+
+if (require.main === module) {
+  startServer().catch(err => {
+    console.error('Failed to start server:', err);
     process.exit(1);
   });
+}
+
+module.exports = { app, startServer };
