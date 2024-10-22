@@ -6,19 +6,27 @@ RUN npm install
 COPY client/ ./
 RUN npm run build
 
-# Server stage
+# Build stage for server
+FROM node:16-alpine AS server-build
+WORKDIR /app/server
+COPY server/package.json server/package-lock.json ./
+RUN npm install
+COPY server/ ./
+RUN npm run build
+
+# Production stage
 FROM node:16-alpine
 WORKDIR /app
 
 # Install PostgreSQL client
 RUN apk add --no-cache postgresql-client
 
-# Copy server files
-COPY server/package.json server/package-lock.json ./
-RUN npm install
-COPY server/ ./
+# Copy server build and dependencies
+COPY --from=server-build /app/server/dist ./dist
+COPY --from=server-build /app/server/package*.json ./
+RUN npm install --production
 
-# Copy client build from build stage
+# Copy client build
 COPY --from=client-build /app/client/build ./client/build
 
 # Set environment variables
@@ -36,4 +44,4 @@ RUN mkdir -p ${OUTPUT_DIR}
 
 EXPOSE 5000
 
-CMD ["node", "src/app.js"]
+CMD ["node", "dist/app.js"]
