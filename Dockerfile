@@ -1,47 +1,31 @@
 # Build stage for client
-FROM node:16-alpine AS client-build
+FROM node:18-alpine AS client-build
 WORKDIR /app/client
 COPY client/package.json client/package-lock.json ./
 RUN npm install
 COPY client/ ./
 RUN npm run build
 
-# Build stage for server
-FROM node:16-alpine AS server-build
-WORKDIR /app/server
-COPY server/package.json server/package-lock.json ./
-RUN npm install
-COPY server/ ./
-RUN npm run build
-
 # Production stage
-FROM node:16-alpine
+FROM node:18-alpine
 WORKDIR /app
 
-# Install PostgreSQL client
-RUN apk add --no-cache postgresql-client
-
-# Copy server build and dependencies
-COPY --from=server-build /app/server/dist ./dist
-COPY --from=server-build /app/server/package*.json ./
+# Copy server source and dependencies
+WORKDIR /app
+COPY server/package.json server/package-lock.json ./
 RUN npm install --production
+COPY server/src ./src
 
 # Copy client build
-COPY --from=client-build /app/client/build ./client/build
+COPY --from=client-build /app/client/build /client/build
 
 # Set environment variables
-ENV NODE_ENV=production
-ENV PORT=5000
-ENV PGUSER=bytestash
-ENV PGHOST=db
-ENV PGPASSWORD=bytestash-password123
-ENV PGDATABASE=snippets_db
-ENV PGPORT=5432
+ENV PORT=8500
 ENV OUTPUT_DIR=/data/snippets
 
 # Create output directory
 RUN mkdir -p ${OUTPUT_DIR}
 
-EXPOSE 5000
+EXPOSE 8500
 
-CMD ["node", "dist/app.js"]
+CMD ["node", "src/app.js"]

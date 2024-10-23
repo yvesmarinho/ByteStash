@@ -1,6 +1,5 @@
 const { app, BrowserWindow } = require('electron');
-const path = require('path');
-const isDev = process.env.NODE_ENV === 'development';
+const PORT = process.env.PORT || 8500;
 let mainWindow;
 
 function createWindow() {
@@ -14,25 +13,15 @@ function createWindow() {
     autoHideMenuBar: true,
   });
 
-  // In development, connect to React dev server
-  if (isDev) {
-    mainWindow.loadURL('http://localhost:3000');
-    // Open the DevTools automatically if in development mode
-    mainWindow.webContents.openDevTools();
-  } else {
-    // In production, load from Express static files
-    mainWindow.loadURL('http://localhost:5000');
-  }
+  mainWindow.loadURL(`http://localhost:${PORT}`);
 
   mainWindow.on('closed', () => {
     mainWindow = null;
   });
 }
 
-// Initialize app
 app.whenReady().then(createWindow);
 
-// Quit when all windows are closed
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -45,7 +34,6 @@ app.on('activate', () => {
   }
 });
 
-// Handle automatic backups
 app.on('before-quit', async () => {
   const { createBackup } = require('../server/src/config/database');
 
