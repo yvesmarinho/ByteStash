@@ -21,10 +21,9 @@ COPY --from=client-build /app/client/build /client/build
 
 # Set environment variables
 ENV PORT=5000
-ENV OUTPUT_DIR=/data/snippets
 
 # Create output directory
-RUN mkdir -p ${OUTPUT_DIR}
+RUN mkdir -p ./data/snippets
 
 EXPOSE 5000
 

@@ -8,6 +8,5 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5000
-      - OUTPUT_DIR=/data/snippets
     volumes:
       - ./data:/data/snippets

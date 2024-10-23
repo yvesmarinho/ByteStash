@@ -9,7 +9,7 @@ function getDatabasePath() {
   if (process.env.NODE_ENV === 'production') {
     const userDataPath = process.env.ELECTRON_START_URL
       ? path.join(process.env.APPDATA || process.env.HOME || process.env.USERPROFILE, 'ByteStash')
-      : process.env.OUTPUT_DIR || './data';
+      : './data/snippets';
     
     if (!fs.existsSync(userDataPath)) {
       fs.mkdirSync(userDataPath, { recursive: true });
@@ -17,7 +17,7 @@ function getDatabasePath() {
     
     return path.join(userDataPath, 'snippets.db');
   } else {
-    const devPath = path.join(__dirname, '../../../data');
+    const devPath = path.join(__dirname, '../../../data/snippets');
     if (!fs.existsSync(devPath)) {
       fs.mkdirSync(devPath, { recursive: true });
     }
