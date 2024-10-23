@@ -1,5 +1,5 @@
 const { app, BrowserWindow } = require('electron');
-const PORT = process.env.PORT || 8500;
+const PORT = process.env.PORT || 5000;
 let mainWindow;
 
 function createWindow() {

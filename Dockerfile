@@ -20,12 +20,12 @@ COPY server/src ./src
 COPY --from=client-build /app/client/build /client/build
 
 # Set environment variables
-ENV PORT=8500
+ENV PORT=5000
 ENV OUTPUT_DIR=/data/snippets
 
 # Create output directory
 RUN mkdir -p ${OUTPUT_DIR}
 
-EXPOSE 8500
+EXPOSE 5000
 
 CMD ["node", "src/app.js"]

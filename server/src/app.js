@@ -5,7 +5,7 @@ const { initializeDatabase } = require('./config/database');
 const snippetRoutes = require('./routes/snippetRoutes');
 
 const app = express();
-const port = process.env.PORT || 8500;
+const port = process.env.PORT || 5000;
 
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../../client/build')));
