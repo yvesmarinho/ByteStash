@@ -10,6 +10,8 @@ const port = process.env.PORT || 5000;
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, '../../client/build')));
 
+app.set('trust proxy', true);
+
 app.use('/api/snippets', snippetRoutes);
 
 app.get('*', (req, res) => {
