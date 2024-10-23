@@ -36,8 +36,7 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   const getRelativeTime = (updatedAt: string): string => {
     try {
       const date = new Date(updatedAt);
-      const localDate = fromZonedTime(date, 'Africa/Abidjan');
-      return formatDistanceToNow(localDate, { 
+      return formatDistanceToNow(date, { 
         addSuffix: true,
         includeSeconds: true 
       });
