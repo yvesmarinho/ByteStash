@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Pencil, Trash2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import { fromZonedTime } from 'date-fns-tz';
 import CodeBlock from './CodeBlock';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
