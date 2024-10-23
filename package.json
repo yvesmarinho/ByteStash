@@ -1,5 +1,7 @@
 {
   "name": "bytestash",
+  "description": "A React and node.js app that stores code snippets",
+  "author": "Jordan Dalby",
   "version": "1.0.0",
   "main": "electron/main.js",
   "scripts": {
