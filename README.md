@@ -11,8 +11,7 @@ ByteStash is a self-hosted web application designed to store, organize, and mana
 ## Tech Stack
 - Frontend: React, Tailwind CSS
 - Backend: Node.js, Express
-- Database: PostgreSQL
-- Containerisation: Docker
+- Containerisation: Docker with Electron
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any improvements or bug fixes.
