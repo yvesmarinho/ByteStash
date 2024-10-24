@@ -7,9 +7,7 @@ let db = null;
 
 function getDatabasePath() {
   if (process.env.NODE_ENV === 'production') {
-    const userDataPath = process.env.ELECTRON_START_URL
-      ? path.join(process.env.APPDATA || process.env.HOME || process.env.USERPROFILE, 'ByteStash')
-      : './data/snippets';
+    const userDataPath = './data/snippets';
     
     if (!fs.existsSync(userDataPath)) {
       fs.mkdirSync(userDataPath, { recursive: true });

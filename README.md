@@ -1,5 +1,5 @@
 # ByteStash
-ByteStash is a self-hosted web application designed to store, organize, and manage your code snippets efficiently. With support for creating, editing, and filtering snippets, ByteStash helps you keep track of your code in one secure place.
+ByteStash is a self-hosted web application designed to store, organise, and manage your code snippets efficiently. With support for creating, editing, and filtering snippets, ByteStash helps you keep track of your code in one secure place.
 
 ![ByteStash App](https://raw.githubusercontent.com/jordan-dalby/ByteStash/refs/heads/main/media/app-image.png)
 
@@ -11,7 +11,7 @@ ByteStash is a self-hosted web application designed to store, organize, and mana
 ## Tech Stack
 - Frontend: React, Tailwind CSS
 - Backend: Node.js, Express
-- Containerisation: Docker with Electron
+- Containerisation: Docker
 
 ## Contributing
 Contributions are welcome! Please submit a pull request or open an issue for any improvements or bug fixes.
