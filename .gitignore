@@ -1,5 +1,5 @@
 # db storage directory
 data
-node_modules
 
+node_modules
 dist

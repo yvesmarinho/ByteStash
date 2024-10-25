@@ -1,26 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { getLanguageForPrism } from '../../utils/languageUtils';
+import { normalizeLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import { CodeBlockProps } from '../../types/types';
 
-const processCodeForPreview = (code: string, isPreview: boolean, previewLines: number): string => {
-  if (!isPreview) return code;
+const CodeBlock: React.FC<CodeBlockProps> = ({ 
+  code, 
+  language = 'plaintext', 
+  isPreview = false, 
+  previewLines = 4 
+}) => {
+  const [normalizedLang, setNormalizedLang] = useState('plaintext');
+  const LINE_HEIGHT = 24;
+  const visibleHeight = (previewLines + 2) * LINE_HEIGHT;
 
-  const lines = code.split('\n');
-  const displayLines = lines.slice(0, previewLines);
-  
-  // Ensure we always have exactly previewLines number of lines
-  while (displayLines.length < previewLines) {
-    displayLines.push('');
-  }
-  
-  return displayLines.join('\n');
-};
-
-const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, isPreview = false, previewLines = 4 }) => {
-  const displayCode = processCodeForPreview(code, isPreview, previewLines);
+  useEffect(() => {
+    const normalized = normalizeLanguage(language);
+    setNormalizedLang(normalized);
+  }, [language]);
 
   return (
     <div className="relative">
@@ -31,32 +29,44 @@ const CodeBlock: React.FC<CodeBlockProps> = ({ code, language, isPreview = false
             color: inherit !important;
           }
           .syntax-highlighter {
-            min-height: ${isPreview ? `${previewLines * 1.5}em` : 'auto'} !important;
+            min-height: ${isPreview ? `${visibleHeight}px` : 'auto'} !important;
           }
           .syntax-highlighter pre {
-            min-height: ${isPreview ? `${previewLines * 1.5}em` : 'auto'} !important;
+            min-height: ${isPreview ? `${visibleHeight}px` : 'auto'} !important;
+            line-height: ${LINE_HEIGHT}px !important;
           }
           .syntax-highlighter code {
             display: inline-block;
-            min-height: ${isPreview ? `${previewLines * 1.5}em` : 'auto'} !important;
+            min-height: ${isPreview ? `${visibleHeight}px` : 'auto'} !important;
+            line-height: ${LINE_HEIGHT}px !important;
           }
         `}
       </style>
-      <SyntaxHighlighter
-        language={getLanguageForPrism(language)}
-        style={vscDarkPlus}
-        customStyle={{
-          padding: '1rem',
-          borderRadius: '0.5rem',
-          fontSize: '0.875rem',
-          lineHeight: '1.5em',
-        }}
-        wrapLines={true}
-        className="syntax-highlighter"
-      >
-        {displayCode}
-      </SyntaxHighlighter>
-      <CopyButton text={code} />
+      <div className="relative">
+        <SyntaxHighlighter
+          language={normalizedLang}
+          style={vscDarkPlus}
+          customStyle={{
+            padding: '1rem',
+            borderRadius: '0.5rem',
+            fontSize: '0.875rem',
+            lineHeight: `${LINE_HEIGHT}px`,
+            maxHeight: isPreview ? `${visibleHeight}px` : 'none',
+            overflow: 'hidden',
+          }}
+          wrapLines={true}
+          className="syntax-highlighter"
+        >
+          {code}
+        </SyntaxHighlighter>
+        {isPreview && (
+          <div 
+            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none" 
+            style={{ height: `${LINE_HEIGHT * 2}px` }}
+          />
+        )}
+        <CopyButton text={code} />
+      </div>
     </div>
   );
 };

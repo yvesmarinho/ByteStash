@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { fetchSnippets, createSnippet, editSnippet, deleteSnippet } from '../api/snippets';
 import { useToast } from '../components/toast/Toast';
 import { Snippet } from '../types/types';
-import { addCustomLanguage, removeCustomLanguage } from '../utils/languageUtils';
 
 export const useSnippets = () => {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
@@ -17,11 +16,6 @@ export const useSnippets = () => {
       const fetchedSnippets = await fetchSnippets();
       const sortedSnippets = fetchedSnippets.sort((a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
       setSnippets(sortedSnippets);
-      
-      removeCustomLanguage(null);
-      fetchedSnippets.forEach(snippet => {
-        addCustomLanguage(snippet.language);
-      });
       
       if (!hasLoadedRef.current) {
         addToast('Snippets loaded successfully', 'success');
@@ -43,7 +37,6 @@ export const useSnippets = () => {
     try {
       const newSnippet = await createSnippet(snippetData);
       setSnippets(prevSnippets => [...prevSnippets, newSnippet]);
-      addCustomLanguage(newSnippet.language);
       addToast('New snippet created successfully', 'success');
       return newSnippet;
     } catch (error) {
@@ -59,7 +52,6 @@ export const useSnippets = () => {
       setSnippets(prevSnippets =>
         prevSnippets.map(s => s.id === updatedSnippet.id ? updatedSnippet : s)
       );
-      addCustomLanguage(updatedSnippet.language);
       addToast('Snippet updated successfully', 'success');
       return updatedSnippet;
     } catch (error) {
@@ -74,13 +66,6 @@ export const useSnippets = () => {
       await deleteSnippet(id);
       setSnippets(prevSnippets => {
         const updatedSnippets = prevSnippets.filter(snippet => snippet.id !== id);
-        const deletedSnippet = prevSnippets.find(snippet => snippet.id === id);
-        if (deletedSnippet) {
-          const languageStillInUse = updatedSnippets.some(snippet => snippet.language === deletedSnippet.language);
-          if (!languageStillInUse) {
-            removeCustomLanguage(deletedSnippet.language);
-          }
-        }
         return updatedSnippets;
       });
       addToast('Snippet deleted successfully', 'success');
