@@ -3,7 +3,7 @@ import Modal from '../common/Modal';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
-import { getSupportedLanguages } from '../../utils/languageUtils';
+import { getSupportedLanguages, getLanguageLabel } from '../../utils/languageUtils';
 import DynamicCodeEditor from './DynamicCodeEditor';
 import { EditSnippetModalProps } from '../../types/types';
 
@@ -134,7 +134,16 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, on
 
   useEffect(() => {
     if (isOpen) {
-      setSupportedLanguages(getSupportedLanguages());
+      const languages = getSupportedLanguages().reduce((acc: string[], lang) => {
+        acc.push(lang.language);
+        acc.push(...lang.aliases);
+        return acc;
+      }, [])
+      .sort((a, b) => {
+        return getLanguageLabel(a).localeCompare(getLanguageLabel(b));
+      });
+
+      setSupportedLanguages(languages);
 
       if (snippetToEdit) {
         setTitle(snippetToEdit.title?.slice(0, 255) || '');

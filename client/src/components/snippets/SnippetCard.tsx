@@ -4,6 +4,7 @@ import { formatDistanceToNow } from 'date-fns';
 import CodeBlock from './CodeBlock';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
+import { getLanguageLabel } from '../../utils/languageUtils';
 
 const SnippetCard: React.FC<SnippetCardProps> = ({
   snippet,
@@ -68,7 +69,7 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
         <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold mb-2 text-gray-200 truncate`} title={snippet.title}>
           {snippet.title}
         </h3>
-        <p className="text-sm text-gray-400 mb-2 truncate">{snippet.language}</p>
+        <p className="text-sm text-gray-400 mb-2 truncate">{getLanguageLabel(snippet.language)}</p>
         {!compactView && (
           <p className="text-sm text-gray-300 mb-2 line-clamp-1 min-h-[1em] break-words">
             {snippet.description ? snippet.description : 'No description available'}

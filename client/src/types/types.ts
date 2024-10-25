@@ -80,7 +80,7 @@ export interface Snippet {
   
   export interface CodeBlockProps {
     code: string;
-    language: string;
+    language?: string;
     isPreview?: boolean;
     previewLines?: number;
   }
@@ -94,7 +94,7 @@ export interface Snippet {
   
   export interface DynamicCodeEditorProps {
     code: string;
-    language: string;
+    language?: string;
     onValueChange: (value: string) => void;
     expandable?: boolean;
   }

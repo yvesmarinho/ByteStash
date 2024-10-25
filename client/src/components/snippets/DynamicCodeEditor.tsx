@@ -1,11 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
-import { getLanguageForPrism } from '../../utils/languageUtils';
+import { normalizeLanguage } from '../../utils/languageUtils';
 import { DynamicCodeEditorProps } from '../../types/types';
 
-const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode, language, onValueChange, expandable = false }) => {
+const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ 
+  code: initialCode, 
+  language = 'plaintext', 
+  onValueChange, 
+  expandable = false 
+}) => {
   const [code, setCode] = useState(initialCode);
+  const [normalizedLang, setNormalizedLang] = useState('plaintext');
   const [editorHeight, setEditorHeight] = useState('400px');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlighterRef = useRef<HTMLDivElement>(null);
@@ -14,6 +20,11 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode
     setCode(initialCode);
     adjustHeight();
   }, [initialCode]);
+
+  useEffect(() => {
+    const normalized = normalizeLanguage(language);
+    setNormalizedLang(normalized);
+  }, [language]);
 
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     const newCode = e.target.value;
@@ -30,6 +41,10 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode
     }
   };
   
+  const processCodeForHighlighter = (code: string): string => {
+    return code.split('\n').map(line => line || ' ').join('\n');
+  };
+
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
@@ -147,11 +162,6 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode
     minHeight: '400px',
   };
 
-  // Ensure empty lines are preserved
-  const processCodeForHighlighter = (code: string): string => {
-    return code.split('\n').map(line => line || ' ').join('\n');
-  };
-
   return (
     <div className="relative rounded-md" style={{ backgroundColor: '#1e1e1e', height: editorHeight, minHeight: '400px' }}>
       <textarea
@@ -189,7 +199,7 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ code: initialCode
         }}
       >
         <SyntaxHighlighter
-          language={getLanguageForPrism(language)}
+          language={normalizedLang}
           style={vscDarkPlus}
           customStyle={{
             margin: 0,
