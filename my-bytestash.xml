@@ -13,7 +13,7 @@
   <Category>Productivity: Tools:</Category>
   <WebUI>http://[IP]:[PORT:5000]</WebUI>
   <TemplateURL/>
-  <Icon/>
+  <Icon>https://raw.githubusercontent.com/jordan-dalby/ByteStash/refs/heads/main/client/public/logo512.png</Icon>
   <ExtraParams/>
   <PostArgs/>
   <CPUset/>
