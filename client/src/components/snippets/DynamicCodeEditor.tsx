@@ -7,8 +7,7 @@ import { DynamicCodeEditorProps } from '../../types/types';
 const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({ 
   code: initialCode, 
   language = 'plaintext', 
-  onValueChange, 
-  expandable = false 
+  onValueChange
 }) => {
   const [code, setCode] = useState(initialCode);
   const [normalizedLang, setNormalizedLang] = useState('plaintext');

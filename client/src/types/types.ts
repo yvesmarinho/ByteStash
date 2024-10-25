@@ -96,7 +96,6 @@ export interface Snippet {
     code: string;
     language?: string;
     onValueChange: (value: string) => void;
-    expandable?: boolean;
   }
   
   export interface ToastProviderProps {
