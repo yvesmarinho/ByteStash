@@ -7,9 +7,18 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   const [showCodePreview, setShowCodePreview] = useState(settings.showCodePreview);
   const [previewLines, setPreviewLines] = useState(settings.previewLines);
   const [includeCodeInSearch, setIncludeCodeInSearch] = useState(settings.includeCodeInSearch);
+  const [showCategories, setShowCategories] = useState(settings.showCategories);
+  const [expandCategories, setExpandCategories] = useState(settings.expandCategories);
 
   const handleSave = () => {
-    onSettingsChange({ compactView, showCodePreview, previewLines, includeCodeInSearch });
+    onSettingsChange({
+      compactView,
+      showCodePreview,
+      previewLines,
+      includeCodeInSearch,
+      showCategories,
+      expandCategories
+    });
     onClose();
   };
 
@@ -61,6 +70,29 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
           />
         </div>
+        <div className="flex items-center justify-between">
+          <label htmlFor="showCategories" className="text-gray-300">Show Categories</label>
+          <input
+            type="checkbox"
+            id="showCategories"
+            checked={showCategories}
+            onChange={(e) => setShowCategories(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+          />
+        </div>
+        
+        {showCategories && (
+          <div className="flex items-center justify-between">
+            <label htmlFor="expandCategories" className="text-gray-300">Expand Categories</label>
+            <input
+              type="checkbox"
+              id="expandCategories"
+              checked={expandCategories}
+              onChange={(e) => setExpandCategories(e.target.checked)}
+              className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+            />
+          </div>
+        )}
       </div>
       <div className="mt-6 flex justify-end">
         <button

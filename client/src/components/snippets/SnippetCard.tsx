@@ -5,6 +5,7 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import PreviewCodeBlock from './PreviewCodeBlock';
+import CategoryList from '../common/CategoryList';
 
 const SnippetCard: React.FC<SnippetCardProps> = ({
   snippet,
@@ -12,9 +13,12 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   onOpen,
   onDelete,
   onEdit,
+  onCategoryClick,
   compactView,
   showCodePreview,
-  previewLines
+  previewLines,
+  showCategories,
+  expandCategories
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -79,6 +83,14 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
           <Clock size={compactView ? 12 : 14} className="mr-1" />
           <span>Updated {getRelativeTime(snippet.updated_at)}</span>
         </div>
+        {showCategories && snippet.categories && snippet.categories.length > 0 && (
+          <CategoryList
+            categories={snippet.categories}
+            onCategoryClick={onCategoryClick}
+            className="mb-3"
+            showAll={expandCategories}
+          />
+        )}
         {showCodePreview && (
           <>
             <div key={`preview-${snippet.id}`}>

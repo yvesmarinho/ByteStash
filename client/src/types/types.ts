@@ -5,6 +5,7 @@ export interface Snippet {
     description: string;
     code: string;
     updated_at: string;
+    categories: string[];
   }
   
   export interface SnippetCardProps {
@@ -13,15 +14,19 @@ export interface Snippet {
     onOpen: (snippet: Snippet) => void;
     onDelete: (id: string) => void;
     onEdit: (snippet: Snippet) => void;
+    onCategoryClick: (category: string) => void;
     compactView: boolean;
     showCodePreview: boolean;
     previewLines: number;
+    showCategories: boolean;
+    expandCategories: boolean;
   }
   
   export interface SnippetModalProps {
     snippet: Snippet | null;
     isOpen: boolean;
     onClose: () => void;
+    onCategoryClick: (category: string) => void;
   }
   
   export interface EditSnippetModalProps {
@@ -39,6 +44,8 @@ export interface Snippet {
       showCodePreview: boolean;
       previewLines: number;
       includeCodeInSearch: boolean;
+      showCategories: boolean;
+      expandCategories: boolean;
     };
     onSettingsChange: (newSettings: SettingsModalProps['settings']) => void;
   }
@@ -55,6 +62,9 @@ export interface Snippet {
     setViewMode: (mode: 'grid' | 'list') => void;
     openSettingsModal: () => void;
     openNewSnippetModal: () => void;
+    allCategories: string[];
+    selectedCategories: string[];
+    onCategoryClick: (category: string) => void;
   }
   
   export interface SnippetListProps {
@@ -63,9 +73,12 @@ export interface Snippet {
     onOpen: (snippet: Snippet) => void;
     onDelete: (id: string) => void;
     onEdit: (snippet: Snippet) => void;
+    onCategoryClick: (category: string) => void;
     compactView: boolean;
     showCodePreview: boolean;
     previewLines: number;
+    showCategories: boolean;
+    expandCategories: boolean;
   }
   
   export interface ModalProps {

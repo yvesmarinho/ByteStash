@@ -13,7 +13,8 @@ const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
   const { 
     viewMode, setViewMode, compactView, showCodePreview, 
-    previewLines, includeCodeInSearch, updateSettings 
+    previewLines, includeCodeInSearch, updateSettings,
+    showCategories, expandCategories
   } = useSettings();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,9 +24,28 @@ const SnippetStorage: React.FC = () => {
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [snippetToEdit, setSnippetToEdit] = useState<Snippet | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  const handleSearchTermChange = useCallback((term: string) => {
+    setSearchTerm(term);
+  }, []);
+
+  const handleCategoryClick = useCallback((category: string) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      }
+      return [...prev, category];
+    });
+  }, []);
 
   const languages = useMemo(() => 
     [...new Set(snippets.map(snippet => getLanguageLabel(snippet.language)))], 
+    [snippets]
+  );
+
+  const allCategories = useMemo(() => 
+    [...new Set(snippets.flatMap(snippet => snippet.categories))].sort(),
     [snippets]
   );
 
@@ -35,13 +55,15 @@ const SnippetStorage: React.FC = () => {
        snippet.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
        snippet.language.toLowerCase().includes(searchTerm.toLowerCase()) ||
        (includeCodeInSearch && snippet.code.toLowerCase().includes(searchTerm.toLowerCase()))) && 
-      (selectedLanguage === '' || getLanguageLabel(snippet.language).toLowerCase() === selectedLanguage.toLowerCase())
+      (selectedLanguage === '' || getLanguageLabel(snippet.language).toLowerCase() === selectedLanguage.toLowerCase()) &&
+      (selectedCategories.length === 0 || 
+       selectedCategories.every(cat => snippet.categories.includes(cat)))
     ).sort((a, b) => {
       const dateA = new Date(a.updated_at);
       const dateB = new Date(b.updated_at);
       return sortOrder === 'desc' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
     });
-  }, [snippets, searchTerm, selectedLanguage, includeCodeInSearch, sortOrder]);
+  }, [snippets, searchTerm, selectedLanguage, includeCodeInSearch, sortOrder, selectedCategories]);
 
   const toggleSortOrder = useCallback(() => setSortOrder(prevOrder => prevOrder === 'desc' ? 'asc' : 'desc'), []);
 
@@ -86,17 +108,13 @@ const SnippetStorage: React.FC = () => {
     return <div className="text-center py-12">Loading snippets...</div>;
   }
 
-  if (isLoading) {
-    return <div className="text-center py-12">Loading snippets...</div>;
-  }
-
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
       <h1 className="text-3xl font-bold mb-8">ByteStash</h1>
       
       <SearchAndFilter 
         searchTerm={searchTerm}
-        setSearchTerm={setSearchTerm}
+        setSearchTerm={handleSearchTermChange}
         selectedLanguage={selectedLanguage}
         setSelectedLanguage={setSelectedLanguage}
         languages={languages}
@@ -106,7 +124,26 @@ const SnippetStorage: React.FC = () => {
         setViewMode={setViewMode}
         openSettingsModal={() => setIsSettingsModalOpen(true)}
         openNewSnippetModal={() => openEditSnippetModal(null)}
+        allCategories={allCategories}
+        selectedCategories={selectedCategories}
+        onCategoryClick={handleCategoryClick}
       />
+      
+      {selectedCategories.length > 0 && (
+        <div className="flex flex-wrap gap-2 mb-4 items-center">
+          <span className="text-sm text-gray-400">Filtered by categories:</span>
+          {selectedCategories.map((category, index) => (
+            <button
+              key={index}
+              onClick={() => handleCategoryClick(category)}
+              className="flex items-center gap-1 px-2 py-1 rounded-md bg-blue-500/20 text-blue-200 hover:bg-blue-500/30 text-sm"
+            >
+              <span>{category}</span>
+              <span className="text-gray-400 hover:text-white">×</span>
+            </button>
+          ))}
+        </div>
+      )}
       
       <SnippetList 
         snippets={filteredSnippets}
@@ -114,9 +151,12 @@ const SnippetStorage: React.FC = () => {
         onOpen={openSnippet}
         onDelete={handleDeleteSnippet}
         onEdit={openEditSnippetModal}
+        onCategoryClick={handleCategoryClick}
         compactView={compactView}
         showCodePreview={showCodePreview}
         previewLines={previewLines}
+        showCategories={showCategories}
+        expandCategories={expandCategories}
       />
 
       {selectedSnippet && (
@@ -124,6 +164,7 @@ const SnippetStorage: React.FC = () => {
           snippet={selectedSnippet} 
           isOpen={!!selectedSnippet} 
           onClose={closeSnippet}
+          onCategoryClick={handleCategoryClick}
         />
       )}
 
@@ -137,7 +178,7 @@ const SnippetStorage: React.FC = () => {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch }}
+        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories }}
         onSettingsChange={updateSettings}
       />
     </div>

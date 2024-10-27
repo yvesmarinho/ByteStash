@@ -33,10 +33,8 @@ async function initializeDatabase() {
       driver: sqlite3.Database
     });
 
-    // Enable foreign keys
     await db.run('PRAGMA foreign_keys = ON');
 
-    // Create snippets table with timestamp
     await db.exec(`
       CREATE TABLE IF NOT EXISTS snippets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -46,6 +44,15 @@ async function initializeDatabase() {
         code TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snippet_id INTEGER,
+        name TEXT NOT NULL,
+        FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_categories_snippet_id ON categories(snippet_id);
     `);
 
     console.log('Database initialized successfully');
