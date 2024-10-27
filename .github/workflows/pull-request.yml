@@ -25,9 +25,9 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Set Docker tag for testing
+      - name: Set Docker tag with PR number
         id: docker_tag
-        run: echo "TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}" >> $GITHUB_ENV
+        run: echo "TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
       - name: Build and Push Docker image for Testing
         uses: docker/build-push-action@v5
@@ -35,17 +35,3 @@ jobs:
           context: .
           push: true
           tags: ${{ env.TAG }}
-
-      - name: Comment on PR with Docker image tag
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const prNumber = context.payload.pull_request.number;
-            const imageTag = process.env.TAG;
-            const commentBody = `Test Docker image pushed: \`${imageTag}\``;
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: prNumber,
-              body: commentBody
-            });
