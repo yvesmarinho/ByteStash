@@ -131,6 +131,35 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, on
   const [key, setKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [supportedLanguages, setSupportedLanguages] = useState<string[]>([]);
+  const [categories, setCategories] = useState<string[]>([]);
+  const [categoryInput, setCategoryInput] = useState('');
+  
+  useEffect(() => {
+    if (snippetToEdit) {
+      setCategories(snippetToEdit.categories || []);
+    } else {
+      setCategories([]);
+    }
+  }, [snippetToEdit]);
+
+  const handleCategoryInputKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if ((e.key === 'Enter' || e.key === ',') && categoryInput.trim()) {
+      e.preventDefault();
+      addCategory(categoryInput.trim());
+    }
+  };
+
+  const addCategory = (category: string) => {
+    const normalizedCategory = category.toLowerCase().replace(/,/g, '').trim();
+    if (normalizedCategory && categories.length < 20 && !categories.includes(normalizedCategory)) {
+      setCategories([...categories, normalizedCategory]);
+    }
+    setCategoryInput('');
+  };
+
+  const removeCategory = (categoryToRemove: string) => {
+    setCategories(categories.filter(cat => cat !== categoryToRemove));
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -173,8 +202,9 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, on
     const snippetData = {
       title: title.slice(0, 255),
       language: language.slice(0, 50),
-      description,
-      code
+      description: description,
+      code: code,
+      categories: categories
     };
 
     try {
@@ -232,6 +262,44 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, on
           ></textarea>
         </div>
         
+        <div>
+          <label htmlFor="categories" className="block text-sm font-medium text-gray-300">
+            Categories (max 20)
+          </label>
+          <div className="mt-1">
+            <input
+              type="text"
+              id="categories"
+              value={categoryInput}
+              onChange={(e) => setCategoryInput(e.target.value)}
+              onKeyDown={handleCategoryInputKeyDown}
+              className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
+              placeholder="Type a category and press Enter or comma"
+              disabled={categories.length >= 20}
+            />
+            <p className="text-sm text-gray-400 mt-1">
+              {categories.length}/20 categories
+            </p>
+            <div className="flex flex-wrap gap-2 mt-2">
+              {categories.map((category, index) => (
+                <div
+                  key={index}
+                  className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-700 text-sm"
+                >
+                  <span>{category}</span>
+                  <button
+                    type="button"
+                    onClick={() => removeCategory(category)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
         <div>
           <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
           <div className="mt-1 rounded-md bg-gray-800 border border-gray-600 overflow-hidden">
