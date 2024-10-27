@@ -1,13 +1,11 @@
-name: Build and Push Docker Image
+name: Build and Push Docker Image for Pull Request Testing
 
 on:
-  release:
-    types: [published]
-  workflow_dispatch:
+  pull_request:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: jordan-dalby/bytestash
+  IMAGE_NAME: jordan-dalby/bytestash-dev
 
 jobs:
   docker:
@@ -27,11 +25,13 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and push
+      - name: Set Docker tag with PR number
+        id: docker_tag
+        run: echo "TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
+
+      - name: Build and Push Docker image for Testing
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: |
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
-            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.event.release.tag_name }}
+          tags: ${{ env.TAG }}

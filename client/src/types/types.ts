@@ -78,10 +78,14 @@ export interface Snippet {
     text: string;
   }
   
-  export interface CodeBlockProps {
+  export interface FullCodeBlockProps {
     code: string;
     language?: string;
-    isPreview?: boolean;
+  }
+
+  export interface PreviewCodeBlockProps {
+    code: string;
+    language?: string;
     previewLines?: number;
   }
   

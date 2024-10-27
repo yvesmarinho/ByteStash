@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Pencil, Trash2, Clock } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
-import CodeBlock from './CodeBlock';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
 import { getLanguageLabel } from '../../utils/languageUtils';
+import PreviewCodeBlock from './PreviewCodeBlock';
 
 const SnippetCard: React.FC<SnippetCardProps> = ({
   snippet,
@@ -81,12 +81,13 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
         </div>
         {showCodePreview && (
           <>
-            <CodeBlock 
-              code={snippet.code} 
-              language={snippet.language} 
-              isPreview={true} 
-              previewLines={previewLines}
-            />
+            <div key={`preview-${snippet.id}`}>
+              <PreviewCodeBlock 
+                code={snippet.code} 
+                language={snippet.language}
+                previewLines={previewLines}
+              />
+            </div>
             {snippet.code.split('\n').length > previewLines && (
               <p className="text-xs text-gray-500 mt-2">Click to view full snippet...</p>
             )}
