@@ -1,54 +1,86 @@
 const { getDb } = require('../config/database');
 
 class SnippetRepository {
-  // Helper method to format SELECT statements with proper UTC handling
-  #getSelectQuery(additional = '') {
-    return `
-      SELECT 
-        id,
-        title,
-        language,
-        description,
-        code,
-        datetime(updated_at) || 'Z' as updated_at
-      FROM snippets
-      ${additional}
-    `.trim();
+  constructor() {
+    this.selectAllStmt = null;
+    this.insertStmt = null;
+    this.updateStmt = null;
+    this.deleteStmt = null;
+    this.selectByIdStmt = null;
   }
 
-  async findAll() {
+  #initializeStatements() {
     const db = getDb();
+    
+    if (!this.selectAllStmt) {
+      this.selectAllStmt = db.prepare(`
+        SELECT 
+          id,
+          title,
+          language,
+          description,
+          code,
+          datetime(updated_at) || 'Z' as updated_at
+        FROM snippets
+        ORDER BY updated_at DESC
+      `);
+
+      this.insertStmt = db.prepare(`
+        INSERT INTO snippets (
+          title, 
+          language, 
+          description, 
+          code, 
+          updated_at
+        ) VALUES (?, ?, ?, ?, datetime('now', 'utc'))
+      `);
+
+      this.updateStmt = db.prepare(`
+        UPDATE snippets 
+        SET title = ?, 
+            language = ?, 
+            description = ?, 
+            code = ?,
+            updated_at = datetime('now', 'utc')
+        WHERE id = ?
+      `);
+
+      this.deleteStmt = db.prepare('DELETE FROM snippets WHERE id = ?');
+
+      this.selectByIdStmt = db.prepare(`
+        SELECT 
+          id,
+          title,
+          language,
+          description,
+          code,
+          datetime(updated_at) || 'Z' as updated_at
+        FROM snippets
+        WHERE id = ?
+      `);
+    }
+  }
+
+  findAll() {
+    this.#initializeStatements();
     try {
-      const snippets = await db.all(
-        this.#getSelectQuery('ORDER BY updated_at DESC')
-      );
-      return snippets;
+      return this.selectAllStmt.all();
     } catch (error) {
       console.error('Error in findAll:', error);
       throw error;
     }
   }
 
-  async create({ title, language, description, code }) {
-    const db = getDb();
+  create({ title, language, description, code }) {
+    this.#initializeStatements();
     try {
-      const result = await db.run(
-        `INSERT INTO snippets (
-          title, 
-          language, 
-          description, 
-          code, 
-          updated_at
-        ) VALUES (?, ?, ?, ?, datetime('now', 'utc'))`,
-        [title, language, description, code]
-      );
+      const db = getDb();
+      const result = db.transaction(() => {
+        const insertResult = this.insertStmt.run(title, language, description, code);
+        return this.selectByIdStmt.get(insertResult.lastInsertRowid);
+      })();
       
-      // Fetch the created snippet with UTC formatting
-      const created = await db.get(
-        this.#getSelectQuery('WHERE id = ?'),
-        [result.lastID]
-      );
-      return created;
+      return result;
     } catch (error) {
       console.error('Error in create:', error);
       console.error('Parameters:', { title, language, description, code });
@@ -56,45 +88,31 @@ class SnippetRepository {
     }
   }
 
-  async delete(id) {
-    const db = getDb();
+  delete(id) {
+    this.#initializeStatements();
     try {
-      // Only fetch necessary fields for deletion confirmation
-      const snippet = await db.get(
-        this.#getSelectQuery('WHERE id = ?'),
-        [id]
-      );
-      
-      if (snippet) {
-        await db.run('DELETE FROM snippets WHERE id = ?', [id]);
-      }
-      
-      return snippet;
+      const db = getDb();
+      return db.transaction(() => {
+        const snippet = this.selectByIdStmt.get(id);
+        if (snippet) {
+          this.deleteStmt.run(id);
+        }
+        return snippet;
+      })();
     } catch (error) {
       console.error('Error in delete:', error);
       throw error;
     }
   }
 
-  async update(id, { title, language, description, code }) {
-    const db = getDb();
+  update(id, { title, language, description, code }) {
+    this.#initializeStatements();
     try {
-      await db.run(
-        `UPDATE snippets 
-         SET title = ?, 
-             language = ?, 
-             description = ?, 
-             code = ?,
-             updated_at = datetime('now', 'utc')
-         WHERE id = ?`,
-        [title, language, description, code, id]
-      );
-      
-      // Return updated snippet with UTC formatting
-      return db.get(
-        this.#getSelectQuery('WHERE id = ?'),
-        [id]
-      );
+      const db = getDb();
+      return db.transaction(() => {
+        this.updateStmt.run(title, language, description, code, id);
+        return this.selectByIdStmt.get(id);
+      })();
     } catch (error) {
       console.error('Error in update:', error);
       throw error;

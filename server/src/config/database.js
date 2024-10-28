@@ -1,5 +1,4 @@
-const sqlite3 = require('sqlite3');
-const { open } = require('sqlite');
+const Database = require('better-sqlite3');
 const path = require('path');
 const fs = require('fs');
 
@@ -23,21 +22,23 @@ function getDatabasePath() {
   }
 }
 
-async function initializeDatabase() {
+function initializeDatabase() {
   try {
     const dbPath = getDatabasePath();
     console.log(`Initializing SQLite database at: ${dbPath}`);
 
-    db = await open({
-      filename: dbPath,
-      driver: sqlite3.Database
+    // Open database with WAL mode for better performance
+    db = new Database(dbPath, { 
+      verbose: console.log,
+      fileMustExist: false
     });
 
-    // Enable foreign keys
-    await db.run('PRAGMA foreign_keys = ON');
+    // Enable foreign keys and WAL mode
+    db.pragma('foreign_keys = ON');
+    db.pragma('journal_mode = WAL');
 
     // Create snippets table with timestamp
-    await db.exec(`
+    db.exec(`
       CREATE TABLE IF NOT EXISTS snippets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
@@ -61,12 +62,11 @@ async function createBackup() {
     const dbPath = getDatabasePath();
     const backupPath = getBackupPath();
     
-    // Check if source database exists
     if (!fs.existsSync(dbPath)) {
       throw new Error('Source database does not exist');
     }
 
-    // Create backup using stream to handle large files
+    // Backup using stream
     await new Promise((resolve, reject) => {
       const readStream = fs.createReadStream(dbPath);
       const writeStream = fs.createWriteStream(backupPath);
@@ -78,7 +78,6 @@ async function createBackup() {
       readStream.pipe(writeStream);
     });
 
-    // Verify backup file exists and has content
     const backupStats = fs.statSync(backupPath);
     if (backupStats.size === 0) {
       throw new Error('Backup file was created but is empty');

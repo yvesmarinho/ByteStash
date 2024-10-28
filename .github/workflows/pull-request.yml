@@ -29,9 +29,18 @@ jobs:
         id: docker_tag
         run: echo "TAG=${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:pr-${{ github.event.pull_request.number }}" >> $GITHUB_ENV
 
+      - name: Set up QEMU for cross-platform builds
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        with:
+          install: true
+
       - name: Build and Push Docker image for Testing
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
+          platforms: linux/amd64,linux/arm64,linux/arm/v7
           tags: ${{ env.TAG }}
