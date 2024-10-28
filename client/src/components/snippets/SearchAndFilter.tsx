@@ -1,6 +1,7 @@
 import React from 'react';
-import { Search, ChevronDown, ArrowUpDown, Grid, List, Settings, Plus } from 'lucide-react';
+import { ChevronDown, ArrowUpDown, Grid, List, Settings, Plus } from 'lucide-react';
 import { SearchAndFilterProps } from '../../types/types';
+import EnhancedSearch from './EnhancedSearch';
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({ 
   searchTerm, 
@@ -13,20 +14,25 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   viewMode,
   setViewMode,
   openSettingsModal,
-  openNewSnippetModal
+  openNewSnippetModal,
+  allCategories,
+  selectedCategories,
+  onCategoryClick
 }) => {
+
+  const handleCategorySelect = (category: string) => {
+    onCategoryClick(category);
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-2 mb-6">
-      <div className="relative flex-grow">
-        <input
-          type="text"
-          placeholder="Search snippets..."
-          className="w-full bg-gray-800 rounded-lg py-2 px-4 pr-10 focus:outline-none"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
-        <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
-      </div>
+      <EnhancedSearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        onCategorySelect={handleCategorySelect}
+        existingCategories={allCategories}
+        selectedCategories={selectedCategories}
+      />
       
       <div className="relative">
         <select

@@ -37,7 +37,7 @@ function initializeDatabase() {
     db.pragma('foreign_keys = ON');
     db.pragma('journal_mode = WAL');
 
-    // Create snippets table with timestamp
+    // Create tables and index
     db.exec(`
       CREATE TABLE IF NOT EXISTS snippets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -47,6 +47,15 @@ function initializeDatabase() {
         code TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
+
+      CREATE TABLE IF NOT EXISTS categories (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snippet_id INTEGER,
+        name TEXT NOT NULL,
+        FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_categories_snippet_id ON categories(snippet_id);
     `);
 
     console.log('Database initialized successfully');
@@ -66,7 +75,6 @@ async function createBackup() {
       throw new Error('Source database does not exist');
     }
 
-    // Backup using stream
     await new Promise((resolve, reject) => {
       const readStream = fs.createReadStream(dbPath);
       const writeStream = fs.createWriteStream(backupPath);

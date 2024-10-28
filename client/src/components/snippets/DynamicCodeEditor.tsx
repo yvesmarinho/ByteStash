@@ -162,7 +162,7 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
   };
 
   return (
-    <div className="relative rounded-md" style={{ backgroundColor: '#1e1e1e', height: editorHeight, minHeight: '400px' }}>
+    <div className="relative rounded-md" style={{ backgroundColor: '#1e1e1e', height: editorHeight, minHeight: '400px', zIndex: 0 }}>
       <textarea
         ref={textareaRef}
         value={code}
@@ -195,6 +195,7 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
           pointerEvents: 'none',
           backgroundColor: 'transparent',
           overflow: 'hidden',
+          zIndex: 0,
         }}
       >
         <SyntaxHighlighter

@@ -61,6 +61,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             min-height: ${visibleHeight}px !important;
             max-height: ${visibleHeight}px !important;
             overflow: hidden !important;
+            border-radius: 0.5rem;
           }
 
           .syntax-highlighter-preview ::selection {

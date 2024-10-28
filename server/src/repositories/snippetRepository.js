@@ -2,30 +2,37 @@ const { getDb } = require('../config/database');
 
 class SnippetRepository {
   constructor() {
+    // Prepare statements once for better performance
     this.selectAllStmt = null;
-    this.insertStmt = null;
-    this.updateStmt = null;
-    this.deleteStmt = null;
+    this.insertSnippetStmt = null;
+    this.insertCategoryStmt = null;
+    this.updateSnippetStmt = null;
+    this.deleteCategoriesStmt = null;
     this.selectByIdStmt = null;
+    this.deleteSnippetStmt = null;
   }
 
+  // Initialize prepared statements
   #initializeStatements() {
     const db = getDb();
     
     if (!this.selectAllStmt) {
       this.selectAllStmt = db.prepare(`
         SELECT 
-          id,
-          title,
-          language,
-          description,
-          code,
-          datetime(updated_at) || 'Z' as updated_at
-        FROM snippets
-        ORDER BY updated_at DESC
+          s.id,
+          s.title,
+          s.language,
+          s.description,
+          s.code,
+          datetime(s.updated_at) || 'Z' as updated_at,
+          GROUP_CONCAT(c.name) as categories
+        FROM snippets s
+        LEFT JOIN categories c ON s.id = c.snippet_id
+        GROUP BY s.id
+        ORDER BY s.updated_at DESC
       `);
 
-      this.insertStmt = db.prepare(`
+      this.insertSnippetStmt = db.prepare(`
         INSERT INTO snippets (
           title, 
           language, 
@@ -35,7 +42,11 @@ class SnippetRepository {
         ) VALUES (?, ?, ?, ?, datetime('now', 'utc'))
       `);
 
-      this.updateStmt = db.prepare(`
+      this.insertCategoryStmt = db.prepare(`
+        INSERT INTO categories (snippet_id, name) VALUES (?, ?)
+      `);
+
+      this.updateSnippetStmt = db.prepare(`
         UPDATE snippets 
         SET title = ?, 
             language = ?, 
@@ -45,45 +56,101 @@ class SnippetRepository {
         WHERE id = ?
       `);
 
-      this.deleteStmt = db.prepare('DELETE FROM snippets WHERE id = ?');
+      this.deleteCategoriesStmt = db.prepare(`
+        DELETE FROM categories WHERE snippet_id = ?
+      `);
 
       this.selectByIdStmt = db.prepare(`
         SELECT 
-          id,
-          title,
-          language,
-          description,
-          code,
-          datetime(updated_at) || 'Z' as updated_at
-        FROM snippets
-        WHERE id = ?
+          s.id,
+          s.title,
+          s.language,
+          s.description,
+          s.code,
+          datetime(s.updated_at) || 'Z' as updated_at,
+          GROUP_CONCAT(c.name) as categories
+        FROM snippets s
+        LEFT JOIN categories c ON s.id = c.snippet_id
+        WHERE s.id = ?
+        GROUP BY s.id
+      `);
+
+      this.deleteSnippetStmt = db.prepare(`
+        DELETE FROM snippets WHERE id = ?
       `);
     }
+  }
+
+  #processCategories(snippet) {
+    return {
+      ...snippet,
+      categories: snippet.categories ? snippet.categories.split(',') : []
+    };
   }
 
   findAll() {
     this.#initializeStatements();
     try {
-      return this.selectAllStmt.all();
+      const snippets = this.selectAllStmt.all();
+      return snippets.map(this.#processCategories);
     } catch (error) {
       console.error('Error in findAll:', error);
       throw error;
     }
   }
 
-  create({ title, language, description, code }) {
+  create({ title, language, description, code, categories = [] }) {
     this.#initializeStatements();
     try {
       const db = getDb();
-      const result = db.transaction(() => {
-        const insertResult = this.insertStmt.run(title, language, description, code);
-        return this.selectByIdStmt.get(insertResult.lastInsertRowid);
-      })();
       
-      return result;
+      return db.transaction(() => {
+        // Insert snippet
+        const insertResult = this.insertSnippetStmt.run(title, language, description, code);
+        const snippetId = insertResult.lastInsertRowid;
+        
+        // Insert categories
+        if (categories.length > 0) {
+          for (const category of categories) {
+            if (category.trim()) {
+              this.insertCategoryStmt.run(snippetId, category.trim().toLowerCase());
+            }
+          }
+        }
+        
+        // Get created snippet with categories
+        const created = this.selectByIdStmt.get(snippetId);
+        return this.#processCategories(created);
+      })();
     } catch (error) {
       console.error('Error in create:', error);
-      console.error('Parameters:', { title, language, description, code });
+      throw error;
+    }
+  }
+
+  update(id, { title, language, description, code, categories = [] }) {
+    this.#initializeStatements();
+    try {
+      const db = getDb();
+      
+      return db.transaction(() => {
+        // Update snippet
+        this.updateSnippetStmt.run(title, language, description, code, id);
+        
+        // Update categories
+        this.deleteCategoriesStmt.run(id);
+        for (const category of categories) {
+          if (category.trim()) {
+            this.insertCategoryStmt.run(id, category.trim().toLowerCase());
+          }
+        }
+        
+        // Get updated snippet with categories
+        const updated = this.selectByIdStmt.get(id);
+        return this.#processCategories(updated);
+      })();
+    } catch (error) {
+      console.error('Error in update:', error);
       throw error;
     }
   }
@@ -92,29 +159,18 @@ class SnippetRepository {
     this.#initializeStatements();
     try {
       const db = getDb();
+      
       return db.transaction(() => {
+        // Get snippet before deletion
         const snippet = this.selectByIdStmt.get(id);
         if (snippet) {
-          this.deleteStmt.run(id);
+          this.deleteSnippetStmt.run(id);
+          return this.#processCategories(snippet);
         }
-        return snippet;
+        return null;
       })();
     } catch (error) {
       console.error('Error in delete:', error);
-      throw error;
-    }
-  }
-
-  update(id, { title, language, description, code }) {
-    this.#initializeStatements();
-    try {
-      const db = getDb();
-      return db.transaction(() => {
-        this.updateStmt.run(title, language, description, code, id);
-        return this.selectByIdStmt.get(id);
-      })();
-    } catch (error) {
-      console.error('Error in update:', error);
       throw error;
     }
   }

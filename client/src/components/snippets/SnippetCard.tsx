@@ -5,6 +5,7 @@ import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { SnippetCardProps } from '../../types/types';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import PreviewCodeBlock from './PreviewCodeBlock';
+import CategoryList from './categories/CategoryList';
 
 const SnippetCard: React.FC<SnippetCardProps> = ({
   snippet,
@@ -12,9 +13,12 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   onOpen,
   onDelete,
   onEdit,
+  onCategoryClick,
   compactView,
   showCodePreview,
-  previewLines
+  previewLines,
+  showCategories,
+  expandCategories
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -31,6 +35,12 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   const handleDeleteConfirm = () => {
     onDelete(snippet.id);
     setIsDeleteModalOpen(false);
+  };
+
+  const handleCategoryClick = (e: React.MouseEvent, category: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onCategoryClick(category);
   };
 
   const getRelativeTime = (updatedAt: string): string => {
@@ -79,6 +89,15 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
           <Clock size={compactView ? 12 : 14} className="mr-1" />
           <span>Updated {getRelativeTime(snippet.updated_at)}</span>
         </div>
+        {showCategories && (
+          <CategoryList
+            categories={snippet.categories || []}
+            onCategoryClick={handleCategoryClick}
+            className="mb-3"
+            variant="clickable"
+            showAll={expandCategories}
+          />
+        )}
         {showCodePreview && (
           <>
             <div key={`preview-${snippet.id}`}>

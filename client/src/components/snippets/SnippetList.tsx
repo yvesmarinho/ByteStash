@@ -7,10 +7,13 @@ const SnippetList: React.FC<SnippetListProps> = ({
   viewMode, 
   onOpen, 
   onDelete, 
-  onEdit, 
+  onEdit,
+  onCategoryClick,
   compactView, 
   showCodePreview, 
-  previewLines 
+  previewLines,
+  showCategories,
+  expandCategories
 }) => {
   if (snippets.length === 0) {
     return (
@@ -33,9 +36,12 @@ const SnippetList: React.FC<SnippetListProps> = ({
           onOpen={onOpen}
           onDelete={onDelete}
           onEdit={onEdit}
+          onCategoryClick={onCategoryClick}
           compactView={compactView}
           showCodePreview={showCodePreview}
           previewLines={previewLines}
+          showCategories={showCategories}
+          expandCategories={expandCategories}
         />
       ))}
     </div>
