@@ -285,19 +285,15 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ isOpen, onClose, on
               </p>
               <div className="flex flex-wrap gap-2 mt-2">
                 {categories.map((category, index) => (
-                  <div
+                  <button
                     key={index}
-                    className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-700 text-sm"
+                    onClick={() => removeCategory(category)}
+                    className="flex items-center gap-1 px-2 py-1 rounded-md bg-gray-700 text-sm hover:bg-gray-600 transition-colors group"
+                    type="button"
                   >
                     <span>{category}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeCategory(category)}
-                      className="text-gray-400 hover:text-white"
-                    >
-                      ×
-                    </button>
-                  </div>
+                    <span className="text-gray-400 group-hover:text-white">×</span>
+                  </button>
                 ))}
               </div>
             </div>
