@@ -1,24 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import CategoryTag from './CategoryTag';
+import type { CategoryTagVariant } from './CategoryTag';
 
 interface CategoryListProps {
   categories: string[];
-  onCategoryClick: (category: string) => void;
+  onCategoryClick: (e: React.MouseEvent, category: string) => void;
   className?: string;
+  variant: CategoryTagVariant;
   showAll?: boolean;
 }
 
-const CategoryList = ({
+const CategoryList: React.FC<CategoryListProps> = ({
   categories,
   onCategoryClick,
-  className = '',
+  className = "",
+  variant,
   showAll = false
-}: CategoryListProps) => {
+}) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [visibleCount, setVisibleCount] = useState(categories.length);
   const containerRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLDivElement>(null);
-  
+
   useEffect(() => {
     if (showAll) return;
     
@@ -57,80 +61,6 @@ const CategoryList = ({
     return () => window.removeEventListener('resize', calculateVisibleCount);
   }, [categories, visibleCount, showAll]);
 
-  const handleCategoryClick = (e: React.MouseEvent, category: string) => {
-    e.stopPropagation();
-    onCategoryClick(category);
-  };
-
-  const handleExpandClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsExpanded(true);
-  };
-
-  const handleCollapseClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setIsExpanded(false);
-  };
-
-  const getCategoryColor = (name: string) => {
-    const colorSchemes = [
-      {
-        bg: 'bg-blue-500/30',
-        text: 'text-blue-100',
-        hover: 'hover:bg-blue-500/40'
-      },
-      {
-        bg: 'bg-emerald-500/30',
-        text: 'text-emerald-100',
-        hover: 'hover:bg-emerald-500/40'
-      },
-      {
-        bg: 'bg-purple-500/30',
-        text: 'text-purple-100',
-        hover: 'hover:bg-purple-500/40'
-      },
-      {
-        bg: 'bg-amber-500/30',
-        text: 'text-amber-100',
-        hover: 'hover:bg-amber-500/40'
-      },
-      {
-        bg: 'bg-rose-500/30',
-        text: 'text-rose-100',
-        hover: 'hover:bg-rose-500/40'
-      },
-      {
-        bg: 'bg-cyan-500/30',
-        text: 'text-cyan-100',
-        hover: 'hover:bg-cyan-500/40'
-      },
-      {
-        bg: 'bg-indigo-500/30',
-        text: 'text-indigo-100',
-        hover: 'hover:bg-indigo-500/40'
-      },
-      {
-        bg: 'bg-teal-500/30',
-        text: 'text-teal-100',
-        hover: 'hover:bg-teal-500/40'
-      }
-    ];
-    
-    const hash = name.split('').reduce((acc, char, i) => {
-      return char.charCodeAt(0) + ((acc << 5) - acc) + i;
-    }, 0);
-    
-    const scheme = colorSchemes[Math.abs(hash) % colorSchemes.length];
-    return `${scheme.bg} ${scheme.text} ${scheme.hover}`;
-  };
-
-  const visibleCategories = showAll || isExpanded 
-    ? categories 
-    : categories.slice(0, visibleCount);
-    
-  const hasMoreCategories = !showAll && categories.length > visibleCount;
-  const moreCount = categories.length - visibleCount;
-
   if (categories.length === 0) {
     return (
       <div className={`relative ${className}`}>
@@ -143,19 +73,33 @@ const CategoryList = ({
     );
   }
 
+  const visibleCategories = showAll || isExpanded 
+    ? categories 
+    : categories.slice(0, visibleCount);
+    
+  const hasMoreCategories = !showAll && categories.length > visibleCount;
+  const moreCount = categories.length - visibleCount;
+
+  const handleExpandClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(true);
+  };
+
+  const handleCollapseClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsExpanded(false);
+  };
+
   return (
     <div className={`relative ${className}`}>
       <div ref={containerRef} className="flex flex-wrap items-center gap-1.5">
         {visibleCategories.map((category) => (
-          <button
+          <CategoryTag
             key={category}
-            onClick={(e) => handleCategoryClick(e, category)}
-            className={`px-2 py-0.5 rounded-full text-xs font-medium 
-              transition-colors duration-200 
-              ${getCategoryColor(category)}`}
-          >
-            {category}
-          </button>
+            category={category}
+            onClick={onCategoryClick}
+            variant={variant}
+          />
         ))}
         
         {hasMoreCategories && !isExpanded && (
@@ -191,13 +135,12 @@ const CategoryList = ({
           style={{ visibility: 'hidden', position: 'absolute', top: 0, left: 0 }}
         >
           {categories.map((category) => (
-            <button
+            <CategoryTag
               key={category}
-              className={`px-2 py-0.5 rounded-full text-xs font-medium 
-                ${getCategoryColor(category)}`}
-            >
-              {category}
-            </button>
+              category={category}
+              onClick={onCategoryClick}
+              variant={variant}
+            />
           ))}
           <button
             className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs 

@@ -35,7 +35,48 @@ export interface Snippet {
     onSubmit: (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => void;
     snippetToEdit: Snippet | null;
   }
+
+  export interface CustomDropdownProps {
+    options: string[];
+    value: string;
+    onChange: (value: string) => void;
+    maxLength: number;
+  }
   
+  export interface CategoryListProps {
+    categories: string[];
+    onRemoveCategory: (category: string) => void;
+    className?: string;
+  }
+
+  export interface CategorySuggestionsProps {
+    inputValue: string;
+    onInputChange: (value: string) => void;
+    onCategorySelect: (category: string) => void;
+    existingCategories: string[];
+    selectedCategories: string[];
+    placeholder?: string;
+    disabled?: boolean;
+    className?: string;
+    showAddText?: boolean;
+    maxCategories?: number;
+  }
+
+  export interface EnhancedSearchProps {
+    searchTerm: string;
+    onSearchChange: (term: string) => void;
+    onCategorySelect: (category: string) => void;
+    existingCategories: string[];
+    selectedCategories: string[];
+  }
+
+  export interface CustomDropdownProps {
+    options: string[];
+    value: string;
+    onChange: (value: string) => void;
+    maxLength: number;
+  }
+
   export interface SettingsModalProps {
     isOpen: boolean;
     onClose: () => void;

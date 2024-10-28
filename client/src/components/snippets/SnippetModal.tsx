@@ -2,10 +2,20 @@ import React from 'react';
 import Modal from '../common/Modal';
 import { SnippetModalProps } from '../../types/types';
 import FullCodeBlock from './FullCodeBlock';
-import CategoryList from '../common/CategoryList';
+import CategoryList from './categories/CategoryList';
 
-const SnippetModal: React.FC<SnippetModalProps> = ({ snippet, isOpen, onClose, onCategoryClick }) => {
+const SnippetModal: React.FC<SnippetModalProps> = ({ 
+  snippet, 
+  isOpen, 
+  onClose, 
+  onCategoryClick 
+}) => {
   if (!snippet) return null;
+
+  const handleCategoryClick = (e: React.MouseEvent, category: string) => {
+    e.preventDefault();
+    onCategoryClick(category);
+  };
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -14,8 +24,9 @@ const SnippetModal: React.FC<SnippetModalProps> = ({ snippet, isOpen, onClose, o
       <p className="text-sm text-gray-300 mb-4 break-words">{snippet.description}</p>
       <CategoryList
         categories={snippet.categories || []}
-        onCategoryClick={onCategoryClick}
+        onCategoryClick={handleCategoryClick}
         className="mb-3"
+        variant="clickable"
         showAll={true}
       />
       <FullCodeBlock code={snippet.code} language={snippet.language} />
