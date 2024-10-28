@@ -73,19 +73,55 @@ const CategoryList = ({
   };
 
   const getCategoryColor = (name: string) => {
-    const colors = [
-      'bg-blue-500/20 text-blue-200 hover:bg-blue-500/30',
-      'bg-green-500/20 text-green-200 hover:bg-green-500/30',
-      'bg-purple-500/20 text-purple-200 hover:bg-purple-500/30',
-      'bg-orange-500/20 text-orange-200 hover:bg-orange-500/30',
-      'bg-pink-500/20 text-pink-200 hover:bg-pink-500/30',
+    const colorSchemes = [
+      {
+        bg: 'bg-blue-600',
+        text: 'text-white',
+        hover: 'hover:bg-blue-700'
+      },
+      {
+        bg: 'bg-emerald-600',
+        text: 'text-white',
+        hover: 'hover:bg-emerald-700'
+      },
+      {
+        bg: 'bg-purple-600',
+        text: 'text-white',
+        hover: 'hover:bg-purple-700'
+      },
+      {
+        bg: 'bg-amber-600',
+        text: 'text-white',
+        hover: 'hover:bg-amber-700'
+      },
+      {
+        bg: 'bg-rose-600',
+        text: 'text-white',
+        hover: 'hover:bg-rose-700'
+      },
+      {
+        bg: 'bg-cyan-600',
+        text: 'text-white',
+        hover: 'hover:bg-cyan-700'
+      },
+      {
+        bg: 'bg-indigo-600',
+        text: 'text-white',
+        hover: 'hover:bg-indigo-700'
+      },
+      {
+        bg: 'bg-teal-600',
+        text: 'text-white',
+        hover: 'hover:bg-teal-700'
+      }
     ];
     
-    const hash = name.split('').reduce((acc, char) => {
-      return char.charCodeAt(0) + ((acc << 5) - acc);
+    const hash = name.split('').reduce((acc, char, i) => {
+      return char.charCodeAt(0) + ((acc << 5) - acc) + i;
     }, 0);
     
-    return colors[Math.abs(hash) % colors.length];
+    const scheme = colorSchemes[Math.abs(hash) % colorSchemes.length];
+    return `${scheme.bg} ${scheme.text} ${scheme.hover}`;
   };
 
   const visibleCategories = showAll || isExpanded 
@@ -102,7 +138,7 @@ const CategoryList = ({
           <button
             key={category}
             onClick={(e) => handleCategoryClick(e, category)}
-            className={`px-2 py-1 rounded-md text-xs font-medium 
+            className={`px-3 py-1.5 rounded-full text-sm font-medium 
               transition-colors duration-200 
               ${getCategoryColor(category)}`}
           >
@@ -113,24 +149,24 @@ const CategoryList = ({
         {hasMoreCategories && !isExpanded && (
           <button
             onClick={handleExpandClick}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs 
-              font-medium bg-gray-700 text-gray-300 hover:bg-gray-600 
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
+              font-medium bg-gray-600 text-white hover:bg-gray-700 
               transition-colors duration-200"
           >
             <span>{moreCount} more</span>
-            <ChevronDown size={14} />
+            <ChevronDown size={16} />
           </button>
         )}
         
         {isExpanded && hasMoreCategories && (
           <button
             onClick={handleCollapseClick}
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs 
-              font-medium bg-gray-700 text-gray-300 hover:bg-gray-600 
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
+              font-medium bg-gray-600 text-white hover:bg-gray-700 
               transition-colors duration-200"
           >
             <span>Show less</span>
-            <ChevronUp size={14} />
+            <ChevronUp size={16} />
           </button>
         )}
       </div>
@@ -145,18 +181,18 @@ const CategoryList = ({
           {categories.map((category) => (
             <button
               key={category}
-              className={`px-2 py-1 rounded-md text-xs font-medium 
+              className={`px-3 py-1.5 rounded-full text-sm font-medium 
                 ${getCategoryColor(category)}`}
             >
               {category}
             </button>
           ))}
           <button
-            className="flex items-center gap-1 px-2 py-1 rounded-md text-xs 
-              font-medium bg-gray-700 text-gray-300"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
+              font-medium bg-gray-600 text-white"
           >
             <span>99 more</span>
-            <ChevronDown size={14} />
+            <ChevronDown size={16} />
           </button>
         </div>
       )}
