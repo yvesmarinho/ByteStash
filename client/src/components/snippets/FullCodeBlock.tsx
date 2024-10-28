@@ -56,6 +56,7 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
         {`
           .syntax-highlighter-full {
             overflow: auto !important;
+            border-radius: 0.5rem;
           }
 
           .syntax-highlighter-full ::selection {
