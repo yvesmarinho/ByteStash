@@ -83,9 +83,9 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
           <Clock size={compactView ? 12 : 14} className="mr-1" />
           <span>Updated {getRelativeTime(snippet.updated_at)}</span>
         </div>
-        {showCategories && snippet.categories && snippet.categories.length > 0 && (
+        {showCategories && (
           <CategoryList
-            categories={snippet.categories}
+            categories={snippet.categories || []}
             onCategoryClick={onCategoryClick}
             className="mb-3"
             showAll={expandCategories}

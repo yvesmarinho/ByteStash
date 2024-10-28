@@ -75,44 +75,44 @@ const CategoryList = ({
   const getCategoryColor = (name: string) => {
     const colorSchemes = [
       {
-        bg: 'bg-blue-600',
-        text: 'text-white',
-        hover: 'hover:bg-blue-700'
+        bg: 'bg-blue-500/30',
+        text: 'text-blue-100',
+        hover: 'hover:bg-blue-500/40'
       },
       {
-        bg: 'bg-emerald-600',
-        text: 'text-white',
-        hover: 'hover:bg-emerald-700'
+        bg: 'bg-emerald-500/30',
+        text: 'text-emerald-100',
+        hover: 'hover:bg-emerald-500/40'
       },
       {
-        bg: 'bg-purple-600',
-        text: 'text-white',
-        hover: 'hover:bg-purple-700'
+        bg: 'bg-purple-500/30',
+        text: 'text-purple-100',
+        hover: 'hover:bg-purple-500/40'
       },
       {
-        bg: 'bg-amber-600',
-        text: 'text-white',
-        hover: 'hover:bg-amber-700'
+        bg: 'bg-amber-500/30',
+        text: 'text-amber-100',
+        hover: 'hover:bg-amber-500/40'
       },
       {
-        bg: 'bg-rose-600',
-        text: 'text-white',
-        hover: 'hover:bg-rose-700'
+        bg: 'bg-rose-500/30',
+        text: 'text-rose-100',
+        hover: 'hover:bg-rose-500/40'
       },
       {
-        bg: 'bg-cyan-600',
-        text: 'text-white',
-        hover: 'hover:bg-cyan-700'
+        bg: 'bg-cyan-500/30',
+        text: 'text-cyan-100',
+        hover: 'hover:bg-cyan-500/40'
       },
       {
-        bg: 'bg-indigo-600',
-        text: 'text-white',
-        hover: 'hover:bg-indigo-700'
+        bg: 'bg-indigo-500/30',
+        text: 'text-indigo-100',
+        hover: 'hover:bg-indigo-500/40'
       },
       {
-        bg: 'bg-teal-600',
-        text: 'text-white',
-        hover: 'hover:bg-teal-700'
+        bg: 'bg-teal-500/30',
+        text: 'text-teal-100',
+        hover: 'hover:bg-teal-500/40'
       }
     ];
     
@@ -131,14 +131,26 @@ const CategoryList = ({
   const hasMoreCategories = !showAll && categories.length > visibleCount;
   const moreCount = categories.length - visibleCount;
 
+  if (categories.length === 0) {
+    return (
+      <div className={`relative ${className}`}>
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="px-2 py-0.5 rounded-full text-xs font-medium bg-gray-500/20 text-gray-400">
+            No categories
+          </span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
-      <div ref={containerRef} className="flex flex-wrap items-center gap-2">
+      <div ref={containerRef} className="flex flex-wrap items-center gap-1.5">
         {visibleCategories.map((category) => (
           <button
             key={category}
             onClick={(e) => handleCategoryClick(e, category)}
-            className={`px-3 py-1.5 rounded-full text-sm font-medium 
+            className={`px-2 py-0.5 rounded-full text-xs font-medium 
               transition-colors duration-200 
               ${getCategoryColor(category)}`}
           >
@@ -149,24 +161,24 @@ const CategoryList = ({
         {hasMoreCategories && !isExpanded && (
           <button
             onClick={handleExpandClick}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
-              font-medium bg-gray-600 text-white hover:bg-gray-700 
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs 
+              font-medium bg-gray-500/20 text-gray-300 hover:bg-gray-500/30 
               transition-colors duration-200"
           >
             <span>{moreCount} more</span>
-            <ChevronDown size={16} />
+            <ChevronDown size={12} />
           </button>
         )}
         
         {isExpanded && hasMoreCategories && (
           <button
             onClick={handleCollapseClick}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
-              font-medium bg-gray-600 text-white hover:bg-gray-700 
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs 
+              font-medium bg-gray-500/20 text-gray-300 hover:bg-gray-500/30 
               transition-colors duration-200"
           >
             <span>Show less</span>
-            <ChevronUp size={16} />
+            <ChevronUp size={12} />
           </button>
         )}
       </div>
@@ -174,25 +186,25 @@ const CategoryList = ({
       {!showAll && (
         <div 
           ref={measureRef} 
-          className="absolute flex flex-wrap items-center gap-2" 
+          className="absolute flex flex-wrap items-center gap-1.5" 
           aria-hidden="true"
           style={{ visibility: 'hidden', position: 'absolute', top: 0, left: 0 }}
         >
           {categories.map((category) => (
             <button
               key={category}
-              className={`px-3 py-1.5 rounded-full text-sm font-medium 
+              className={`px-2 py-0.5 rounded-full text-xs font-medium 
                 ${getCategoryColor(category)}`}
             >
               {category}
             </button>
           ))}
           <button
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-sm 
-              font-medium bg-gray-600 text-white"
+            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs 
+              font-medium bg-gray-500/20 text-gray-300"
           >
             <span>99 more</span>
-            <ChevronDown size={16} />
+            <ChevronDown size={12} />
           </button>
         </div>
       )}
