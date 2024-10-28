@@ -27,15 +27,17 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
     >
       <div 
         ref={modalRef} 
-        className={`bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] overflow-y-auto transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
+        className={`bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
       >
-        <div className="p-4">
+        <div className="px-4 pt-4">
           <button 
             onClick={onClose}
             className="float-right text-gray-400 hover:text-white"
           >
             <X size={24} />
           </button>
+        </div>
+        <div className="px-4 overflow-y-auto flex-1">
           {children}
         </div>
       </div>
