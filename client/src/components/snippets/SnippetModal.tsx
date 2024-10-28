@@ -29,7 +29,9 @@ const SnippetModal: React.FC<SnippetModalProps> = ({
         variant="clickable"
         showAll={true}
       />
-      <FullCodeBlock code={snippet.code} language={snippet.language} />
+      <div className="mb-4">
+        <FullCodeBlock code={snippet.code} language={snippet.language} />
+      </div>
     </Modal>
   );
 };
