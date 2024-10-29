@@ -60,6 +60,7 @@ export interface Snippet {
     className?: string;
     showAddText?: boolean;
     maxCategories?: number;
+    handleHashtag: boolean;
   }
 
   export interface EnhancedSearchProps {
@@ -75,6 +76,7 @@ export interface Snippet {
     value: string;
     onChange: (value: string) => void;
     maxLength: number;
+    standardOptions?: string[];
   }
 
   export interface SettingsModalProps {
