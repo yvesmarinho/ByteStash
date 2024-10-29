@@ -60,7 +60,7 @@ const CategorySuggestions: React.FC<CategorySuggestionsProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' || e.key === ',') {
+    if (e.key === ',') {
       e.preventDefault();
       const term = handleHashtag
         ? internalValue.slice(internalValue.lastIndexOf('#') + 1).trim()
@@ -80,9 +80,7 @@ const CategorySuggestions: React.FC<CategorySuggestionsProps> = ({
   const handleSelect = (option: string) => {
     let newCategory;
     if (option.startsWith('Add new:')) {
-      newCategory = handleHashtag
-        ? internalValue.slice(internalValue.lastIndexOf('#') + 1).trim()
-        : internalValue.trim();
+      newCategory = option.slice(9).trim();
     } else {
       newCategory = option;
     }
