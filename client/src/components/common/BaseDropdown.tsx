@@ -16,6 +16,7 @@ export interface BaseDropdownProps {
   className?: string;
   disabled?: boolean;
   maxLength?: number;
+  showChevron?: boolean;
 }
 
 const BaseDropdown: React.FC<BaseDropdownProps> = ({
@@ -27,7 +28,8 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
   placeholder = "Select or type a value",
   className = "",
   disabled = false,
-  maxLength
+  maxLength,
+  showChevron = true,
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
@@ -138,7 +140,7 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
         <input
           ref={inputRef}
           type="text"
-          className={`mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 pr-8 text-sm ${className}`}
+          className={`block w-full rounded-md bg-gray-700 text-white p-2 pr-8 text-sm ${className}`}
           value={value}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
@@ -147,10 +149,13 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
           disabled={disabled}
           maxLength={maxLength}
         />
-        <ChevronDown 
-          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
-          size={16}
-        />
+        {showChevron && (
+          <ChevronDown 
+            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
+            size={16}
+          />
+          )
+        }
       </div>
       {isOpen && sections.length > 0 && (
         <ul 

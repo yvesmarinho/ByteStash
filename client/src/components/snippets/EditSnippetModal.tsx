@@ -197,7 +197,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value.slice(0, 100))}
-              className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
+              className="mt-1 block w-full rounded-md bg-gray-700 text-white p-2 text-sm"
               required
               placeholder="Enter the title of the snippet (max 100 characters)"
               maxLength={100}
@@ -223,7 +223,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="mt-1 block w-full rounded-md bg-gray-700 border border-gray-600 text-white p-2 text-sm"
+              className="mt-1 block w-full rounded-md bg-gray-700 text-white p-2 text-sm"
               rows={3}
               placeholder="Write a short description of the snippet"
             />
@@ -258,7 +258,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
 
           <div className="relative">
             <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
-            <div className="mt-1 rounded-md bg-gray-800 border border-gray-600 overflow-hidden">
+            <div className="mt-1 rounded-md bg-gray-800 overflow-hidden">
               <DynamicCodeEditor
                 key={key}
                 code={code}

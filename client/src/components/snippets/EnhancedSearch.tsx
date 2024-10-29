@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
-import CategorySuggestions from './categories/CategorySuggestions';
+import BaseDropdown from '../common/BaseDropdown';
 
 interface EnhancedSearchProps {
   searchTerm: string;
@@ -27,24 +27,70 @@ const EnhancedSearch: React.FC<EnhancedSearchProps> = ({
     }
   }, [searchTerm]);
 
-  const handleInputChange = (value: string) => {
-    setInputValue(value);
-    onSearchChange(value);
+  const getSections = (searchTerm: string) => {
+    if (!searchTerm.includes('#')) return [];
+
+    const term = searchTerm.slice(searchTerm.lastIndexOf('#') + 1).trim().toLowerCase();
+    const sections = [];
+    
+    const availableCategories = existingCategories.filter(
+      cat => !selectedCategories.includes(cat.toLowerCase())
+    );
+
+    const filtered = term
+      ? availableCategories.filter(cat => cat.toLowerCase().includes(term))
+      : availableCategories;
+
+    if (filtered.length > 0) {
+      sections.push({
+        title: 'Categories',
+        items: filtered
+      });
+    }
+
+    if (term && !existingCategories.some(cat => cat.toLowerCase() === term)) {
+      sections.push({
+        title: 'Add New',
+        items: [`Add new: ${term}`]
+      });
+    }
+
+    return sections;
+  };
+
+  const handleSelect = (option: string) => {
+    const newCategory = option.startsWith('Add new:') 
+      ? option.slice(9).trim() 
+      : option;
+
+    const hashtagIndex = inputValue.lastIndexOf('#');
+    if (hashtagIndex !== -1) {
+      const newValue = inputValue.substring(0, hashtagIndex).trim();
+      setInputValue(newValue);
+      onSearchChange(newValue);
+    }
+
+    onCategorySelect(newCategory.toLowerCase());
   };
 
   return (
     <div className="relative flex-grow">
-      <CategorySuggestions
-        inputValue={inputValue}
-        onInputChange={handleInputChange}
-        onCategorySelect={onCategorySelect}
-        existingCategories={existingCategories}
-        selectedCategories={selectedCategories}
+      <BaseDropdown
+        value={inputValue}
+        onChange={(value) => {
+          setInputValue(value);
+          onSearchChange(value);
+        }}
+        onSelect={handleSelect}
+        getSections={getSections}
         placeholder="Search snippets... (Type # to see all available categories)"
-        className="w-full bg-gray-800 rounded-lg py-2 px-4 pr-10 focus:outline-none"
-        handleHashtag={true}
+        className="h-10 mt-0 bg-gray-800"
+        showChevron={false}
       />
-      <Search className="absolute right-3 top-2.5 text-gray-400" size={20} />
+      <Search 
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
+        size={20} 
+      />
     </div>
   );
 };
