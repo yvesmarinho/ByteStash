@@ -33,6 +33,12 @@ export const useSnippets = () => {
     loadSnippets();
   }, [loadSnippets]);
 
+  const reloadSnippets = useCallback(() => {
+    hasLoadedRef.current = false;
+    setIsLoading(true);
+    loadSnippets();
+  }, [loadSnippets]);
+
   const addSnippet = async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
     try {
       const newSnippet = await createSnippet(snippetData);
@@ -81,6 +87,7 @@ export const useSnippets = () => {
     isLoading,
     addSnippet,
     updateSnippet,
-    removeSnippet
+    removeSnippet,
+    reloadSnippets
   };
 };

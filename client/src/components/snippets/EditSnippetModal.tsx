@@ -7,7 +7,7 @@ import { getSupportedLanguages, getLanguageLabel } from '../../utils/languageUti
 import DynamicCodeEditor from './DynamicCodeEditor';
 import { EditSnippetModalProps } from '../../types/types';
 import { useSnippets } from '../../hooks/useSnippets';
-import CustomDropdown from './CustomDropdown';
+import BaseDropdown from '../common/BaseDropdown';
 import CategorySuggestions from './categories/CategorySuggestions';
 import CategoryList from './categories/CategoryList';
 
@@ -17,7 +17,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
   onSubmit, 
   snippetToEdit 
 }) => {
-  const { snippets } = useSnippets();
+  const { snippets, reloadSnippets } = useSnippets();
   const [title, setTitle] = useState('');
   const [language, setLanguage] = useState('');
   const [description, setDescription] = useState('');
@@ -25,25 +25,95 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
   const [error, setError] = useState('');
   const [key, setKey] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [supportedLanguages, setSupportedLanguages] = useState<string[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
   const [categoryInput, setCategoryInput] = useState('');
 
-  const allCategories = useMemo(() => 
-    [...new Set(snippets.flatMap(snippet => snippet.categories || []))].sort(),
-    [snippets]
-  );
+  const allCategories = useMemo(() => {
+    const uniqueCategories = new Set<string>();
+    snippets.forEach(snippet => {
+      snippet.categories?.forEach(category => {
+        uniqueCategories.add(category);
+      });
+    });
+    return Array.from(uniqueCategories).sort();
+  }, [snippets]);
+
+  const standardLanguages = useMemo(() => {
+    const langs = getSupportedLanguages().reduce((acc: string[], lang) => {
+      acc.push(lang.language);
+      acc.push(...lang.aliases);
+      return acc;
+    }, []);
+    return [...new Set(langs)].sort((a, b) => 
+      getLanguageLabel(a).localeCompare(getLanguageLabel(b))
+    );
+  }, []);
+
+  const customLanguages = useMemo(() => {
+    const customLangs = snippets
+      .map(snippet => snippet.language)
+      .filter(lang => !standardLanguages.includes(lang));
+    return [...new Set(customLangs)];
+  }, [snippets, standardLanguages]);
+
+  const getLanguageSections = (searchTerm: string) => {
+    const term = searchTerm.toLowerCase();
+    const normalizedStandard = standardLanguages.reduce((acc, lang) => {
+      const normalized = lang.toLowerCase();
+      if (!acc.some(l => l.toLowerCase() === normalized)) {
+        acc.push(lang);
+      }
+      return acc;
+    }, [] as string[]);
+    
+    const normalizedCustom = customLanguages.reduce((acc, lang) => {
+      const normalized = lang.toLowerCase();
+      if (!acc.some(l => l.toLowerCase() === normalized) && 
+          !normalizedStandard.some(l => l.toLowerCase() === normalized)) {
+        acc.push(lang);
+      }
+      return acc;
+    }, [] as string[]);
+    
+    const sections = [];
+
+    const standardFiltered = normalizedStandard.filter(option =>
+      getLanguageLabel(option).toLowerCase().includes(term)
+    );
+    
+    if (standardFiltered.length > 0) {
+      sections.push({
+        title: 'Standard Languages',
+        items: standardFiltered
+      });
+    }
+
+    const customFiltered = normalizedCustom.filter(option =>
+      getLanguageLabel(option).toLowerCase().includes(term)
+    );
+
+    if (customFiltered.length > 0) {
+      sections.push({
+        title: 'Custom Languages',
+        items: customFiltered
+      });
+    }
+
+    if (term && 
+        !normalizedStandard.some(l => l.toLowerCase() === term) &&
+        !normalizedCustom.some(l => l.toLowerCase() === term) &&
+        term.length > 0) {
+      sections.push({
+        title: 'Add New',
+        items: [`Add new: ${term}`]
+      });
+    }
+
+    return sections;
+  };
 
   useEffect(() => {
     if (isOpen) {
-      const languages = getSupportedLanguages().reduce((acc: string[], lang) => {
-        acc.push(lang.language);
-        acc.push(...lang.aliases);
-        return acc;
-      }, []).sort((a, b) => getLanguageLabel(a).localeCompare(getLanguageLabel(b)));
-
-      setSupportedLanguages(languages);
-
       if (snippetToEdit) {
         setTitle(snippetToEdit.title?.slice(0, 255) || '');
         setLanguage(snippetToEdit.language?.slice(0, 50) || '');
@@ -58,15 +128,26 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
         setCategories([]);
       }
       setError('');
+      setCategoryInput('');
       setKey(prevKey => prevKey + 1);
     }
   }, [isOpen, snippetToEdit]);
 
+  const handleLanguageChange = (value: string) => {
+    setLanguage(value);
+  };
+
+  const handleLanguageSelect = (option: string) => {
+    const finalValue = option.startsWith('Add new:') ? option.slice(9).trim() : option;
+    setLanguage(finalValue);
+  };
+
   const handleCategorySelect = (category: string) => {
     const normalizedCategory = category.toLowerCase().trim();
     if (normalizedCategory && categories.length < 20 && !categories.includes(normalizedCategory)) {
-      setCategories([...categories, normalizedCategory]);
+      setCategories(prev => [...prev, normalizedCategory]);
     }
+    setCategoryInput('');
   };
 
   const handleRemoveCategory = (e: React.MouseEvent, category: string) => {
@@ -74,7 +155,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
     setCategories(cats => cats.filter(c => c !== category));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
 
@@ -88,7 +169,9 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
     };
 
     try {
-      onSubmit(snippetData);
+      await onSubmit(snippetData);
+      reloadSnippets();
+      onClose();
     } catch (error) {
       setError('An error occurred while saving the snippet. Please try again.');
       console.error('Error saving snippet:', error);
@@ -124,11 +207,13 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
           
           <div>
             <label htmlFor="language" className="block text-sm font-medium text-gray-300">Language</label>
-            <CustomDropdown
-              options={supportedLanguages}
+            <BaseDropdown
               value={language}
-              onChange={(value) => setLanguage(value)}
+              onChange={handleLanguageChange}
+              onSelect={handleLanguageSelect}
+              getSections={getLanguageSections}
               maxLength={50}
+              placeholder="Select or type a language"
             />
           </div>
           
@@ -149,6 +234,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
               Categories (max 20)
             </label>
             <CategorySuggestions
+              key={`category-suggestions-${key}`}
               inputValue={categoryInput}
               onInputChange={setCategoryInput}
               onCategorySelect={handleCategorySelect}
@@ -157,6 +243,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
               placeholder="Type a category and press Enter or comma"
               maxCategories={20}
               showAddText={true}
+              handleHashtag={false}
             />
             <p className="text-sm text-gray-400 mt-1">
               {categories.length}/20 categories
