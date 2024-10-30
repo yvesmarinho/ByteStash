@@ -9,6 +9,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   const [includeCodeInSearch, setIncludeCodeInSearch] = useState(settings.includeCodeInSearch);
   const [showCategories, setShowCategories] = useState(settings.showCategories);
   const [expandCategories, setExpandCategories] = useState(settings.expandCategories);
+  const [showLineNumbers, setShowLineNumbers] = useState(settings.showLineNumbers);
 
   const handleSave = () => {
     onSettingsChange({
@@ -17,7 +18,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
       previewLines,
       includeCodeInSearch,
       showCategories,
-      expandCategories
+      expandCategories,
+      showLineNumbers
     });
     onClose();
   };
@@ -93,6 +95,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
             />
           </div>
         )}
+        <div className="flex items-center justify-between">
+          <label htmlFor="showLineNumbers" className="text-gray-300">Show Line Numbers</label>
+          <input
+            type="checkbox"
+            id="showLineNumbers"
+            checked={showLineNumbers}
+            onChange={(e) => setShowLineNumbers(e.target.checked)}
+            className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
+          />
+        </div>
       </div>
       <div className="mt-6 flex justify-end">
         <button

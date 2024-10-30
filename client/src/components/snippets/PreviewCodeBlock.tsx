@@ -9,7 +9,8 @@ import { PreviewCodeBlockProps } from '@/types/types';
 const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({ 
   code, 
   language = 'plaintext',
-  previewLines = 4 
+  previewLines = 4,
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const LINE_HEIGHT = 24;
@@ -20,6 +21,16 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
     const normalized = normalizeLanguage(language);
     setNormalizedLang(normalized);
   }, [language]);
+
+  const lineNumberStyle = {
+    minWidth: '2.5em',
+    paddingRight: '0.5em',
+    textAlign: 'right',
+    userSelect: 'none',
+    opacity: '0.5',
+    borderRight: '1px solid #404040',
+    marginRight: '1em',
+  } as const;
 
   const components: Components = {
     code: ({ className, children }) => (
@@ -151,6 +162,8 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
               style={vscDarkPlus}
               wrapLines={true}
               className="syntax-highlighter-preview"
+              lineNumberStyle={lineNumberStyle}
+              showLineNumbers={showLineNumbers}
             >
               {code}
             </SyntaxHighlighter>

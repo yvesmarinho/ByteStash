@@ -8,7 +8,8 @@ const SnippetModal: React.FC<SnippetModalProps> = ({
   snippet, 
   isOpen, 
   onClose, 
-  onCategoryClick 
+  onCategoryClick,
+  showLineNumbers
 }) => {
   if (!snippet) return null;
 
@@ -30,7 +31,7 @@ const SnippetModal: React.FC<SnippetModalProps> = ({
         showAll={true}
       />
       <div className="mb-4">
-        <FullCodeBlock code={snippet.code} language={snippet.language} />
+        <FullCodeBlock code={snippet.code} language={snippet.language} showLineNumbers={showLineNumbers}/>
       </div>
     </Modal>
   );

@@ -18,7 +18,8 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   showCodePreview,
   previewLines,
   showCategories,
-  expandCategories
+  expandCategories,
+  showLineNumbers
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
@@ -105,6 +106,7 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
                 code={snippet.code} 
                 language={snippet.language}
                 previewLines={previewLines}
+                showLineNumbers={showLineNumbers}
               />
             </div>
             {snippet.code.split('\n').length > previewLines && (

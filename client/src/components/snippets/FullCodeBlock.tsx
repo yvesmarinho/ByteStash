@@ -8,7 +8,8 @@ import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
   code, 
-  language = 'plaintext'
+  language = 'plaintext',
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const isMarkdown = getLanguageLabel(language) === 'markdown';
@@ -17,6 +18,16 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     const normalized = normalizeLanguage(language);
     setNormalizedLang(normalized);
   }, [language]);
+
+  const lineNumberStyle = {
+    minWidth: '2.5em',
+    paddingRight: '0.5em',
+    textAlign: 'right',
+    userSelect: 'none',
+    opacity: '0.5',
+    borderRight: '1px solid #404040',
+    marginRight: '1em',
+  } as const;
 
   const components: Components = {
     code: ({ className, children }) => (
@@ -136,6 +147,8 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             style={vscDarkPlus}
             wrapLines={true}
             className="syntax-highlighter-full"
+            lineNumberStyle={lineNumberStyle}
+            showLineNumbers={showLineNumbers}
           >
             {code}
           </SyntaxHighlighter>

@@ -20,6 +20,7 @@ export interface Snippet {
     previewLines: number;
     showCategories: boolean;
     expandCategories: boolean;
+    showLineNumbers: boolean;
   }
   
   export interface SnippetModalProps {
@@ -27,6 +28,7 @@ export interface Snippet {
     isOpen: boolean;
     onClose: () => void;
     onCategoryClick: (category: string) => void;
+    showLineNumbers: boolean;
   }
   
   export interface EditSnippetModalProps {
@@ -89,6 +91,7 @@ export interface Snippet {
       includeCodeInSearch: boolean;
       showCategories: boolean;
       expandCategories: boolean;
+      showLineNumbers: boolean;
     };
     onSettingsChange: (newSettings: SettingsModalProps['settings']) => void;
   }
@@ -122,6 +125,7 @@ export interface Snippet {
     previewLines: number;
     showCategories: boolean;
     expandCategories: boolean;
+    showLineNumbers: boolean;
   }
   
   export interface ModalProps {
@@ -137,12 +141,14 @@ export interface Snippet {
   export interface FullCodeBlockProps {
     code: string;
     language?: string;
+    showLineNumbers?: boolean;
   }
 
   export interface PreviewCodeBlockProps {
     code: string;
     language?: string;
     previewLines?: number;
+    showLineNumbers?: boolean;
   }
   
   export interface DeleteConfirmationModalProps {

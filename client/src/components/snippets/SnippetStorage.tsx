@@ -14,7 +14,7 @@ const SnippetStorage: React.FC = () => {
   const { 
     viewMode, setViewMode, compactView, showCodePreview, 
     previewLines, includeCodeInSearch, updateSettings,
-    showCategories, expandCategories
+    showCategories, expandCategories, showLineNumbers
   } = useSettings();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -157,6 +157,7 @@ const SnippetStorage: React.FC = () => {
         previewLines={previewLines}
         showCategories={showCategories}
         expandCategories={expandCategories}
+        showLineNumbers={showLineNumbers}
       />
 
       {selectedSnippet && (
@@ -165,6 +166,7 @@ const SnippetStorage: React.FC = () => {
           isOpen={!!selectedSnippet} 
           onClose={closeSnippet}
           onCategoryClick={handleCategoryClick}
+          showLineNumbers={showLineNumbers}
         />
       )}
 
@@ -178,7 +180,7 @@ const SnippetStorage: React.FC = () => {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories }}
+        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories, showLineNumbers }}
         onSettingsChange={updateSettings}
       />
     </div>
