@@ -9,6 +9,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
   code,
   language = 'plaintext',
   previewLines = 4,
+  showLineNumbers
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const isMarkdown = getLanguageLabel(language) === 'markdown';
@@ -51,7 +52,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: 13,
-            lineNumbers: 'off',
+            lineNumbers: showLineNumbers ? 'on' : 'off',
             renderLineHighlight: 'none',
             folding: false,
             wordWrap: 'on',
