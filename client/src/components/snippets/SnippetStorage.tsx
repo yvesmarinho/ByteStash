@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import SearchAndFilter from './SearchAndFilter';
 import SnippetList from './SnippetList';
 import SnippetModal from './SnippetModal';
@@ -8,6 +8,7 @@ import { useSnippets } from '../../hooks/useSnippets';
 import { useSettings } from '../../hooks/useSettings';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
+import { initializeMonaco } from '../../utils/languageUtils';
 
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
@@ -25,6 +26,10 @@ const SnippetStorage: React.FC = () => {
   const [snippetToEdit, setSnippetToEdit] = useState<Snippet | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    initializeMonaco();
+  }, []);
 
   const handleSearchTermChange = useCallback((term: string) => {
     setSearchTerm(term);
@@ -175,6 +180,7 @@ const SnippetStorage: React.FC = () => {
         onClose={closeEditSnippetModal}
         onSubmit={handleSnippetSubmit}
         snippetToEdit={snippetToEdit}
+        showLineNumbers={showLineNumbers}
       />
 
       <SettingsModal

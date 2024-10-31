@@ -1,14 +1,8 @@
-import Prism from 'prismjs';
-import 'prismjs/themes/prism.css';
-
-if (typeof window !== 'undefined') {
-  window.Prism = window.Prism || {};
-  window.Prism.manual = true;
-}
+import * as monaco from 'monaco-editor';
 
 interface LanguageConfig {
   aliases: string[];
-  loader?: () => any;
+  monacoAlias: string;
   label: string;
 }
 
@@ -17,224 +11,292 @@ type LanguageMapping = {
 };
 
 const LANGUAGE_MAPPING: LanguageMapping = {
-  // Web Development
+  // Web Development Languages
   javascript: {
-    aliases: ['js', 'node', 'nodejs', 'jsx', 'mjs', 'cjs', 'node.js'],
-    loader: () => require('prismjs/components/prism-javascript'),
+    aliases: ['js', 'node', 'nodejs', 'jsx', 'mjs', 'cjs', 'node.js', 'ecmascript', 'es6', 'es2015', 'es2016', 'es2017', 'es2018', 'es2019', 'es2020'],
+    monacoAlias: 'javascript',
     label: 'javascript'
   },
   typescript: {
-    aliases: ['ts', 'tsx', 'typescript-next', 'typescriptreact'],
-    loader: () => require('prismjs/components/prism-typescript'),
+    aliases: ['ts', 'tsx', 'typescript-next', 'typescriptreact', 'ts-next', 'tsx', 'tsc'],
+    monacoAlias: 'typescript',
     label: 'typescript'
   },
   html: {
-    aliases: ['html5', 'htm', 'xhtml'],
-    loader: undefined,
+    aliases: ['html5', 'htm', 'xhtml', 'markup', 'shtml', 'dhtml', 'html4'],
+    monacoAlias: 'html',
     label: 'html'
   },
   css: {
-    aliases: ['css3', 'styles', 'stylesheet'],
-    loader: undefined,
+    aliases: ['css3', 'styles', 'stylesheet', 'scss', 'sass', 'less', 'postcss', 'style'],
+    monacoAlias: 'css',
     label: 'css'
   },
   php: {
-    aliases: ['php3', 'php4', 'php5', 'php7', 'php8'],
-    loader: () => require('prismjs/components/prism-php'),
+    aliases: ['php3', 'php4', 'php5', 'php7', 'php8', 'phps', 'phtml', 'laravel', 'symfony'],
+    monacoAlias: 'php',
     label: 'php'
   },
   webassembly: {
-    aliases: ['wasm'],
-    loader: () => require('prismjs/components/prism-wasm'),
+    aliases: ['wasm', 'wat', 'wasmer', 'wasmtime'],
+    monacoAlias: 'wasm',
     label: 'webassembly'
   },
 
-  // System Programming
+  // System Programming Languages
   c: {
-    aliases: ['h'],
-    loader: () => require('prismjs/components/prism-c'),
+    aliases: ['h', 'ansi-c', 'c99', 'c11', 'c17', 'c23'],
+    monacoAlias: 'c',
     label: 'c'
   },
   cpp: {
-    aliases: ['c++', 'cc', 'cxx', 'hpp', 'h++', 'cplusplus'],
-    loader: () => require('prismjs/components/prism-cpp'),
+    aliases: ['c++', 'cc', 'cxx', 'hpp', 'h++', 'cplusplus', 'c++11', 'c++14', 'c++17', 'c++20', 'c++23'],
+    monacoAlias: 'cpp',
     label: 'c++'
   },
   csharp: {
-    aliases: ['cs', 'c#', 'dotnet', 'net'],
-    loader: () => require('prismjs/components/prism-csharp'),
+    aliases: ['cs', 'c#', 'dotnet', 'net', 'dotnetcore', 'net6', 'net7', 'net8', 'aspnet'],
+    monacoAlias: 'csharp',
     label: 'c#'
   },
   rust: {
-    aliases: ['rs', 'rust-lang', 'rustlang'],
-    loader: () => require('prismjs/components/prism-rust'),
+    aliases: ['rs', 'rust-lang', 'rustlang', 'cargo', 'rustc'],
+    monacoAlias: 'rust',
     label: 'rust'
   },
   go: {
-    aliases: ['golang', 'go-lang'],
-    loader: () => require('prismjs/components/prism-go'),
+    aliases: ['golang', 'go-lang', 'gopher', 'gocode'],
+    monacoAlias: 'go',
     label: 'go'
   },
 
   // JVM Languages
   java: {
-    aliases: ['jsp'],
-    loader: () => require('prismjs/components/prism-java'),
+    aliases: ['jsp', 'jvm', 'spring', 'javase', 'javaee', 'jakarta'],
+    monacoAlias: 'java',
     label: 'java'
   },
   kotlin: {
-    aliases: ['kt', 'kts'],
-    loader: () => require('prismjs/components/prism-kotlin'),
+    aliases: ['kt', 'kts', 'kotlinx', 'ktor', 'spring-kotlin'],
+    monacoAlias: 'kotlin',
     label: 'kotlin'
   },
   scala: {
-    aliases: ['sc'],
-    loader: () => require('prismjs/components/prism-scala'),
+    aliases: ['sc', 'scala2', 'scala3', 'dotty', 'akka', 'play'],
+    monacoAlias: 'scala',
     label: 'scala'
   },
   groovy: {
-    aliases: ['gvy', 'gy', 'gsh'],
-    loader: () => require('prismjs/components/prism-groovy'),
+    aliases: ['gvy', 'gy', 'gsh', 'gradle', 'grails'],
+    monacoAlias: 'groovy',
     label: 'groovy'
   },
 
   // Scripting Languages
   python: {
-    aliases: ['py', 'py3', 'pyc', 'pyd', 'pyo', 'pyw', 'pyz'],
-    loader: () => require('prismjs/components/prism-python'),
+    aliases: ['py', 'py3', 'pyc', 'pyd', 'pyo', 'pyw', 'pyz', 'django', 'flask', 'fastapi', 'jupyter'],
+    monacoAlias: 'python',
     label: 'python'
   },
   ruby: {
-    aliases: ['rb', 'rbw', 'rake', 'gemspec', 'podspec', 'thor', 'irb'],
-    loader: () => require('prismjs/components/prism-ruby'),
+    aliases: ['rb', 'rbw', 'rake', 'gemspec', 'podspec', 'thor', 'irb', 'rails', 'sinatra'],
+    monacoAlias: 'ruby',
     label: 'ruby'
   },
   perl: {
-    aliases: ['pl', 'pm', 'pod', 't', 'prl'],
-    loader: () => require('prismjs/components/prism-perl'),
+    aliases: ['pl', 'pm', 'pod', 't', 'prl', 'perl5', 'perl6', 'raku'],
+    monacoAlias: 'perl',
     label: 'perl'
   },
   lua: {
-    aliases: ['lua'],
-    loader: () => require('prismjs/components/prism-lua'),
+    aliases: ['luac', 'luajit', 'moonscript', 'lua5'],
+    monacoAlias: 'lua',
     label: 'lua'
   },
 
   // Shell Scripting
   bash: {
-    aliases: ['sh', 'shell', 'zsh', 'ksh', 'csh', 'tcsh', 'shellscript'],
-    loader: () => require('prismjs/components/prism-bash'),
+    aliases: ['sh', 'shell', 'zsh', 'ksh', 'csh', 'tcsh', 'shellscript', 'bash-script', 'bashrc', 'zshrc'],
+    monacoAlias: 'shell',
     label: 'bash'
   },
   powershell: {
-    aliases: ['ps', 'ps1', 'psd1', 'psm1', 'pwsh'],
-    loader: () => require('prismjs/components/prism-powershell'),
+    aliases: ['ps', 'ps1', 'psd1', 'psm1', 'pwsh', 'psc1', 'pssc', 'windows-powershell'],
+    monacoAlias: 'powershell',
     label: 'powershell'
   },
   batch: {
-    aliases: ['bat', 'cmd', 'command'],
-    loader: () => require('prismjs/components/prism-batch'),
+    aliases: ['bat', 'cmd', 'command', 'dos', 'windows-batch'],
+    monacoAlias: 'bat',
     label: 'batch'
   },
 
-  // Database
+  // Database Languages
   sql: {
-    aliases: ['mysql', 'postgresql', 'psql', 'pgsql', 'plsql', 'tsql', 'mssql', 'sqlite'],
-    loader: () => require('prismjs/components/prism-sql'),
+    aliases: ['mysql', 'postgresql', 'psql', 'pgsql', 'plsql', 'tsql', 'mssql', 'sqlite', 'oracle', 'mariadb'],
+    monacoAlias: 'sql',
     label: 'sql'
   },
   mongodb: {
-    aliases: ['mongo'],
-    loader: () => require('prismjs/components/prism-mongodb'),
+    aliases: ['mongo', 'mongoose', 'nosql', 'mongosh'],
+    monacoAlias: 'javascript',
     label: 'mongodb'
   },
 
-  // Markup & Config
+  // Markup & Configuration Languages
   markdown: {
-    aliases: ['md', 'mkd', 'mkdown', 'mdwn', 'mdown'],
-    loader: () => require('prismjs/components/prism-markdown'),
+    aliases: ['md', 'mkd', 'mkdown', 'mdwn', 'mdown', 'markd', 'mdx', 'rmd', 'commonmark'],
+    monacoAlias: 'markdown',
     label: 'markdown'
   },
   yaml: {
-    aliases: ['yml', 'yaml-frontmatter'],
-    loader: () => require('prismjs/components/prism-yaml'),
+    aliases: ['yml', 'yaml-frontmatter', 'docker-compose', 'k8s', 'kubernetes', 'ansible'],
+    monacoAlias: 'yaml',
     label: 'yaml'
   },
   json: {
-    aliases: ['json5', 'jsonc', 'jsonl', 'geojson'],
-    loader: () => require('prismjs/components/prism-json'),
+    aliases: ['json5', 'jsonc', 'jsonl', 'geojson', 'json-ld', 'composer', 'package.json', 'tsconfig', 'jsonnet'],
+    monacoAlias: 'json',
     label: 'json'
   },
   xml: {
-    aliases: ['rss', 'atom', 'xhtml', 'xsl', 'plist', 'svg'],
-    loader: undefined,
+    aliases: ['rss', 'atom', 'xhtml', 'xsl', 'plist', 'svg', 'xmlns', 'xsd', 'dtd', 'maven'],
+    monacoAlias: 'xml',
     label: 'xml'
   },
+  toml: {
+    aliases: ['ini', 'conf', 'config', 'cargo.toml', 'poetry.toml'],
+    monacoAlias: 'ini',
+    label: 'toml'
+  },
 
-  // Other
-  latex: {
-    aliases: ['tex', 'context', 'ltx'],
-    loader: () => require('prismjs/components/prism-latex'),
-    label: 'latex'
+  // Cloud & Infrastructure
+  terraform: {
+    aliases: ['tf', 'hcl', 'tfvars', 'terraform-config'],
+    monacoAlias: 'hcl',
+    label: 'terraform'
   },
-  graphql: {
-    aliases: ['gql'],
-    loader: () => require('prismjs/components/prism-graphql'),
-    label: 'graphql'
+  dockerfile: {
+    aliases: ['docker', 'containerfile', 'docker-compose'],
+    monacoAlias: 'dockerfile',
+    label: 'dockerfile'
   },
+  kubernetes: {
+    aliases: ['k8s', 'helm', 'kustomize'],
+    monacoAlias: 'yaml',
+    label: 'kubernetes'
+  },
+
+  // Other Programming Languages
+  swift: {
+    aliases: ['swiftc', 'swift5', 'swift-lang', 'apple-swift'],
+    monacoAlias: 'swift',
+    label: 'swift'
+  },
+  r: {
+    aliases: ['rlang', 'rscript', 'r-stats', 'r-project'],
+    monacoAlias: 'r',
+    label: 'r'
+  },
+  julia: {
+    aliases: ['jl', 'julia-lang', 'julialang'],
+    monacoAlias: 'julia',
+    label: 'julia'
+  },
+  dart: {
+    aliases: ['flutter', 'dart-lang', 'dart2', 'dart3'],
+    monacoAlias: 'dart',
+    label: 'dart'
+  },
+  elm: {
+    aliases: ['elm-lang', 'elm-format'],
+    monacoAlias: 'elm',
+    label: 'elm'
+  },
+
+  // Smart Contract Languages
   solidity: {
-    aliases: ['sol'],
-    loader: () => require('prismjs/components/prism-solidity'),
+    aliases: ['sol', 'ethereum', 'smart-contract', 'evm'],
+    monacoAlias: 'sol',
     label: 'solidity'
   },
+  vyper: {
+    aliases: ['vy', 'ethereum-vyper'],
+    monacoAlias: 'python',
+    label: 'vyper'
+  },
+
+  // Scientific & Math
+  latex: {
+    aliases: ['tex', 'context', 'ltx', 'bibtex', 'texinfo'],
+    monacoAlias: 'latex',
+    label: 'latex'
+  },
+  matlab: {
+    aliases: ['octave', 'm', 'mat'],
+    monacoAlias: 'matlab',
+    label: 'matlab'
+  },
+
+  // Query Languages
+  graphql: {
+    aliases: ['gql', 'graphqlschema', 'apollo'],
+    monacoAlias: 'graphql',
+    label: 'graphql'
+  },
+  cypher: {
+    aliases: ['neo4j', 'neo4j-cypher'],
+    monacoAlias: 'cypher',
+    label: 'cypher'
+  },
+
+  // Fallback
   plaintext: {
-    aliases: ['text', 'txt', 'plain'],
-    loader: undefined,
-    label: 'plain text'
+    aliases: ['text', 'txt', 'plain', 'log', 'raw'],
+    monacoAlias: 'plaintext',
+    label: 'plaintext'
   }
 };
 
-const ALIAS_TO_LANGUAGE: { [key: string]: string } = Object.entries(LANGUAGE_MAPPING).reduce((acc, [lang, info]) => {
-  acc[lang] = lang;
-  info.aliases.forEach(alias => {
-    acc[alias] = lang;
-  });
-  return acc;
-}, {} as { [key: string]: string });
-
-const loadedLanguages = new Set<string>(['markup', 'css', 'html']);
-
-const initializeCoreLanguages = () => {
-  if (typeof Prism === 'undefined') {
-    console.error('Prism is not properly initialized');
-    return;
-  }
-
-  const coreLanguages = ['javascript', 'typescript', 'python', 'java'];
+const getAllLanguageIdentifiers = (): Set<string> => {
+  const identifiers = new Set<string>();
   
-  coreLanguages.forEach(lang => {
-    const config = LANGUAGE_MAPPING[lang];
-    if (config?.loader) {
-      try {
-        config.loader();
-        loadedLanguages.add(lang);
-      } catch (error) {
-        console.warn(`Failed to load core language: ${lang}`, error);
-      }
-    }
+  Object.entries(LANGUAGE_MAPPING).forEach(([key, config]) => {
+    identifiers.add(key.toLowerCase());
+    config.aliases.forEach(alias => identifiers.add(alias.toLowerCase()));
   });
+  
+  return identifiers;
 };
 
-if (typeof Prism !== 'undefined') {
-  initializeCoreLanguages();
-} else {
-  console.warn('Prism not available during initialization');
-}
+const LANGUAGE_IDENTIFIERS = getAllLanguageIdentifiers();
 
 export const normalizeLanguage = (lang: string): string => {
   if (!lang || typeof lang !== 'string') return 'plaintext';
+  
   const normalized = lang.toLowerCase().trim();
-  return ALIAS_TO_LANGUAGE[normalized] || normalized;
+  
+  if (LANGUAGE_MAPPING[normalized]) {
+    return normalized;
+  }
+  
+  for (const [language, config] of Object.entries(LANGUAGE_MAPPING)) {
+    if (config.aliases.includes(normalized)) {
+      return language;
+    }
+  }
+  
+  return 'plaintext';
+};
+
+export const getMonacoLanguage = (lang: string): string => {
+  const normalized = normalizeLanguage(lang);
+  return LANGUAGE_MAPPING[normalized]?.monacoAlias || 'plaintext';
+};
+
+export const getLanguageLabel = (lang: string): string => {
+  const normalized = normalizeLanguage(lang);
+  return LANGUAGE_MAPPING[normalized]?.label || lang;
 };
 
 export interface LanguageInfo {
@@ -244,55 +306,133 @@ export interface LanguageInfo {
 }
 
 export const getSupportedLanguages = (): LanguageInfo[] => {
-  return Object.entries(LANGUAGE_MAPPING).map(([lang, info]) => ({
+  return Object.entries(LANGUAGE_MAPPING).map(([lang, config]) => ({
     language: lang,
-    aliases: [...info.aliases],
-    label: info.label
+    aliases: [...config.aliases],
+    label: config.label
   }));
 };
 
 export const isLanguageSupported = (lang: string): boolean => {
-  const normalized = normalizeLanguage(lang);
-  return normalized in LANGUAGE_MAPPING;
+  const normalized = lang?.toLowerCase().trim() || '';
+  return LANGUAGE_IDENTIFIERS.has(normalized);
 };
 
-export const getLanguageLabel = (lang: string): string => {
+export const getLanguageAliases = (lang: string): string[] => {
   const normalized = normalizeLanguage(lang);
-  return LANGUAGE_MAPPING[normalized]?.label || lang.toLowerCase();
+  return LANGUAGE_MAPPING[normalized]?.aliases || [];
 };
 
 export const getAllLanguageAliases = (): Record<string, string[]> => {
-  return Object.entries(LANGUAGE_MAPPING).reduce((acc, [lang, info]) => {
-    acc[lang] = [...info.aliases];
+  return Object.entries(LANGUAGE_MAPPING).reduce((acc, [lang, config]) => {
+    acc[lang] = [...config.aliases];
     return acc;
   }, {} as Record<string, string[]>);
 };
 
-export const loadLanguage = async (lang: string): Promise<boolean> => {
-  if (typeof Prism === 'undefined') {
-    console.error('Prism is not properly initialized');
-    return false;
-  }
-
-  const normalized = normalizeLanguage(lang);
-  
-  if (loadedLanguages.has(normalized)) {
-    return true;
-  }
-
-  const config = LANGUAGE_MAPPING[normalized];
-  if (config?.loader) {
-    try {
-      await config.loader();
-      loadedLanguages.add(normalized);
-      return true;
-    } catch (error) {
-      console.warn(`Failed to load language: ${normalized}`, error);
-      return false;
+export const configureMonaco = () => {
+  monaco.editor.defineTheme('bytestash-dark', {
+    base: 'vs-dark',
+    inherit: true,
+    rules: [
+      { token: 'comment', foreground: '6A9955' },
+      { token: 'keyword', foreground: '569CD6' },
+      { token: 'string', foreground: 'CE9178' },
+      { token: 'number', foreground: 'B5CEA8' },
+      { token: 'regexp', foreground: 'D16969' },
+      { token: 'type', foreground: '4EC9B0' },
+      { token: 'class', foreground: '4EC9B0' },
+      { token: 'function', foreground: 'DCDCAA' },
+      { token: 'variable', foreground: '9CDCFE' },
+      { token: 'constant', foreground: '4FC1FF' },
+      { token: 'parameter', foreground: '9CDCFE' },
+      { token: 'builtin', foreground: '4EC9B0' },
+      { token: 'operator', foreground: 'D4D4D4' },
+    ],
+    colors: {
+      'editor.background': '#1E1E1E',
+      'editor.foreground': '#D4D4D4',
+      'editor.lineHighlightBackground': '#2F2F2F',
+      'editorLineNumber.foreground': '#858585',
+      'editorLineNumber.activeForeground': '#C6C6C6',
+      'editor.selectionBackground': '#264F78',
+      'editor.inactiveSelectionBackground': '#3A3D41',
+      'editorBracketMatch.background': '#0D3A58',
+      'editorBracketMatch.border': '#888888',
     }
-  }
+  });
+};
 
-  return false;
+export const getDefaultEditorOptions = (isReadOnly: boolean = false, showLineNumbers: boolean = true): monaco.editor.IStandaloneEditorConstructionOptions => {
+  return {
+    theme: 'bytestash-dark',
+    fontSize: 14,
+    lineNumbers: showLineNumbers ? 'on' : 'off',
+    readOnly: isReadOnly,
+    minimap: { enabled: false },
+    scrollBeyondLastLine: false,
+    renderLineHighlight: 'all',
+    wordWrap: 'on',
+    wrappingIndent: 'indent',
+    automaticLayout: true,
+    tabSize: 2,
+    formatOnPaste: true,
+    formatOnType: true,
+    suggestOnTriggerCharacters: true,
+    quickSuggestions: true,
+    contextmenu: true,
+    scrollbar: {
+      vertical: 'visible',
+      horizontal: 'visible',
+      useShadows: false,
+      verticalScrollbarSize: 10,
+      horizontalScrollbarSize: 10,
+    },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    hideCursorInOverviewRuler: true,
+    padding: {
+      top: 12
+    },
+  };
+};
+
+export const getPreviewEditorOptions = (
+  showLineNumbers: boolean = true
+): monaco.editor.IStandaloneEditorConstructionOptions => {
+  return {
+    ...getDefaultEditorOptions(true, showLineNumbers),
+    readOnly: true,
+    scrollBeyondLastLine: false,
+    renderLineHighlight: 'none',
+    folding: false,
+    wordWrap: 'on',
+    wrappingIndent: 'indent',
+    contextmenu: false,
+    scrollbar: {
+      vertical: 'hidden',
+      horizontal: 'hidden',
+      handleMouseWheel: false,
+    },
+    overviewRulerLanes: 0,
+    overviewRulerBorder: false,
+    hideCursorInOverviewRuler: true,
+    lineDecorationsWidth: showLineNumbers ? 'inherit' : 0,
+    renderFinalNewline: 'off',
+    domReadOnly: true,
+    matchBrackets: 'never',
+    renderValidationDecorations: 'off',
+    find: {
+      addExtraSpaceOnTop: false,
+    },
+    padding: {
+      top: 12
+    }
+  };
+};
+
+export const initializeMonaco = () => {
+  configureMonaco();
 };
 
 export const languageMapping = LANGUAGE_MAPPING;

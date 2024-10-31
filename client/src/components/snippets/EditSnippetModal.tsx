@@ -4,7 +4,7 @@ import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
 import { getSupportedLanguages, getLanguageLabel } from '../../utils/languageUtils';
-import DynamicCodeEditor from './DynamicCodeEditor';
+import CodeEditor from './CodeEditor';
 import { EditSnippetModalProps } from '../../types/types';
 import { useSnippets } from '../../hooks/useSnippets';
 import BaseDropdown from '../common/BaseDropdown';
@@ -15,7 +15,8 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
   isOpen, 
   onClose, 
   onSubmit, 
-  snippetToEdit 
+  snippetToEdit,
+  showLineNumbers = true
 }) => {
   const { snippets, reloadSnippets } = useSnippets();
   const [title, setTitle] = useState('');
@@ -56,8 +57,51 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
     return [...new Set(customLangs)];
   }, [snippets, standardLanguages]);
 
-  const getLanguageSections = (searchTerm: string) => {
+  const sortByRelevance = (items: string[], searchTerm: string): string[] => {
+    if (!searchTerm) return items;
+    
     const term = searchTerm.toLowerCase();
+    
+    return [...items].sort((a, b) => {
+      const aLower = a.toLowerCase();
+      const bLower = b.toLowerCase();
+      
+      if (aLower === term && bLower !== term) return -1;
+      if (aLower !== term && bLower === term) return 1;
+      
+      const aLabel = getLanguageLabel(a).toLowerCase();
+      const bLabel = getLanguageLabel(b).toLowerCase();
+      if (aLabel === term && bLabel !== term) return -1;
+      if (aLabel !== term && bLabel === term) return 1;
+      
+      const aStarts = aLower.startsWith(term);
+      const bStarts = bLower.startsWith(term);
+      if (aStarts && !bStarts) return -1;
+      if (!aStarts && bStarts) return 1;
+      
+      const aLabelStarts = aLabel.startsWith(term);
+      const bLabelStarts = bLabel.startsWith(term);
+      if (aLabelStarts && !bLabelStarts) return -1;
+      if (!aLabelStarts && bLabelStarts) return 1;
+      
+      const aContains = aLower.includes(term);
+      const bContains = bLower.includes(term);
+      if (aContains && !bContains) return -1;
+      if (!aContains && bContains) return 1;
+      
+      const aLabelContains = aLabel.includes(term);
+      const bLabelContains = bLabel.includes(term);
+      if (aLabelContains && !bLabelContains) return -1;
+      if (!aLabelContains && bLabelContains) return 1;
+      
+      if (a.length !== b.length) return a.length - b.length;
+      return a.localeCompare(b);
+    });
+  };
+
+  const getLanguageSections = (searchTerm: string) => {
+    const term = searchTerm.toLowerCase().trim();
+    
     const normalizedStandard = standardLanguages.reduce((acc, lang) => {
       const normalized = lang.toLowerCase();
       if (!acc.some(l => l.toLowerCase() === normalized)) {
@@ -77,32 +121,39 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
     
     const sections = [];
 
-    const standardFiltered = normalizedStandard.filter(option =>
-      getLanguageLabel(option).toLowerCase().includes(term)
-    );
+    const standardFiltered = normalizedStandard.filter(option => {
+      const label = getLanguageLabel(option).toLowerCase();
+      const optionLower = option.toLowerCase();
+      return label.includes(term) || optionLower.includes(term);
+    });
     
     if (standardFiltered.length > 0) {
       sections.push({
         title: 'Standard Languages',
-        items: standardFiltered
+        items: sortByRelevance(standardFiltered, term)
       });
     }
 
-    const customFiltered = normalizedCustom.filter(option =>
-      getLanguageLabel(option).toLowerCase().includes(term)
-    );
+    const customFiltered = normalizedCustom.filter(option => {
+      const label = getLanguageLabel(option).toLowerCase();
+      const optionLower = option.toLowerCase();
+      return label.includes(term) || optionLower.includes(term);
+    });
 
     if (customFiltered.length > 0) {
       sections.push({
         title: 'Custom Languages',
-        items: customFiltered
+        items: sortByRelevance(customFiltered, term)
       });
     }
 
-    if (term && 
-        !normalizedStandard.some(l => l.toLowerCase() === term) &&
-        !normalizedCustom.some(l => l.toLowerCase() === term) &&
-        term.length > 0) {
+    const hasExactMatch = [...standardFiltered, ...customFiltered].some(
+      option => 
+        option.toLowerCase() === term || 
+        getLanguageLabel(option).toLowerCase() === term
+    );
+
+    if (term && !hasExactMatch && term.length > 0) {
       sections.push({
         title: 'Add New',
         items: [`Add new: ${term}`]
@@ -259,11 +310,12 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
           <div className="relative">
             <label htmlFor="code" className="block text-sm font-medium text-gray-300">Code</label>
             <div className="mt-1 rounded-md bg-gray-800 overflow-hidden">
-              <DynamicCodeEditor
+              <CodeEditor
                 key={key}
                 code={code}
-                onValueChange={setCode}
+                onValueChange={(value) => setCode(value ?? '')}
                 language={language}
+                showLineNumbers={showLineNumbers}
               />
             </div>
           </div>

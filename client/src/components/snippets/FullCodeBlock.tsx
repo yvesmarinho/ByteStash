@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Editor from '@monaco-editor/react';
 import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown, { Components } from 'react-markdown';
@@ -8,8 +7,7 @@ import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
   code, 
-  language = 'plaintext',
-  showLineNumbers = true
+  language = 'plaintext'
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const isMarkdown = getLanguageLabel(language) === 'markdown';
@@ -18,16 +16,6 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     const normalized = normalizeLanguage(language);
     setNormalizedLang(normalized);
   }, [language]);
-
-  const lineNumberStyle = {
-    minWidth: '2.5em',
-    paddingRight: '0.5em',
-    textAlign: 'right',
-    userSelect: 'none',
-    opacity: '0.5',
-    borderRight: '1px solid #404040',
-    marginRight: '1em',
-  } as const;
 
   const components: Components = {
     code: ({ className, children }) => (
@@ -50,13 +38,24 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
       const code = String(codeElement.props.children).replace(/\n$/, '');
 
       return (
-        <SyntaxHighlighter
-          language={lang}
-          style={vscDarkPlus}
-          className="syntax-highlighter-full"
-        >
-          {code}
-        </SyntaxHighlighter>
+        <Editor
+          height="400px"
+          defaultLanguage={lang}
+          defaultValue={code}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 13,
+            lineNumbers: 'on',
+            renderLineHighlight: 'all',
+            folding: true,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            padding: { top: 16, bottom: 16 },
+          }}
+        />
       );
     }
   };
@@ -65,16 +64,6 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     <div className="relative">
       <style>
         {`
-          .syntax-highlighter-full {
-            overflow: auto !important;
-            border-radius: 0.5rem;
-          }
-
-          .syntax-highlighter-full ::selection {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-            color: inherit !important;
-          }
-
           .markdown-content-full {
             color: white;
             background-color: #1E1E1E;
@@ -142,16 +131,24 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             </ReactMarkdown>
           </div>
         ) : (
-          <SyntaxHighlighter
-            language={normalizedLang}
-            style={vscDarkPlus}
-            wrapLines={true}
-            className="syntax-highlighter-full"
-            lineNumberStyle={lineNumberStyle}
-            showLineNumbers={showLineNumbers}
-          >
-            {code}
-          </SyntaxHighlighter>
+          <Editor
+            height="400px"
+            defaultLanguage={normalizedLang}
+            defaultValue={code}
+            theme="vs-dark"
+            options={{
+              readOnly: true,
+              minimap: { enabled: false },
+              scrollBeyondLastLine: false,
+              fontSize: 13,
+              lineNumbers: 'on',
+              renderLineHighlight: 'all',
+              folding: true,
+              wordWrap: 'on',
+              wrappingIndent: 'indent',
+              padding: { top: 16, bottom: 16 },
+            }}
+          />
         )}
         <CopyButton text={code} />
       </div>

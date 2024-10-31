@@ -36,6 +36,7 @@ export interface Snippet {
     onClose: () => void;
     onSubmit: (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => void;
     snippetToEdit: Snippet | null;
+    showLineNumbers: boolean;
   }
 
   export interface CustomDropdownProps {
@@ -161,7 +162,8 @@ export interface Snippet {
   export interface DynamicCodeEditorProps {
     code: string;
     language?: string;
-    onValueChange: (value: string) => void;
+    onValueChange: (value?: string) => void;
+    showLineNumbers: boolean;
   }
   
   export interface ToastProviderProps {
