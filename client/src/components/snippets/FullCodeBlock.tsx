@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Editor from '@monaco-editor/react';
 import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown, { Components } from 'react-markdown';
@@ -8,14 +7,17 @@ import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
   code, 
-  language = 'plaintext'
+  language = 'plaintext',
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
+  const [key, setKey] = useState<number>(0);
   const isMarkdown = getLanguageLabel(language) === 'markdown';
 
   useEffect(() => {
     const normalized = normalizeLanguage(language);
     setNormalizedLang(normalized);
+    setKey(prev => prev + 1);
   }, [language]);
 
   const components: Components = {
@@ -39,13 +41,26 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
       const code = String(codeElement.props.children).replace(/\n$/, '');
 
       return (
-        <SyntaxHighlighter
+        <Editor
+          key={`${lang}-${key}`}
+          height="500px"
           language={lang}
-          style={vscDarkPlus}
-          className="syntax-highlighter-full"
-        >
-          {code}
-        </SyntaxHighlighter>
+          defaultValue={code}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 13,
+            lineNumbers: showLineNumbers ? 'on' : 'off',
+            renderLineHighlight: 'all',
+            folding: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            lineDecorationsWidth: 24,
+            padding: { top: 16, bottom: 16 },
+          }}
+        />
       );
     }
   };
@@ -54,14 +69,13 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     <div className="relative">
       <style>
         {`
-          .syntax-highlighter-full {
-            overflow: auto !important;
+          .editor-mask-wrapper {
+            position: relative;
             border-radius: 0.5rem;
-          }
-
-          .syntax-highlighter-full ::selection {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-            color: inherit !important;
+            mask-image: radial-gradient(white, white);
+            -webkit-mask-image: -webkit-radial-gradient(white, white);
+            transform: translateZ(0);
+            overflow: hidden;
           }
 
           .markdown-content-full {
@@ -77,42 +91,6 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 0.5rem;
-          }
-
-          .markdown-content-full h1 {
-            font-size: 1.5rem;
-            line-height: 2rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h2 {
-            font-size: 1.25rem;
-            line-height: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h3 {
-            font-size: 1.125rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h4,
-          .markdown-content-full h5,
-          .markdown-content-full h6 {
-            font-size: 1rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full ul,
-          .markdown-content-full ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
           }
 
           .markdown-content-full code {
@@ -131,16 +109,34 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             </ReactMarkdown>
           </div>
         ) : (
-          <SyntaxHighlighter
-            language={normalizedLang}
-            style={vscDarkPlus}
-            wrapLines={true}
-            className="syntax-highlighter-full"
-          >
-            {code}
-          </SyntaxHighlighter>
+          <div className="editor-mask-wrapper">
+            <Editor
+              key={`${normalizedLang}-${key}`}
+              height="500px"
+              language={normalizedLang}
+              className="rounded-lg"
+              defaultValue={code}
+              theme="vs-dark"
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: showLineNumbers ? 'on' : 'off',
+                renderLineHighlight: 'all',
+                folding: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                lineDecorationsWidth: 24,
+                padding: { top: 16, bottom: 16 },
+              }}
+            />
+          </div>
         )}
-        <CopyButton text={code} />
+
+        <div className="absolute" style={{ zIndex: 3, right: 0, top: 0 }}>
+          <CopyButton text={code} />
+        </div>
       </div>
     </div>
   );

@@ -10,6 +10,7 @@ export const useSettings = () => {
   const [includeCodeInSearch, setIncludeCodeInSearch] = useState(() => localStorage.getItem('includeCodeInSearch') === 'true');
   const [showCategories, setShowCategories] = useState(() => localStorage.getItem('showCategories') !== 'false');
   const [expandCategories, setExpandCategories] = useState(() => localStorage.getItem('expandCategories') === 'true');
+  const [showLineNumbers, setShowLineNumbers] = useState(() => localStorage.getItem('showLineNumbers') === 'true')
 
   useEffect(() => {
     localStorage.setItem('viewMode', viewMode);
@@ -39,6 +40,10 @@ export const useSettings = () => {
     localStorage.setItem('expandCategories', expandCategories.toString());
   }, [expandCategories]);
 
+  useEffect(() => {
+    localStorage.setItem('showLineNumbers', showLineNumbers.toString());
+  }, [showLineNumbers]);
+
   const updateSettings = (newSettings: {
     compactView: boolean;
     showCodePreview: boolean;
@@ -46,6 +51,7 @@ export const useSettings = () => {
     includeCodeInSearch: boolean;
     showCategories: boolean;
     expandCategories: boolean;
+    showLineNumbers: boolean;
   }) => {
     setCompactView(newSettings.compactView);
     setShowCodePreview(newSettings.showCodePreview);
@@ -53,6 +59,7 @@ export const useSettings = () => {
     setIncludeCodeInSearch(newSettings.includeCodeInSearch);
     setShowCategories(newSettings.showCategories);
     setExpandCategories(newSettings.expandCategories);
+    setShowLineNumbers(newSettings.showLineNumbers);
   };
 
   return {
@@ -64,6 +71,7 @@ export const useSettings = () => {
     includeCodeInSearch,
     showCategories,
     expandCategories,
-    updateSettings
+    updateSettings,
+    showLineNumbers
   };
 };

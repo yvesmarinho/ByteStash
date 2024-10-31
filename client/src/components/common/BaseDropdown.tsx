@@ -33,9 +33,15 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState<number>(-1);
+  const [internalValue, setInternalValue] = useState(value);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
+  const lastInteractionWasMouse = useRef(false);
+
+  useEffect(() => {
+    setInternalValue(value);
+  }, [value]);
 
   const getAllItems = (sections: Section[]): string[] => {
     return sections.reduce((acc: string[], section) => [...acc, ...section.items], []);
@@ -46,34 +52,42 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
         setHighlightedIndex(-1);
+        setInternalValue(value);
       }
     };
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  useEffect(() => {
-    setHighlightedIndex(-1);
-  }, [isOpen, value]);
+  }, [value]);
 
   useEffect(() => {
     if (isOpen && highlightedIndex >= 0 && listRef.current) {
       const highlightedElement = listRef.current.querySelector(`[data-index="${highlightedIndex}"]`);
       if (highlightedElement) {
-        highlightedElement.scrollIntoView({ block: 'nearest' });
+        if (!lastInteractionWasMouse.current) {
+          highlightedElement.scrollIntoView({ block: 'nearest' });
+        }
       }
     }
-  }, [highlightedIndex, isOpen]);
+  }, [highlightedIndex]);
+
+  const handleMouseEnter = (index: number) => {
+    lastInteractionWasMouse.current = true;
+    setHighlightedIndex(index);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = maxLength ? e.target.value.slice(0, maxLength) : e.target.value;
+    setInternalValue(newValue);
     onChange(newValue);
     setIsOpen(true);
+    setHighlightedIndex(-1);
   };
 
   const handleOptionClick = (option: string) => {
-    onSelect(option);
+    const finalValue = option.startsWith('Add new:') ? option.slice(9).trim() : option;
+    setInternalValue(finalValue);
+    onSelect(finalValue);
     setIsOpen(false);
     setHighlightedIndex(-1);
   };
@@ -84,7 +98,7 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
       if (e.defaultPrevented) return;
     }
 
-    const sections = getSections(value);
+    const sections = getSections(internalValue);
     const allItems = getAllItems(sections);
     const totalItems = allItems.length;
 
@@ -109,29 +123,35 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
 
       case 'Enter':
         e.preventDefault();
-        if (isOpen && highlightedIndex >= 0 && highlightedIndex < totalItems) {
-          handleOptionClick(allItems[highlightedIndex]);
-        } else if (sections.length > 0) {
-          const lastSection = sections[sections.length - 1];
-          if (lastSection.items.length > 0) {
-            handleOptionClick(lastSection.items[0]);
+        if (isOpen) {
+          if (highlightedIndex >= 0 && highlightedIndex < totalItems) {
+            handleOptionClick(allItems[highlightedIndex]);
+          } else if (sections.length > 0) {
+            const lastSection = sections[sections.length - 1];
+            if (lastSection.items.length > 0) {
+              handleOptionClick(lastSection.items[0]);
+            }
           }
+          setIsOpen(false);
         }
         break;
 
       case 'Escape':
+        e.preventDefault();
         setIsOpen(false);
         setHighlightedIndex(-1);
+        setInternalValue(value); // Reset to selected value
         break;
 
       case 'Tab':
         setIsOpen(false);
         setHighlightedIndex(-1);
+        setInternalValue(value); // Reset to selected value
         break;
     }
   };
 
-  const sections = getSections(value);
+  const sections = getSections(internalValue);
   let currentIndex = -1;
 
   return (
@@ -141,31 +161,34 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
           ref={inputRef}
           type="text"
           className={`block w-full rounded-md bg-gray-700 text-white p-2 pr-8 text-sm ${className}`}
-          value={value}
+          value={internalValue}
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={placeholder}
           disabled={disabled}
           maxLength={maxLength}
+          aria-expanded={isOpen}
+          aria-haspopup="listbox"
+          role="combobox"
         />
         {showChevron && (
           <ChevronDown 
-            className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" 
+            className={`absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
             size={16}
           />
-          )
-        }
+        )}
       </div>
       {isOpen && sections.length > 0 && (
         <ul 
           ref={listRef}
           className="absolute z-10 mt-1 w-full bg-gray-700 border border-gray-600 rounded-md shadow-lg max-h-60 overflow-auto"
+          role="listbox"
         >
           {sections.map((section, sectionIndex) => (
             <React.Fragment key={section.title}>
               {sectionIndex > 0 && (
-                <li className="border-t border-gray-600" />
+                <li className="border-t border-gray-600" role="separator" />
               )}
               <li className="px-3 py-1 text-xs font-medium text-gray-400 bg-gray-800">
                 {section.title}
@@ -180,8 +203,10 @@ const BaseDropdown: React.FC<BaseDropdownProps> = ({
                     }`}
                     onClick={() => handleOptionClick(item)}
                     onMouseDown={(e) => e.preventDefault()}
-                    onMouseEnter={() => setHighlightedIndex(currentIndex)}
+                    onMouseEnter={() => handleMouseEnter(currentIndex)}
                     data-index={currentIndex}
+                    role="option"
+                    aria-selected={highlightedIndex === currentIndex}
                   >
                     {item}
                   </li>

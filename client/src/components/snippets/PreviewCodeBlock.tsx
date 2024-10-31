@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import Editor from '@monaco-editor/react';
 import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown, { Components } from 'react-markdown';
 import { PreviewCodeBlockProps } from '@/types/types';
 
-const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({ 
-  code, 
+const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
+  code,
   language = 'plaintext',
-  previewLines = 4 
+  previewLines = 4,
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
-  const LINE_HEIGHT = 24;
-  const visibleHeight = (previewLines + 2) * LINE_HEIGHT;
   const isMarkdown = getLanguageLabel(language) === 'markdown';
+  const LINE_HEIGHT = 19;
+  const visibleHeight = (previewLines + 2) * LINE_HEIGHT;
 
   useEffect(() => {
     const normalized = normalizeLanguage(language);
@@ -42,31 +42,50 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
       const code = String(codeElement.props.children).replace(/\n$/, '');
 
       return (
-        <SyntaxHighlighter
-          language={lang}
-          style={vscDarkPlus}
-          className="syntax-highlighter-preview"
-        >
-          {code}
-        </SyntaxHighlighter>
+        <Editor
+          height={`${visibleHeight}px`}
+          defaultLanguage={lang}
+          defaultValue={code}
+          theme="vs-dark"
+          options={{
+            readOnly: true,
+            minimap: { enabled: false },
+            scrollBeyondLastLine: false,
+            fontSize: 13,
+            lineNumbers: showLineNumbers ? 'on' : 'off',
+            renderLineHighlight: 'none',
+            folding: false,
+            wordWrap: 'on',
+            wrappingIndent: 'indent',
+            overviewRulerLanes: 0,
+            hideCursorInOverviewRuler: true,
+            overviewRulerBorder: false,
+            scrollbar: {
+              vertical: 'hidden',
+              horizontal: 'hidden',
+              handleMouseWheel: false,
+            },
+            domReadOnly: true,
+            contextmenu: false,
+            lineDecorationsWidth: 24,
+            padding: { top: 16, bottom: 16 },
+          }}
+        />
       );
     }
   };
 
   return (
-    <div className="relative">
+    <div className="relative select-none" style={{ height: visibleHeight }}>
       <style>
         {`
-          .syntax-highlighter-preview {
-            min-height: ${visibleHeight}px !important;
-            max-height: ${visibleHeight}px !important;
-            overflow: hidden !important;
+          .editor-mask-wrapper {
+            position: relative;
             border-radius: 0.5rem;
-          }
-
-          .syntax-highlighter-preview ::selection {
-            background-color: rgba(255, 255, 255, 0.3) !important;
-            color: inherit !important;
+            mask-image: radial-gradient(white, white);
+            -webkit-mask-image: -webkit-radial-gradient(white, white);
+            transform: translateZ(0);
+            overflow: hidden;
           }
 
           .markdown-content-preview {
@@ -74,10 +93,9 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             background-color: #1E1E1E;
             padding: 1rem;
             border-radius: 0.5rem;
-            min-height: ${visibleHeight}px;
+            position: relative;
             max-height: ${visibleHeight}px;
             overflow: hidden;
-            position: relative;
           }
 
           .markdown-content-preview p,
@@ -85,42 +103,6 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 0.5rem;
-          }
-
-          .markdown-content-preview h1 {
-            font-size: 1.5rem;
-            line-height: 2rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-preview h2 {
-            font-size: 1.25rem;
-            line-height: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-preview h3 {
-            font-size: 1.125rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-preview h4,
-          .markdown-content-preview h5,
-          .markdown-content-preview h6 {
-            font-size: 1rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-preview ul,
-          .markdown-content-preview ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
           }
 
           .markdown-content-preview code {
@@ -133,34 +115,56 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
       </style>
       <div className="relative">
         {isMarkdown ? (
-          <div className="relative">
-            <div className="markdown-content-preview">
-              <ReactMarkdown components={components}>
-                {code}
-              </ReactMarkdown>
-            </div>
-            <div 
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none" 
-              style={{ height: `${LINE_HEIGHT * 2}px` }}
-            />
+          <div className="markdown-content-preview">
+            <ReactMarkdown components={components}>
+              {code}
+            </ReactMarkdown>
           </div>
         ) : (
-          <>
-            <SyntaxHighlighter
-              language={normalizedLang}
-              style={vscDarkPlus}
-              wrapLines={true}
-              className="syntax-highlighter-preview"
-            >
-              {code}
-            </SyntaxHighlighter>
-            <div 
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-gray-900 to-transparent pointer-events-none" 
-              style={{ height: `${LINE_HEIGHT * 2}px` }}
+          <div className="editor-mask-wrapper">
+            <Editor
+              className="pointer-events-none rounded-lg"
+              height={`${visibleHeight}px`}
+              defaultLanguage={normalizedLang}
+              defaultValue={code}
+              theme="vs-dark"
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: showLineNumbers ? 'on' : 'off',
+                renderLineHighlight: 'none',
+                folding: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                overviewRulerBorder: false,
+                scrollbar: {
+                  vertical: 'hidden',
+                  horizontal: 'hidden',
+                  handleMouseWheel: false,
+                },
+                domReadOnly: true,
+                contextmenu: false,
+                lineDecorationsWidth: 24,
+                padding: { top: 16, bottom: 16 },
+              }}
             />
-          </>
+          </div>
         )}
-        <CopyButton text={code} />
+
+        {!isMarkdown && (
+          <div 
+            className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1e1e1e] to-transparent pointer-events-none rounded-b-lg"
+            style={{ height: `${LINE_HEIGHT * 2}px`, zIndex: 2 }}
+          />
+        )}
+
+        <div className="absolute" style={{ zIndex: 3, right: 0, top: 0 }}>
+          <CopyButton text={code} />
+        </div>
       </div>
     </div>
   );

@@ -13,7 +13,8 @@ const SnippetList: React.FC<SnippetListProps> = ({
   showCodePreview, 
   previewLines,
   showCategories,
-  expandCategories
+  expandCategories,
+  showLineNumbers
 }) => {
   if (snippets.length === 0) {
     return (
@@ -42,6 +43,7 @@ const SnippetList: React.FC<SnippetListProps> = ({
           previewLines={previewLines}
           showCategories={showCategories}
           expandCategories={expandCategories}
+          showLineNumbers={showLineNumbers}
         />
       ))}
     </div>

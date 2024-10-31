@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import SearchAndFilter from './SearchAndFilter';
 import SnippetList from './SnippetList';
 import SnippetModal from './SnippetModal';
@@ -8,13 +8,14 @@ import { useSnippets } from '../../hooks/useSnippets';
 import { useSettings } from '../../hooks/useSettings';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
+import { initializeMonaco } from '../../utils/languageUtils';
 
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
   const { 
     viewMode, setViewMode, compactView, showCodePreview, 
     previewLines, includeCodeInSearch, updateSettings,
-    showCategories, expandCategories
+    showCategories, expandCategories, showLineNumbers
   } = useSettings();
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -25,6 +26,10 @@ const SnippetStorage: React.FC = () => {
   const [snippetToEdit, setSnippetToEdit] = useState<Snippet | null>(null);
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
+  useEffect(() => {
+    initializeMonaco();
+  }, []);
 
   const handleSearchTermChange = useCallback((term: string) => {
     setSearchTerm(term);
@@ -157,6 +162,7 @@ const SnippetStorage: React.FC = () => {
         previewLines={previewLines}
         showCategories={showCategories}
         expandCategories={expandCategories}
+        showLineNumbers={showLineNumbers}
       />
 
       {selectedSnippet && (
@@ -165,6 +171,7 @@ const SnippetStorage: React.FC = () => {
           isOpen={!!selectedSnippet} 
           onClose={closeSnippet}
           onCategoryClick={handleCategoryClick}
+          showLineNumbers={showLineNumbers}
         />
       )}
 
@@ -173,12 +180,13 @@ const SnippetStorage: React.FC = () => {
         onClose={closeEditSnippetModal}
         onSubmit={handleSnippetSubmit}
         snippetToEdit={snippetToEdit}
+        showLineNumbers={showLineNumbers}
       />
 
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories }}
+        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories, showLineNumbers }}
         onSettingsChange={updateSettings}
       />
     </div>
