@@ -7,14 +7,17 @@ import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
   code, 
-  language = 'plaintext'
+  language = 'plaintext',
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
+  const [key, setKey] = useState<number>(0);
   const isMarkdown = getLanguageLabel(language) === 'markdown';
 
   useEffect(() => {
     const normalized = normalizeLanguage(language);
     setNormalizedLang(normalized);
+    setKey(prev => prev + 1);
   }, [language]);
 
   const components: Components = {
@@ -39,8 +42,9 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
 
       return (
         <Editor
-          height="400px"
-          defaultLanguage={lang}
+          key={`${lang}-${key}`}
+          height="500px"
+          language={lang}
           defaultValue={code}
           theme="vs-dark"
           options={{
@@ -48,11 +52,12 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             minimap: { enabled: false },
             scrollBeyondLastLine: false,
             fontSize: 13,
-            lineNumbers: 'on',
+            lineNumbers: showLineNumbers ? 'on' : 'off',
             renderLineHighlight: 'all',
-            folding: true,
+            folding: false,
             wordWrap: 'on',
             wrappingIndent: 'indent',
+            lineDecorationsWidth: 24,
             padding: { top: 16, bottom: 16 },
           }}
         />
@@ -64,6 +69,15 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     <div className="relative">
       <style>
         {`
+          .editor-mask-wrapper {
+            position: relative;
+            border-radius: 0.5rem;
+            mask-image: radial-gradient(white, white);
+            -webkit-mask-image: -webkit-radial-gradient(white, white);
+            transform: translateZ(0);
+            overflow: hidden;
+          }
+
           .markdown-content-full {
             color: white;
             background-color: #1E1E1E;
@@ -77,42 +91,6 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             font-size: 0.875rem;
             line-height: 1.5;
             margin-bottom: 0.5rem;
-          }
-
-          .markdown-content-full h1 {
-            font-size: 1.5rem;
-            line-height: 2rem;
-            margin-bottom: 1rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h2 {
-            font-size: 1.25rem;
-            line-height: 1.75rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h3 {
-            font-size: 1.125rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full h4,
-          .markdown-content-full h5,
-          .markdown-content-full h6 {
-            font-size: 1rem;
-            line-height: 1.5rem;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-          }
-
-          .markdown-content-full ul,
-          .markdown-content-full ol {
-            margin-left: 1.5rem;
-            margin-bottom: 1rem;
           }
 
           .markdown-content-full code {
@@ -131,26 +109,34 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             </ReactMarkdown>
           </div>
         ) : (
-          <Editor
-            height="400px"
-            defaultLanguage={normalizedLang}
-            defaultValue={code}
-            theme="vs-dark"
-            options={{
-              readOnly: true,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-              lineNumbers: 'on',
-              renderLineHighlight: 'all',
-              folding: true,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-              padding: { top: 16, bottom: 16 },
-            }}
-          />
+          <div className="editor-mask-wrapper">
+            <Editor
+              key={`${normalizedLang}-${key}`}
+              height="500px"
+              language={normalizedLang}
+              className="rounded-lg"
+              defaultValue={code}
+              theme="vs-dark"
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: showLineNumbers ? 'on' : 'off',
+                renderLineHighlight: 'all',
+                folding: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                lineDecorationsWidth: 24,
+                padding: { top: 16, bottom: 16 },
+              }}
+            />
+          </div>
         )}
-        <CopyButton text={code} />
+
+        <div className="absolute" style={{ zIndex: 3, right: 0, top: 0 }}>
+          <CopyButton text={code} />
+        </div>
       </div>
     </div>
   );

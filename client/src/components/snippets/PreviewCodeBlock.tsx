@@ -9,7 +9,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
   code,
   language = 'plaintext',
   previewLines = 4,
-  showLineNumbers
+  showLineNumbers = true
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const isMarkdown = getLanguageLabel(language) === 'markdown';
@@ -79,6 +79,15 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
     <div className="relative select-none" style={{ height: visibleHeight }}>
       <style>
         {`
+          .editor-mask-wrapper {
+            position: relative;
+            border-radius: 0.5rem;
+            mask-image: radial-gradient(white, white);
+            -webkit-mask-image: -webkit-radial-gradient(white, white);
+            transform: translateZ(0);
+            overflow: hidden;
+          }
+
           .markdown-content-preview {
             color: white;
             background-color: #1E1E1E;
@@ -112,36 +121,38 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             </ReactMarkdown>
           </div>
         ) : (
-          <Editor
-            className="pointer-events-none"
-            height={`${visibleHeight}px`}
-            defaultLanguage={normalizedLang}
-            defaultValue={code}
-            theme="vs-dark"
-            options={{
-              readOnly: true,
-              minimap: { enabled: false },
-              scrollBeyondLastLine: false,
-              fontSize: 13,
-              lineNumbers: 'off',
-              renderLineHighlight: 'none',
-              folding: false,
-              wordWrap: 'on',
-              wrappingIndent: 'indent',
-              overviewRulerLanes: 0,
-              hideCursorInOverviewRuler: true,
-              overviewRulerBorder: false,
-              scrollbar: {
-                vertical: 'hidden',
-                horizontal: 'hidden',
-                handleMouseWheel: false,
-              },
-              domReadOnly: true,
-              contextmenu: false,
-              lineDecorationsWidth: 24,
-              padding: { top: 16, bottom: 16 },
-            }}
-          />
+          <div className="editor-mask-wrapper">
+            <Editor
+              className="pointer-events-none rounded-lg"
+              height={`${visibleHeight}px`}
+              defaultLanguage={normalizedLang}
+              defaultValue={code}
+              theme="vs-dark"
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                fontSize: 13,
+                lineNumbers: showLineNumbers ? 'on' : 'off',
+                renderLineHighlight: 'none',
+                folding: false,
+                wordWrap: 'on',
+                wrappingIndent: 'indent',
+                overviewRulerLanes: 0,
+                hideCursorInOverviewRuler: true,
+                overviewRulerBorder: false,
+                scrollbar: {
+                  vertical: 'hidden',
+                  horizontal: 'hidden',
+                  handleMouseWheel: false,
+                },
+                domReadOnly: true,
+                contextmenu: false,
+                lineDecorationsWidth: 24,
+                padding: { top: 16, bottom: 16 },
+              }}
+            />
+          </div>
         )}
 
         {!isMarkdown && (
