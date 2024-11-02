@@ -1,14 +1,13 @@
 import { Snippet } from '../types/types';
 
-const getBasePath = (): string => {
-  const envBasePath = process.env.BASE_PATH;
-  if (envBasePath) {
-    const normalized = envBasePath.endsWith('/') ? envBasePath.slice(0, -1) : envBasePath;
-    console.log('Using BASE_PATH from env:', normalized);
-    return normalized;
+declare global {
+  interface Window {
+    BASE_PATH?: string;
   }
-  
-  return "";
+}
+
+const getBasePath = (): string => {
+  return window?.BASE_PATH?.endsWith('/') ? window.BASE_PATH.slice(0, -1) : window.BASE_PATH || '';
 };
 
 const BASE_PATH = getBasePath();
