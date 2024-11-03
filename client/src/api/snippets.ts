@@ -11,24 +11,59 @@ const getBasePath = (): string => {
 };
 
 const BASE_PATH = getBasePath();
-
 export const API_URL = `${BASE_PATH}/api/snippets`;
+
+interface ApiError extends Error {
+  status?: number;
+}
+
+export const AUTH_ERROR_EVENT = 'bytestash:auth_error';
+export const authErrorEvent = new CustomEvent(AUTH_ERROR_EVENT);
+
+const handleResponse = async (response: Response) => {
+  if (response.status === 401 || response.status === 403) {
+    window.dispatchEvent(authErrorEvent);
+    
+    const error = new Error('Authentication required') as ApiError;
+    error.status = response.status;
+    throw error;
+  }
+
+  if (!response.ok) {
+    const text = await response.text();
+    console.error('Error response body:', text);
+    const error = new Error(`Request failed: ${response.status} ${response.statusText}`) as ApiError;
+    error.status = response.status;
+    throw error;
+  }
+
+  return response;
+};
+
+const getHeaders = () => {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  
+  const token = localStorage.getItem('token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
 
 export const fetchSnippets = async (): Promise<Snippet[]> => {
   try {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {
+      headers: getHeaders()
+    });
     
-    if (!response.ok) {
-      const text = await response.text();
-      console.error('Error response body:', text);
-      throw new Error(`Failed to fetch snippets: ${response.status} ${response.statusText}`);
-    }
-    
+    await handleResponse(response);
     const text = await response.text();
     
     try {
-      const data = JSON.parse(text);
-      return data;
+      return JSON.parse(text);
     } catch (e) {
       console.error('Failed to parse JSON:', e);
       console.error('Full response:', text);
@@ -44,18 +79,12 @@ export const createSnippet = async (snippet: Omit<Snippet, 'id' | 'updated_at'>)
   try {
     const response = await fetch(API_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(snippet),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to create snippet');
-    }
-
-    const createdSnippet = await response.json();
-    return createdSnippet;
+    await handleResponse(response);
+    return response.json();
   } catch (error) {
     console.error('Error creating snippet:', error);
     throw error;
@@ -66,12 +95,10 @@ export const deleteSnippet = async (id: string): Promise<string> => {
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'DELETE',
+      headers: getHeaders(),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to delete snippet');
-    }
-
+    await handleResponse(response);
     await response.json();
     return id;
   } catch (error) {
@@ -84,18 +111,12 @@ export const editSnippet = async (id: string, snippet: Omit<Snippet, 'id' | 'upd
   try {
     const response = await fetch(`${API_URL}/${id}`, {
       method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: getHeaders(),
       body: JSON.stringify(snippet),
     });
 
-    if (!response.ok) {
-      throw new Error('Failed to update snippet');
-    }
-
-    const updatedSnippet = await response.json();
-    return updatedSnippet;
+    await handleResponse(response);
+    return response.json();
   } catch (error) {
     console.error('Error updating snippet:', error);
     throw error;

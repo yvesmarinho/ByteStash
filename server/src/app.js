@@ -4,6 +4,8 @@ const path = require('path');
 const fs = require('fs');
 const { initializeDatabase } = require('./config/database');
 const snippetRoutes = require('./routes/snippetRoutes');
+const authRoutes = require('./routes/authRoutes');
+const { authenticateToken } = require('./middleware/auth');
 
 const expressApp = express();
 const port = process.env.PORT || 5000;
@@ -33,8 +35,10 @@ function app(server) {
             index: false
         }));
 
-        server.use(`${normalizedBasePath}/api/snippets`, snippetRoutes);
-        server.use('/api/snippets', snippetRoutes);
+        server.use(`${normalizedBasePath}/api/auth`, authRoutes);
+        server.use(`${normalizedBasePath}/api/snippets`, authenticateToken, snippetRoutes);
+        server.use('/api/auth', authRoutes);
+        server.use('/api/snippets', authenticateToken, snippetRoutes);
         
         server.get(normalizedBasePath, injectBasePath);
         server.get(`${normalizedBasePath}/*`, injectBasePath);
@@ -43,7 +47,8 @@ function app(server) {
         });
     } else {
         server.use(express.static(clientBuildPath));
-        server.use('/api/snippets', snippetRoutes);
+        server.use('/api/auth', authRoutes);
+        server.use('/api/snippets', authenticateToken, snippetRoutes);
         server.get('*', injectBasePath);
     }
 

@@ -1,14 +1,36 @@
 import React from 'react';
 import SnippetStorage from './components/snippets/SnippetStorage';
 import { ToastProvider } from './components/toast/Toast';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import LoginPage from './components/auth/LoginPage';
+
+const AuthenticatedApp: React.FC = () => {
+  const { isAuthenticated, isAuthRequired, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Loading...</div>
+      </div>
+    );
+  }
+
+  if (isAuthRequired && !isAuthenticated) {
+    return <LoginPage />;
+  }
+
+  return <SnippetStorage />;
+};
 
 const App: React.FC = () => {
   return (
-    <ToastProvider>
-      <div className="min-h-screen bg-gray-900">
-        <SnippetStorage />
-      </div>
-    </ToastProvider>
+    <AuthProvider>
+      <ToastProvider>
+        <div className="min-h-screen bg-gray-900">
+          <AuthenticatedApp />
+        </div>
+      </ToastProvider>
+    </AuthProvider>
   );
 };
 
