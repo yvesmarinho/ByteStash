@@ -1,0 +1,66 @@
+name: Bug Report
+description: Create a report to help us improve the project
+title: "[BUG] "
+labels: bug
+assignees: ''
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Description
+        Please provide a detailed description of the issue.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      placeholder: "What is happening? What do you expect to happen?"
+
+  - type: input
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to Reproduce
+      placeholder: "Step 1, Step 2, Step 3"
+
+  - type: input
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      placeholder: "What did you expect to happen?"
+
+  - type: input
+    id: actual_behavior
+    attributes:
+      label: Actual Behavior
+      placeholder: "What actually happened?"
+
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      placeholder: "Operating System, Browser, Version"
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional Context
+      placeholder: "Provide any other relevant information."
+
+  - type: input
+    id: proposed_solution
+    attributes:
+      label: Proposed Solution
+      placeholder: "If you have a suggestion for how to fix the issue."
+
+  - type: checkboxes
+    id: labels
+    attributes:
+      label: Labels
+      options:
+        - label: Bug
+          value: bug
+        - label: Enhancement
+          value: enhancement
+        - label: Question
+          value: question
