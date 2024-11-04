@@ -8,7 +8,7 @@ const authRoutes = require('./routes/authRoutes');
 const { authenticateToken } = require('./middleware/auth');
 
 const expressApp = express();
-const port = process.env.PORT || 5000;
+const port = 5000;
 
 function app(server) {
     const basePath = process.env.BASE_PATH;
