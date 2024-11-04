@@ -13,8 +13,10 @@ function app(server) {
     server.use(bodyParser.json());
     server.set('trust proxy', true);
 
+    const clientBuildPath = '/client/build';
+
     const injectBasePath = (req, res) => {
-        const indexPath = path.join(__dirname, '../../client/build', 'index.html');
+        const indexPath = path.join(clientBuildPath, 'index.html');
         let html = fs.readFileSync(indexPath, 'utf8');
         
         const script = `<script>window.BASE_PATH = "${basePath || ''}";</script>`;
@@ -25,18 +27,34 @@ function app(server) {
 
     if (basePath) {
         const normalizedBasePath = basePath.endsWith('/') ? basePath.slice(0, -1) : basePath;
-        server.get(normalizedBasePath, injectBasePath);
-        server.use(express.static(path.join(__dirname, '../../client/build')));
+        
+        server.use(normalizedBasePath, express.static(clientBuildPath));
+        server.use(express.static(clientBuildPath, {
+            index: false
+        }));
+
         server.use(`${normalizedBasePath}/api/snippets`, snippetRoutes);
+        server.use('/api/snippets', snippetRoutes);
+        
+        server.get(normalizedBasePath, injectBasePath);
         server.get(`${normalizedBasePath}/*`, injectBasePath);
         server.get('/', (req, res) => {
             res.redirect(normalizedBasePath);
         });
     } else {
-        server.use(express.static(path.join(__dirname, '../../client/build')));
+        server.use(express.static(clientBuildPath));
         server.use('/api/snippets', snippetRoutes);
         server.get('*', injectBasePath);
     }
+
+    server.use((req, res, next) => {
+        if (req.path.includes('/assets/') || req.path.endsWith('.json')) {
+            console.log('404 for static file:', req.path);
+            res.status(404).send('File not found');
+        } else {
+            next();
+        }
+    });
 }
 
 async function startServer() {
