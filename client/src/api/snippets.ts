@@ -1,15 +1,39 @@
 import { Snippet } from '../types/types';
 
-const API_URL = '/api/snippets';
+declare global {
+  interface Window {
+    BASE_PATH?: string;
+  }
+}
+
+const getBasePath = (): string => {
+  return window?.BASE_PATH?.endsWith('/') ? window.BASE_PATH.slice(0, -1) : window.BASE_PATH || '';
+};
+
+const BASE_PATH = getBasePath();
+
+export const API_URL = `${BASE_PATH}/api/snippets`;
 
 export const fetchSnippets = async (): Promise<Snippet[]> => {
   try {
     const response = await fetch(API_URL);
+    
     if (!response.ok) {
-      throw new Error('Failed to fetch snippets');
+      const text = await response.text();
+      console.error('Error response body:', text);
+      throw new Error(`Failed to fetch snippets: ${response.status} ${response.statusText}`);
     }
-    const data = await response.json();
-    return data;
+    
+    const text = await response.text();
+    
+    try {
+      const data = JSON.parse(text);
+      return data;
+    } catch (e) {
+      console.error('Failed to parse JSON:', e);
+      console.error('Full response:', text);
+      throw e;
+    }
   } catch (error) {
     console.error('Error fetching snippets:', error);
     throw error;
