@@ -1,4 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { LogOut } from 'lucide-react';
 import SearchAndFilter from './SearchAndFilter';
 import SnippetList from './SnippetList';
 import SnippetModal from './SnippetModal';
@@ -6,12 +7,14 @@ import EditSnippetModal from './EditSnippetModal';
 import SettingsModal from '../settings/SettingsModal';
 import { useSnippets } from '../../hooks/useSnippets';
 import { useSettings } from '../../hooks/useSettings';
+import { useAuth } from '../../context/AuthContext';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
 import { initializeMonaco } from '../../utils/languageUtils';
 
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
+  const { logout, isAuthRequired } = useAuth();
   const { 
     viewMode, setViewMode, compactView, showCodePreview, 
     previewLines, includeCodeInSearch, updateSettings,
@@ -43,6 +46,10 @@ const SnippetStorage: React.FC = () => {
       return [...prev, category];
     });
   }, []);
+
+  const handleLogout = () => {
+    logout();
+  };
 
   const languages = useMemo(() => 
     [...new Set(snippets.map(snippet => getLanguageLabel(snippet.language)))], 
@@ -115,7 +122,18 @@ const SnippetStorage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
-      <h1 className="text-3xl font-bold mb-8">ByteStash</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">ByteStash</h1>
+        {isAuthRequired && (
+          <button
+            onClick={handleLogout}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-800 hover:bg-gray-700 rounded-md transition-colors"
+          >
+            <LogOut size={18} />
+            <span>Logout</span>
+          </button>
+        )}
+      </div>
       
       <SearchAndFilter 
         searchTerm={searchTerm}

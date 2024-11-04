@@ -20,9 +20,6 @@ COPY server/src ./src
 # Copy client build
 COPY --from=client-build /app/client/build /client/build
 
-# Set environment variables
-ENV PORT=5000
-
 # Create output directory
 RUN mkdir -p ./data/snippets
 
