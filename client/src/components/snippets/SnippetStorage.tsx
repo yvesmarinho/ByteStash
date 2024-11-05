@@ -12,6 +12,8 @@ import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
 import { initializeMonaco } from '../../utils/languageUtils';
 
+const APP_VERSION = "1.4.0";
+
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
   const { logout, isAuthRequired } = useAuth();
@@ -122,8 +124,11 @@ const SnippetStorage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">ByteStash</h1>
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-end gap-2">
+          <h1 className="text-4xl font-bold text-gray-100">ByteStash</h1>
+          <span className="text-sm text-gray-400 mb-0">v{APP_VERSION}</span>
+        </div>
         {isAuthRequired && (
           <button
             onClick={handleLogout}

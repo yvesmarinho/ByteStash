@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import { SettingsModalProps } from '../../types/types';
+import { BookOpen } from 'lucide-react';
+
+const GITHUB_URL = "https://github.com/jordan-dalby/ByteStash";
+const DOCKER_URL = "https://github.com/jordan-dalby/ByteStash/pkgs/container/bytestash";
+const REDDIT_URL = "https://www.reddit.com/r/selfhosted/comments/1gb1ail/selfhosted_code_snippet_manager/";
+const WIKI_URL = "https://github.com/jordan-dalby/ByteStash/wiki";
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onSettingsChange }) => {
   const [compactView, setCompactView] = useState(settings.compactView);
@@ -106,7 +112,61 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
               className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500"
             />
           </div>
+
+          <div className="border-t border-gray-700 pt-4 mt-4">
+            <div className="flex gap-4 justify-center">
+              <a 
+                href={GITHUB_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                title="GitHub Repository"
+              >
+                <img 
+                  src="/github-mark-white.svg" 
+                  alt="GitHub" 
+                  className="w-6 h-6"
+                />
+              </a>
+              <a 
+                href={DOCKER_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                title="Docker Hub"
+              >
+                <img 
+                  src="/docker-mark-white.svg" 
+                  alt="Docker" 
+                  className="w-6 h-6"
+                />
+              </a>
+              <a 
+                href={REDDIT_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                title="Reddit Post"
+              >
+                <img 
+                  src="/reddit-mark-white.svg" 
+                  alt="Reddit" 
+                  className="w-6 h-6"
+                />
+              </a>
+              <a 
+                href={WIKI_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                title="Documentation"
+              >
+                <BookOpen className="w-6 h-6 text-white" />
+              </a>
+            </div>
+          </div>
         </div>
+
         <div className="mt-6 flex justify-end">
           <button
             onClick={onClose}
