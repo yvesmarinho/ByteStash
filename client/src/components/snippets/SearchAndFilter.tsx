@@ -1,7 +1,14 @@
 import React from 'react';
-import { ChevronDown, ArrowUpDown, Grid, List, Settings, Plus } from 'lucide-react';
-import { SearchAndFilterProps } from '../../types/types';
+import { ChevronDown, Grid, List, Settings, Plus } from 'lucide-react';
+import { SearchAndFilterProps, SortOrder } from '../../types/types';
 import EnhancedSearch from './EnhancedSearch';
+
+const sortOptions: { value: SortOrder; label: string }[] = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'alpha-asc', label: 'Alphabetically A-Z' },
+  { value: 'alpha-desc', label: 'Alphabetically Z-A' },
+];
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({ 
   searchTerm, 
@@ -9,8 +16,8 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   selectedLanguage, 
   setSelectedLanguage, 
   languages, 
-  sortOrder, 
-  toggleSortOrder,
+  sortOrder,
+  setSortOrder,
   viewMode,
   setViewMode,
   openSettingsModal,
@@ -19,7 +26,6 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
   selectedCategories,
   onCategoryClick
 }) => {
-
   const handleCategorySelect = (category: string) => {
     onCategoryClick(category);
   };
@@ -50,13 +56,22 @@ const SearchAndFilter: React.FC<SearchAndFilterProps> = ({
         </div>
       </div>
 
-      <button
-        className="h-10 px-4 rounded-lg bg-gray-800 focus:outline-none hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center"
-        onClick={toggleSortOrder}
-      >
-        <span className="mr-2">Sort {sortOrder === 'desc' ? 'Newest' : 'Oldest'}</span>
-        <ArrowUpDown size={20} />
-      </button>
+      <div className="relative">
+        <select
+          className="appearance-none bg-gray-800 rounded-lg py-2 px-4 pr-10 focus:outline-none"
+          value={sortOrder}
+          onChange={(e) => setSortOrder(e.target.value as SortOrder)}
+        >
+          {sortOptions.map(option => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-400">
+          <ChevronDown size={20} />
+        </div>
+      </div>
 
       <div className="flex items-center gap-2">
         <button
