@@ -14,12 +14,7 @@ ByteStash is a self-hosted web application designed to store, organise, and mana
 
 ## Howto
 ### Unraid
-ByteStash comes with an Unraid compatible template for easy deployment
-- Copy my-bytestash.xml to `/boot/config/plugins/dockerMan/templates-user/my-bytestash.xml`
-- Navigate to the Docker tab in the Unraid UI
-- Select "Add Container"
-- Select ByteStash from the template list
-- Configure as needed
+ByteStash is now on the Unraid App Store! Install it from there.
 
 ### Other
 ByteStash can also be hosted manually via the docker-compose file:
