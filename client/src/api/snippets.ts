@@ -1,6 +1,7 @@
 import { Snippet } from '../types/types';
 
-export const API_URL = '/api/snippets';
+export const basePath = (window as any).__BASE_PATH__ || '';
+export const API_URL = `${basePath}/api/snippets`;
 
 interface ApiError extends Error {
     status?: number;
