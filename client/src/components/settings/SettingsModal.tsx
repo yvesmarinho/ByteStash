@@ -133,7 +133,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
                 target="_blank"
                 rel="noopener noreferrer"
                 className="opacity-60 hover:opacity-100 transition-opacity"
-                title="Docker Hub"
+                title="GitHub Packages"
               >
                 <img 
                   src="/docker-mark-white.svg" 
