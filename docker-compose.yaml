@@ -6,6 +6,7 @@ services:
     ports:
       - "5001:5000"
     environment:
+      - BASE_PATH=
       # if auth username or password are left blank then authorisation is disabled
       # the username used for logging in
       - AUTH_USERNAME=bytestash
