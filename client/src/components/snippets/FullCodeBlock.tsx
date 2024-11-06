@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
 import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
-import ReactMarkdown, { Components } from 'react-markdown';
+import ReactMarkdown from 'react-markdown';
 import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
@@ -19,51 +19,6 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     setNormalizedLang(normalized);
     setKey(prev => prev + 1);
   }, [language]);
-
-  const components: Components = {
-    code: ({ className, children }) => (
-      <code className={className}>
-        {children}
-      </code>
-    ),
-    pre: ({ children }) => {
-      const codeElement = React.Children.toArray(children).find(
-        (child) => React.isValidElement(child) && child.type === 'code'
-      );
-      
-      if (!React.isValidElement(codeElement)) {
-        return <pre>{children}</pre>;
-      }
-
-      const className = codeElement.props.className || '';
-      const match = /language-(\w+)/.exec(className);
-      const lang = match ? match[1] : normalizedLang;
-      const code = String(codeElement.props.children).replace(/\n$/, '');
-
-      return (
-        <Editor
-          key={`${lang}-${key}`}
-          height="500px"
-          language={lang}
-          defaultValue={code}
-          theme="vs-dark"
-          options={{
-            readOnly: true,
-            minimap: { enabled: false },
-            scrollBeyondLastLine: false,
-            fontSize: 13,
-            lineNumbers: showLineNumbers ? 'on' : 'off',
-            renderLineHighlight: 'all',
-            folding: false,
-            wordWrap: 'on',
-            wrappingIndent: 'indent',
-            lineDecorationsWidth: 24,
-            padding: { top: 16, bottom: 16 },
-          }}
-        />
-      );
-    }
-  };
 
   return (
     <div className="relative">
@@ -86,25 +41,43 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             position: relative;
           }
 
-          .markdown-content-full p,
-          .markdown-content-full li {
-            font-size: 0.875rem;
-            line-height: 1.5;
-            margin-bottom: 0.5rem;
+          .markdown-content-full blockquote {
+            border-left: 3px solid #4a5568;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #a0aec0;
           }
 
-          .markdown-content-full code {
-            background-color: rgba(255, 255, 255, 0.1);
-            padding: 0.2rem 0.4rem;
-            border-radius: 0.25rem;
-            font-size: 0.875em;
+          .markdown-content-full table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+          }
+
+          .markdown-content-full th,
+          .markdown-content-full td {
+            border: 1px solid #4a5568;
+            padding: 0.5rem;
+            text-align: left;
+          }
+
+          .markdown-content-full th {
+            background-color: #2d3748;
+          }
+
+          .markdown-content-full hr {
+            border: 0;
+            border-top: 1px solid #4a5568;
+            margin: 1rem 0;
           }
         `}
       </style>
       <div className="relative">
         {isMarkdown ? (
           <div className="markdown-content-full">
-            <ReactMarkdown components={components}>
+            <ReactMarkdown
+              className="text-sm text-gray-300 markdown"
+            >
               {code}
             </ReactMarkdown>
           </div>

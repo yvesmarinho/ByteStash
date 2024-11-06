@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
 import { SettingsModalProps } from '../../types/types';
-import { BookOpen } from 'lucide-react';
+import { BookOpen, Clock } from 'lucide-react';
+import ChangelogModal from '../changelog/ChangelogModal';
 
 const GITHUB_URL = "https://github.com/jordan-dalby/ByteStash";
 const DOCKER_URL = "https://github.com/jordan-dalby/ByteStash/pkgs/container/bytestash";
@@ -16,6 +17,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   const [showCategories, setShowCategories] = useState(settings.showCategories);
   const [expandCategories, setExpandCategories] = useState(settings.expandCategories);
   const [showLineNumbers, setShowLineNumbers] = useState(settings.showLineNumbers);
+  const [showChangelog, setShowChangelog] = useState(false);
 
   const handleSave = () => {
     onSettingsChange({
@@ -115,6 +117,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
 
           <div className="border-t border-gray-700 pt-4 mt-4">
             <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => setShowChangelog(true)}
+                className="opacity-60 hover:opacity-100 transition-opacity"
+                title="Changelog"
+              >
+                <Clock className="w-6 h-6 text-white" />
+              </button>
               <a 
                 href={GITHUB_URL}
                 target="_blank"
@@ -182,6 +191,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
           </button>
         </div>
       </div>
+      <ChangelogModal 
+        isOpen={showChangelog}
+        onClose={() => setShowChangelog(false)}
+      />
     </Modal>
   );
 };
