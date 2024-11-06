@@ -96,6 +96,8 @@ export interface Snippet {
     };
     onSettingsChange: (newSettings: SettingsModalProps['settings']) => void;
   }
+
+  export type SortOrder = 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc';
   
   export interface SearchAndFilterProps {
     searchTerm: string;
@@ -103,8 +105,8 @@ export interface Snippet {
     selectedLanguage: string;
     setSelectedLanguage: (language: string) => void;
     languages: string[];
-    sortOrder: 'asc' | 'desc';
-    toggleSortOrder: () => void;
+    sortOrder: 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc';
+    setSortOrder: (order: 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc') => void;
     viewMode: 'grid' | 'list';
     setViewMode: (mode: 'grid' | 'list') => void;
     openSettingsModal: () => void;

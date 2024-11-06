@@ -12,6 +12,8 @@ import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
 import { initializeMonaco } from '../../utils/languageUtils';
 
+const APP_VERSION = "1.4.0";
+
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
   const { logout, isAuthRequired } = useAuth();
@@ -27,7 +29,7 @@ const SnippetStorage: React.FC = () => {
   const [isEditSnippetModalOpen, setIsEditSnippetModalOpen] = useState(false);
   const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [snippetToEdit, setSnippetToEdit] = useState<Snippet | null>(null);
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc'>('newest');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
 
   useEffect(() => {
@@ -71,13 +73,20 @@ const SnippetStorage: React.FC = () => {
       (selectedCategories.length === 0 || 
        selectedCategories.every(cat => snippet.categories.includes(cat)))
     ).sort((a, b) => {
-      const dateA = new Date(a.updated_at);
-      const dateB = new Date(b.updated_at);
-      return sortOrder === 'desc' ? dateB.getTime() - dateA.getTime() : dateA.getTime() - dateB.getTime();
+      switch (sortOrder) {
+        case 'newest':
+          return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
+        case 'oldest':
+          return new Date(a.updated_at).getTime() - new Date(b.updated_at).getTime();
+        case 'alpha-asc':
+          return a.title.localeCompare(b.title);
+        case 'alpha-desc':
+          return b.title.localeCompare(a.title);
+        default:
+          return 0;
+      }
     });
   }, [snippets, searchTerm, selectedLanguage, includeCodeInSearch, sortOrder, selectedCategories]);
-
-  const toggleSortOrder = useCallback(() => setSortOrder(prevOrder => prevOrder === 'desc' ? 'asc' : 'desc'), []);
 
   const openSnippet = useCallback((snippet: Snippet) => setSelectedSnippet(snippet), []);
   const closeSnippet = useCallback(() => setSelectedSnippet(null), []);
@@ -122,8 +131,11 @@ const SnippetStorage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 p-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">ByteStash</h1>
+      <div className="flex justify-between items-start mb-4">
+        <div className="flex items-end gap-2">
+          <h1 className="text-4xl font-bold text-gray-100">ByteStash</h1>
+          <span className="text-sm text-gray-400 mb-0">v{APP_VERSION}</span>
+        </div>
         {isAuthRequired && (
           <button
             onClick={handleLogout}
@@ -142,7 +154,7 @@ const SnippetStorage: React.FC = () => {
         setSelectedLanguage={setSelectedLanguage}
         languages={languages}
         sortOrder={sortOrder}
-        toggleSortOrder={toggleSortOrder}
+        setSortOrder={setSortOrder}
         viewMode={viewMode}
         setViewMode={setViewMode}
         openSettingsModal={() => setIsSettingsModalOpen(true)}
