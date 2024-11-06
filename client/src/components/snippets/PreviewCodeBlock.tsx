@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
-import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
+import { getLanguageLabel, getMonacoLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown from 'react-markdown';
 import { PreviewCodeBlockProps } from '@/types/types';
@@ -17,7 +17,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
   const visibleHeight = (previewLines + 2) * LINE_HEIGHT;
 
   useEffect(() => {
-    const normalized = normalizeLanguage(language);
+    const normalized = getMonacoLanguage(language);
     setNormalizedLang(normalized);
   }, [language]);
 

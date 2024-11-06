@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Editor from '@monaco-editor/react';
-import { getLanguageLabel, normalizeLanguage } from '../../utils/languageUtils';
+import { getLanguageLabel, getMonacoLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown from 'react-markdown';
 import { FullCodeBlockProps } from '@/types/types';
@@ -15,7 +15,7 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
   const isMarkdown = getLanguageLabel(language) === 'markdown';
 
   useEffect(() => {
-    const normalized = normalizeLanguage(language);
+    const normalized = getMonacoLanguage(language);
     setNormalizedLang(normalized);
     setKey(prev => prev + 1);
   }, [language]);
@@ -86,7 +86,7 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             <Editor
               key={`${normalizedLang}-${key}`}
               height="500px"
-              language={normalizedLang}
+              defaultLanguage={normalizedLang}
               className="rounded-lg"
               defaultValue={code}
               theme="vs-dark"
