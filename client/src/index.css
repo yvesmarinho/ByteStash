@@ -60,3 +60,42 @@ code {
   padding: 0;
   background-color: transparent;
 }
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(24, 24, 27, 0.8);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(82, 82, 91, 0.8);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(113, 113, 122, 0.9);
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(82, 82, 91, 0.8) rgba(24, 24, 27, 0.8);
+}
+
+.modal-content,
+  [role="dialog"],
+  [role="complementary"],
+  .overflow-auto,
+  .overflow-y-auto,
+  .overflow-x-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(82, 82, 91, 0.8) rgba(24, 24, 27, 0.8);
+}

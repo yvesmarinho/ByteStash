@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Editor from '@monaco-editor/react';
 import { getLanguageLabel, getMonacoLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
@@ -12,6 +12,10 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
 }) => {
   const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
   const [key, setKey] = useState<number>(0);
+  const [editorHeight, setEditorHeight] = useState<string>("100px");
+  const [isEditorFocused, setIsEditorFocused] = useState(false);
+  const editorRef = useRef<any>(null);
+  const wrapperRef = useRef<HTMLDivElement>(null);
   const isMarkdown = getLanguageLabel(language) === 'markdown';
 
   useEffect(() => {
@@ -19,6 +23,41 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     setNormalizedLang(normalized);
     setKey(prev => prev + 1);
   }, [language]);
+
+  const updateEditorHeight = () => {
+    if (!editorRef.current) return;
+    
+    const editor = editorRef.current;
+    const contentHeight = editor.getContentHeight();
+    const newHeight = Math.min(500, Math.max(100, contentHeight));
+    
+    setEditorHeight(`${newHeight}px`);
+    editor.layout();
+  };
+
+  const handleEditorDidMount = (editor: any) => {
+    editorRef.current = editor;
+    
+    editor.onDidContentSizeChange(() => {
+      window.requestAnimationFrame(updateEditorHeight);
+    });
+    
+    updateEditorHeight();
+    
+    editor.onDidFocusEditorWidget(() => {
+      setIsEditorFocused(true);
+      if (wrapperRef.current) {
+        wrapperRef.current.style.overflow = 'auto';
+      }
+    });
+    
+    editor.onDidBlurEditorWidget(() => {
+      setIsEditorFocused(false);
+      if (wrapperRef.current) {
+        wrapperRef.current.style.overflow = 'hidden';
+      }
+    });
+  };
 
   return (
     <div className="relative">
@@ -33,6 +72,18 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             overflow: hidden;
           }
 
+          .editor-mask-wrapper:hover {
+            overflow: auto !important;
+          }
+
+          .editor-mask-wrapper:not(:hover):not(.focused) .monaco-editor .scroll-decoration {
+            box-shadow: none !important;
+          }
+
+          .editor-mask-wrapper:not(:hover):not(.focused) .monaco-editor .scrollbar {
+            opacity: 0 !important;
+          }
+
           .markdown-content-full {
             color: white;
             background-color: #1E1E1E;
@@ -40,56 +91,28 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             border-radius: 0.5rem;
             position: relative;
           }
-
-          .markdown-content-full blockquote {
-            border-left: 3px solid #4a5568;
-            padding-left: 1rem;
-            margin: 1rem 0;
-            color: #a0aec0;
-          }
-
-          .markdown-content-full table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-          }
-
-          .markdown-content-full th,
-          .markdown-content-full td {
-            border: 1px solid #4a5568;
-            padding: 0.5rem;
-            text-align: left;
-          }
-
-          .markdown-content-full th {
-            background-color: #2d3748;
-          }
-
-          .markdown-content-full hr {
-            border: 0;
-            border-top: 1px solid #4a5568;
-            margin: 1rem 0;
-          }
         `}
       </style>
       <div className="relative">
         {isMarkdown ? (
           <div className="markdown-content-full">
-            <ReactMarkdown
-              className="text-sm text-gray-300 markdown"
-            >
+            <ReactMarkdown className="text-sm text-gray-300 markdown">
               {code}
             </ReactMarkdown>
           </div>
         ) : (
-          <div className="editor-mask-wrapper">
+          <div 
+            ref={wrapperRef}
+            className={`editor-mask-wrapper ${isEditorFocused ? 'focused' : ''}`}
+          >
             <Editor
               key={`${normalizedLang}-${key}`}
-              height="500px"
+              height={editorHeight}
               defaultLanguage={normalizedLang}
               className="rounded-lg"
               defaultValue={code}
               theme="vs-dark"
+              onMount={handleEditorDidMount}
               options={{
                 readOnly: true,
                 minimap: { enabled: false },
@@ -100,8 +123,8 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
                 folding: false,
                 wordWrap: 'on',
                 wrappingIndent: 'indent',
-                lineDecorationsWidth: 24,
-                padding: { top: 16, bottom: 16 },
+                lineDecorationsWidth: showLineNumbers ? 24 : 50,
+                padding: { top: 12, bottom: 12 }
               }}
             />
           </div>

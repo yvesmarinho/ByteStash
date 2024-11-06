@@ -15,7 +15,7 @@ import { initializeMonaco } from '../../utils/languageUtils';
 const APP_VERSION = "1.4.0";
 
 const SnippetStorage: React.FC = () => {
-  const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet } = useSnippets();
+  const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet, reloadSnippets } = useSnippets();
   const { logout, isAuthRequired } = useAuth();
   const { 
     viewMode, setViewMode, compactView, showCodePreview, 
@@ -53,10 +53,15 @@ const SnippetStorage: React.FC = () => {
     logout();
   };
 
-  const languages = useMemo(() => 
-    [...new Set(snippets.map(snippet => getLanguageLabel(snippet.language)))], 
-    [snippets]
-  );
+  const languages = useMemo(() => {
+    const langSet = new Set<string>();
+    snippets.forEach(snippet => {
+      snippet.fragments.forEach(fragment => {
+        langSet.add(getLanguageLabel(fragment.language));
+      });
+    });
+    return Array.from(langSet).sort();
+  }, [snippets]);
 
   const allCategories = useMemo(() => 
     [...new Set(snippets.flatMap(snippet => snippet.categories))].sort(),
@@ -64,15 +69,28 @@ const SnippetStorage: React.FC = () => {
   );
 
   const filteredSnippets = useMemo(() => {
-    return snippets.filter(snippet => 
-      (snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       snippet.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       snippet.language.toLowerCase().includes(searchTerm.toLowerCase()) ||
-       (includeCodeInSearch && snippet.code.toLowerCase().includes(searchTerm.toLowerCase()))) && 
-      (selectedLanguage === '' || getLanguageLabel(snippet.language).toLowerCase() === selectedLanguage.toLowerCase()) &&
-      (selectedCategories.length === 0 || 
-       selectedCategories.every(cat => snippet.categories.includes(cat)))
-    ).sort((a, b) => {
+    return snippets.filter(snippet => {
+      const basicMatch = (
+        snippet.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        snippet.description.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+  
+      const fragmentMatch = snippet.fragments.some(fragment => 
+        fragment.file_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        getLanguageLabel(fragment.language).toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (includeCodeInSearch && fragment.code.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+  
+      const languageMatch = selectedLanguage === '' || 
+        snippet.fragments.some(fragment => 
+          getLanguageLabel(fragment.language).toLowerCase() === selectedLanguage.toLowerCase()
+        );
+  
+      const categoryMatch = selectedCategories.length === 0 || 
+        selectedCategories.every(cat => snippet.categories.includes(cat));
+  
+      return (basicMatch || fragmentMatch) && languageMatch && categoryMatch;
+    }).sort((a, b) => {
       switch (sortOrder) {
         case 'newest':
           return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
@@ -104,15 +122,21 @@ const SnippetStorage: React.FC = () => {
   const handleSnippetSubmit = useCallback(async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
     try {
       if (snippetToEdit) {
-        await updateSnippet(snippetToEdit.id, snippetData);
+        const updatedSnippet = await updateSnippet(snippetToEdit.id, snippetData);
+        await reloadSnippets();
+        if (selectedSnippet?.id === snippetToEdit.id) {
+          setSelectedSnippet(updatedSnippet);
+        }
       } else {
         await addSnippet(snippetData);
+        await reloadSnippets();
       }
       closeEditSnippetModal();
     } catch (error) {
       console.error('Error saving snippet:', error);
+      throw error;
     }
-  }, [snippetToEdit, updateSnippet, addSnippet, closeEditSnippetModal]);
+  }, [snippetToEdit, updateSnippet, addSnippet, closeEditSnippetModal, selectedSnippet, reloadSnippets]);
 
   const handleDeleteSnippet = useCallback(async (id: string) => {
     try {
@@ -195,15 +219,13 @@ const SnippetStorage: React.FC = () => {
         showLineNumbers={showLineNumbers}
       />
 
-      {selectedSnippet && (
-        <SnippetModal 
-          snippet={selectedSnippet} 
-          isOpen={!!selectedSnippet} 
-          onClose={closeSnippet}
-          onCategoryClick={handleCategoryClick}
-          showLineNumbers={showLineNumbers}
-        />
-      )}
+      <SnippetModal 
+        snippet={selectedSnippet} 
+        isOpen={!!selectedSnippet} 
+        onClose={closeSnippet}
+        onCategoryClick={handleCategoryClick}
+        showLineNumbers={showLineNumbers}
+      />
 
       <EditSnippetModal
         isOpen={isEditSnippetModalOpen}
@@ -216,7 +238,15 @@ const SnippetStorage: React.FC = () => {
       <SettingsModal
         isOpen={isSettingsModalOpen}
         onClose={() => setIsSettingsModalOpen(false)}
-        settings={{ compactView, showCodePreview, previewLines, includeCodeInSearch, showCategories, expandCategories, showLineNumbers }}
+        settings={{ 
+          compactView, 
+          showCodePreview, 
+          previewLines, 
+          includeCodeInSearch, 
+          showCategories, 
+          expandCategories, 
+          showLineNumbers 
+        }}
         onSettingsChange={updateSettings}
       />
     </div>

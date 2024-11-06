@@ -57,6 +57,8 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
     }
   };
 
+  const previewFragment = snippet.fragments[0];
+
   return (
     <>
       <div 
@@ -77,19 +79,31 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
         >
           <Pencil size={compactView ? 16 : 18} className="text-gray-400 hover:text-blue-500" />
         </button>
-        <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold mb-2 text-gray-200 truncate`} title={snippet.title}>
-          {snippet.title}
-        </h3>
-        <p className="text-sm text-gray-400 mb-2 truncate">{getLanguageLabel(snippet.language)}</p>
+
+        <div className="flex items-center gap-2 mb-2">
+          <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate`} title={snippet.title}>
+            {snippet.title}
+          </h3>
+        </div>
+
+        <p className="text-sm text-gray-400 mb-2 truncate">
+          {snippet.fragments.length > 0 
+            ? snippet.fragments.map(fragment => getLanguageLabel(fragment.language)).join(', ')
+            : 'No language'
+          }
+        </p>
+        
         {!compactView && (
           <p className="text-sm text-gray-300 mb-2 line-clamp-1 min-h-[1em] break-words">
             {snippet.description ? snippet.description : 'No description available'}
           </p>
         )}
+        
         <div className="flex items-center text-xs text-gray-500 mb-3">
           <Clock size={compactView ? 12 : 14} className="mr-1" />
           <span>Updated {getRelativeTime(snippet.updated_at)}</span>
         </div>
+
         {showCategories && (
           <CategoryList
             categories={snippet.categories || []}
@@ -99,22 +113,24 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
             showAll={expandCategories}
           />
         )}
-        {showCodePreview && (
+
+        {showCodePreview && previewFragment && (
           <>
             <div key={`preview-${snippet.id}`}>
               <PreviewCodeBlock 
-                code={snippet.code} 
-                language={snippet.language}
+                code={previewFragment.code}
+                language={previewFragment.language}
                 previewLines={previewLines}
                 showLineNumbers={showLineNumbers}
               />
             </div>
-            {snippet.code.split('\n').length > previewLines && (
-              <p className="text-xs text-gray-500 mt-2">Click to view full snippet...</p>
+            {(previewFragment.code.split('\n').length > previewLines || snippet.fragments.length > 1) && (
+              <p className="text-xs text-gray-500 mt-2">Click to view all files...</p>
             )}
           </>
         )}
       </div>
+
       <DeleteConfirmationModal
         isOpen={isDeleteModalOpen}
         onClose={() => setIsDeleteModalOpen(false)}

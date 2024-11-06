@@ -33,9 +33,12 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={<h2 className="text-xl font-bold text-gray-100">Settings</h2>}
+    >
       <div className="pb-4">
-        <h2 className="text-xl font-bold text-gray-100 mb-4">Settings</h2>
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <label htmlFor="compactView" className="text-gray-300">Compact View</label>
