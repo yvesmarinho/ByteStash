@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import Editor from '@monaco-editor/react';
 import { getLanguageLabel, getMonacoLanguage } from '../../utils/languageUtils';
 import CopyButton from '../common/CopyButton';
 import ReactMarkdown from 'react-markdown';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 import { FullCodeBlockProps } from '@/types/types';
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
@@ -10,78 +11,59 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
   language = 'plaintext',
   showLineNumbers = true
 }) => {
-  const [normalizedLang, setNormalizedLang] = useState<string>('plaintext');
-  const [key, setKey] = useState<number>(0);
-  const [editorHeight, setEditorHeight] = useState<string>("100px");
-  const [isEditorFocused, setIsEditorFocused] = useState(false);
-  const editorRef = useRef<any>(null);
-  const wrapperRef = useRef<HTMLDivElement>(null);
   const isMarkdown = getLanguageLabel(language) === 'markdown';
+  const [highlighterHeight, setHighlighterHeight] = useState<string>("100px");
+  const containerRef = useRef<HTMLDivElement>(null);
+  const LINE_HEIGHT = 19;
 
   useEffect(() => {
-    const normalized = getMonacoLanguage(language);
-    setNormalizedLang(normalized);
-    setKey(prev => prev + 1);
-  }, [language]);
+    updateHighlighterHeight();
+    const resizeObserver = new ResizeObserver(updateHighlighterHeight);
+    if (containerRef.current) {
+      resizeObserver.observe(containerRef.current);
+    }
+    return () => resizeObserver.disconnect();
+  }, [code]);
 
-  const updateEditorHeight = () => {
-    if (!editorRef.current) return;
+  const updateHighlighterHeight = () => {
+    if (!containerRef.current) return;
     
-    const editor = editorRef.current;
-    const contentHeight = editor.getContentHeight();
+    const lineCount = code.split('\n').length;
+    const contentHeight = (lineCount * LINE_HEIGHT) + 35;
     const newHeight = Math.min(500, Math.max(100, contentHeight));
-    
-    setEditorHeight(`${newHeight}px`);
-    editor.layout();
+    setHighlighterHeight(`${newHeight}px`);
   };
 
-  const handleEditorDidMount = (editor: any) => {
-    editorRef.current = editor;
-    
-    editor.onDidContentSizeChange(() => {
-      window.requestAnimationFrame(updateEditorHeight);
-    });
-    
-    updateEditorHeight();
-    
-    editor.onDidFocusEditorWidget(() => {
-      setIsEditorFocused(true);
-      if (wrapperRef.current) {
-        wrapperRef.current.style.overflow = 'auto';
-      }
-    });
-    
-    editor.onDidBlurEditorWidget(() => {
-      setIsEditorFocused(false);
-      if (wrapperRef.current) {
-        wrapperRef.current.style.overflow = 'hidden';
-      }
-    });
+  const customStyle = {
+    ...vscDarkPlus,
+    'pre[class*="language-"]': {
+      ...vscDarkPlus['pre[class*="language-"]'],
+      margin: 0,
+      fontSize: '13px',
+      background: '#1E1E1E',
+      padding: '1rem',
+    },
+    'code[class*="language-"]': {
+      ...vscDarkPlus['code[class*="language-"]'],
+      fontSize: '13px',
+      background: '#1E1E1E',
+      display: 'block',
+      textIndent: 0,
+    }
   };
 
   return (
     <div className="relative">
       <style>
         {`
-          .editor-mask-wrapper {
-            position: relative;
-            border-radius: 0.5rem;
-            mask-image: radial-gradient(white, white);
-            -webkit-mask-image: -webkit-radial-gradient(white, white);
-            transform: translateZ(0);
-            overflow: hidden;
-          }
-
-          .editor-mask-wrapper:hover {
+          .syntax-highlighter-full {
             overflow: auto !important;
+            border-radius: 0.5rem;
           }
 
-          .editor-mask-wrapper:not(:hover):not(.focused) .monaco-editor .scroll-decoration {
-            box-shadow: none !important;
-          }
-
-          .editor-mask-wrapper:not(:hover):not(.focused) .monaco-editor .scrollbar {
-            opacity: 0 !important;
+          .syntax-highlighter-full ::selection {
+            background-color: rgba(255, 255, 255, 0.3) !important;
+            color: inherit !important;
           }
 
           .markdown-content-full {
@@ -91,8 +73,39 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             border-radius: 0.5rem;
             position: relative;
           }
+
+          .markdown-content-full blockquote {
+            border-left: 3px solid #4a5568;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            color: #a0aec0;
+          }
+
+          .markdown-content-full table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+          }
+
+          .markdown-content-full th,
+          .markdown-content-full td {
+            border: 1px solid #4a5568;
+            padding: 0.5rem;
+            text-align: left;
+          }
+
+          .markdown-content-full th {
+            background-color: #2d3748;
+          }
+
+          .markdown-content-full hr {
+            border: 0;
+            border-top: 1px solid #4a5568;
+            margin: 1rem 0;
+          }
         `}
       </style>
+
       <div className="relative">
         {isMarkdown ? (
           <div className="markdown-content-full">
@@ -102,31 +115,44 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
           </div>
         ) : (
           <div 
-            ref={wrapperRef}
-            className={`editor-mask-wrapper ${isEditorFocused ? 'focused' : ''}`}
+            ref={containerRef}
+            className="highlighter-wrapper"
+            style={{ maxHeight: '500px' }}
           >
-            <Editor
-              key={`${normalizedLang}-${key}`}
-              height={editorHeight}
-              defaultLanguage={normalizedLang}
-              className="rounded-lg"
-              defaultValue={code}
-              theme="vs-dark"
-              onMount={handleEditorDidMount}
-              options={{
-                readOnly: true,
-                minimap: { enabled: false },
-                scrollBeyondLastLine: false,
-                fontSize: 13,
-                lineNumbers: showLineNumbers ? 'on' : 'off',
-                renderLineHighlight: 'all',
-                folding: false,
-                wordWrap: 'on',
-                wrappingIndent: 'indent',
-                lineDecorationsWidth: showLineNumbers ? 24 : 50,
-                padding: { top: 12, bottom: 12 }
+            <SyntaxHighlighter
+              className="syntax-highlighter-full"
+              language={getMonacoLanguage(language)}
+              style={customStyle}
+              showLineNumbers={showLineNumbers}
+              wrapLines={true}
+              lineProps={{
+                style: { 
+                  whiteSpace: 'pre-wrap', 
+                  wordBreak: 'break-all',
+                  paddingLeft: 0,
+                  textIndent: 0,
+                  marginLeft: 0
+                }
               }}
-            />
+              customStyle={{
+                height: highlighterHeight,
+                minHeight: '100px',
+                marginBottom: 0,
+                marginTop: 0,
+                textIndent: 0,
+                paddingLeft: showLineNumbers ? 0 : 20
+              }}
+              useInlineStyles={true}
+              codeTagProps={{
+                style: {
+                  textIndent: 0,
+                  paddingLeft: 0,
+                  marginLeft: 0
+                }
+              }}
+            >
+              {code}
+            </SyntaxHighlighter>
           </div>
         )}
 
