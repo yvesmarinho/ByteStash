@@ -187,6 +187,14 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
             background: linear-gradient(to top, rgb(31, 41, 55), transparent);
             pointer-events: none;
           }
+
+          .add-fragment-button {
+            transition: all 0.2s ease-in-out;
+          }
+
+          .add-fragment-button:hover {
+            transform: translateY(-1px);
+          }
         `}
       </style>
       <div className="flex flex-col h-full max-h-full relative isolate">
@@ -195,9 +203,9 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
             {error && <p className="text-red-500 mb-4">{error}</p>}
           </div>
 
-          {/* Create a wrapper for the scrollable content */}
           <div className="flex-1 overflow-y-auto min-h-0">
             <div className="space-y-4 pr-2">
+              {/* Title input */}
               <div>
                 <label htmlFor="title" className="block text-sm font-medium text-gray-300">Title</label>
                 <input
@@ -213,6 +221,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
                 <p className="text-sm text-gray-400 mt-1">{title.length}/100 characters</p>
               </div>
               
+              {/* Description input */}
               <div>
                 <label htmlFor="description" className="block text-sm font-medium text-gray-300">Description</label>
                 <textarea
@@ -225,6 +234,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
                 />
               </div>
               
+              {/* Categories section */}
               <div>
                 <label htmlFor="categories" className="block text-sm font-medium text-gray-300">
                   Categories (max 20)
@@ -251,22 +261,13 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
                 />
               </div>
 
+              {/* Code Fragments section */}
               <div>
-                <div className="flex items-center justify-between mb-4">
-                  <label className="block text-sm font-medium text-gray-300">
-                    Code Fragments ({fragments.length})
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleAddFragment}
-                    className="flex items-center gap-2 px-3 py-1 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm"
-                  >
-                    <Plus size={16} />
-                    Add Fragment
-                  </button>
-                </div>
+                <label className="block text-sm font-medium text-gray-300 mb-4">
+                  Code Fragments ({fragments.length})
+                </label>
 
-                <div className="space-y-4 mb-4">
+                <div className="space-y-4">
                   {fragments.map((fragment, index) => (
                     <FragmentEditor
                       key={index}
@@ -280,11 +281,24 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
                       canMoveDown={index < fragments.length - 1}
                     />
                   ))}
+                  
+                  {/* New Add Fragment button positioned below fragments */}
+                  <button
+                    type="button"
+                    onClick={handleAddFragment}
+                    className="add-fragment-button w-full py-3 px-4 border-2 border-dashed border-gray-600 rounded-lg 
+                             hover:border-blue-500 hover:bg-gray-800/50 transition-all duration-200
+                             flex items-center justify-center gap-2 text-gray-400 hover:text-blue-400 group"
+                  >
+                    <Plus size={20} className="transition-transform group-hover:scale-110" />
+                    <span className="text-sm font-medium">Add New Fragment</span>
+                  </button>
                 </div>
               </div>
             </div>
           </div>
 
+          {/* Footer */}
           <div className="modal-footer -bottom-5 inset-x-0 bg-gray-800 border-t border-gray-600 mt-4 z-10">
             <div className="flex justify-end gap-2 py-4">
               <button
