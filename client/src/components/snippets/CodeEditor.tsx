@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Editor, { OnMount } from '@monaco-editor/react';
 import { DynamicCodeEditorProps } from '../../types/types';
 import { getMonacoLanguage } from '../../utils/languageUtils';
@@ -11,10 +11,49 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
   showLineNumbers = true
 }) => {
   const editorRef = useRef<Monaco.editor.IStandaloneCodeEditor | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const monacoLanguage = getMonacoLanguage(language);
+  const [editorHeight, setEditorHeight] = useState<string>("100px");
+
+  useEffect(() => {
+    if (editorRef.current) {
+      const currentValue = editorRef.current.getValue();
+      if (currentValue !== code) {
+        editorRef.current.setValue(code);
+      }
+    }
+  }, [code]);
+
+  const updateEditorHeight = () => {
+    if (!editorRef.current) return;
+    
+    const editor = editorRef.current;
+    const contentHeight = editor.getContentHeight();
+    const maxHeight = 500;
+    
+    const newHeight = Math.min(maxHeight, Math.max(100, contentHeight));
+    
+    setEditorHeight(`${newHeight}px`);
+    
+    const shouldShowScrollbar = contentHeight > maxHeight;
+    editor.updateOptions({
+      scrollbar: {
+        vertical: shouldShowScrollbar ? 'visible' : 'hidden',
+        horizontal: 'visible',
+        verticalScrollbarSize: 12,
+        horizontalScrollbarSize: 12,
+      }
+    });
+    
+    editor.layout();
+  };
 
   const handleEditorDidMount: OnMount = (editor) => {
     editorRef.current = editor;
+
+    editor.onDidContentSizeChange(() => {
+      window.requestAnimationFrame(updateEditorHeight);
+    });
   };
 
   useEffect(() => {
@@ -22,17 +61,27 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
       const model = editorRef.current.getModel();
       if (model) {
         Monaco.editor.setModelLanguage(model, monacoLanguage);
+        updateEditorHeight();
       }
     }
   }, [monacoLanguage]);
 
+  useEffect(() => {
+    if (editorRef.current) {
+      setTimeout(updateEditorHeight, 50);
+    }
+  }, [code]);
+
   return (
-    <div className="overflow-hidden rounded-lg">
+    <div ref={containerRef} className="overflow-hidden rounded-lg">
       <Editor
-        height="400px"
-        defaultValue={code}
+        height={editorHeight}
+        value={code}
         defaultLanguage={monacoLanguage}
-        onChange={onValueChange}
+        onChange={(value) => {
+          onValueChange?.(value);
+          setTimeout(updateEditorHeight, 10);
+        }}
         onMount={handleEditorDidMount}
         theme="vs-dark"
         options={{
@@ -44,10 +93,20 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
           wordWrap: 'on',
           wrappingIndent: 'indent',
           automaticLayout: true,
-          tabSize: 2,
+          folding: false,
+          tabSize: 4,
           formatOnPaste: true,
           formatOnType: true,
-          padding: { top: 16, bottom: 16 },
+          padding: { top: 12, bottom: 12 },
+          lineDecorationsWidth: showLineNumbers ? 24 : 50,
+          overviewRulerBorder: false,
+          scrollbar: {
+            vertical: 'visible',
+            horizontal: 'visible',
+            verticalScrollbarSize: 12,
+            horizontalScrollbarSize: 12,
+            useShadows: false
+          }
         }}
       />
     </div>

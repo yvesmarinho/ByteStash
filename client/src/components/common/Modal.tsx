@@ -2,8 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { ModalProps } from '../../types/types';
 
-const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
+const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -13,10 +14,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
     };
 
     if (isOpen) {
+      document.body.style.overflow = 'hidden';
       document.addEventListener('mousedown', handleClickOutside);
+      if (contentRef.current) {
+        contentRef.current.scrollTop = 0;
+      }
     }
 
     return () => {
+      document.body.style.overflow = 'unset';
       document.removeEventListener('mousedown', handleClickOutside);
     };
   }, [isOpen, onClose]);
@@ -29,15 +35,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children }) => {
         ref={modalRef} 
         className={`bg-gray-800 rounded-lg max-w-3xl w-full max-h-[80vh] flex flex-col transition-all duration-300 ${isOpen ? 'opacity-100 scale-100' : 'opacity-0 scale-95'}`}
       >
-        <div className="px-4 pt-4 pb-4">
+        <div className="px-4 pt-4 pb-4 flex items-center justify-between border-b border-gray-700">
+          <div className="text-lg font-semibold text-white">
+            {title}
+          </div>
           <button 
             onClick={onClose}
-            className="float-right text-gray-400 hover:text-white"
+            className="text-gray-400 hover:text-white"
           >
             <X size={24} />
           </button>
         </div>
-        <div className="px-4 overflow-y-auto flex-1">
+        <div ref={contentRef} className="px-4 pb-4 overflow-y-auto flex-1 mt-4">
           {children}
         </div>
       </div>

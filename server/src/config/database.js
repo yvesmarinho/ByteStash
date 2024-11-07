@@ -22,29 +22,106 @@ function getDatabasePath() {
   }
 }
 
+async function migrateToFragments(db) {
+  console.log('Starting migration to fragments...');
+  
+  // Check if code column exists in snippets table
+  const hasCodeColumn = db.prepare(`
+    SELECT COUNT(*) as count 
+    FROM pragma_table_info('snippets') 
+    WHERE name = 'code'
+  `).get().count > 0;
+
+  if (!hasCodeColumn) {
+    console.log('Migration already completed');
+    return;
+  }
+
+  // Enable foreign keys and start transaction
+  db.pragma('foreign_keys = OFF');
+  
+  try {
+    db.transaction(() => {
+      // Create fragments table with language column
+      db.exec(`
+        CREATE TABLE IF NOT EXISTS fragments (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          snippet_id INTEGER NOT NULL,
+          file_name TEXT NOT NULL,
+          code TEXT NOT NULL,
+          language TEXT NOT NULL,
+          position INTEGER NOT NULL,
+          FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+        );
+
+        CREATE INDEX IF NOT EXISTS idx_fragments_snippet_id ON fragments(snippet_id);
+      `);
+
+      // Copy existing code to fragments, using the snippet's language
+      const snippets = db.prepare('SELECT id, code, language FROM snippets').all();
+      const insertFragment = db.prepare(
+        'INSERT INTO fragments (snippet_id, file_name, code, language, position) VALUES (?, ?, ?, ?, ?)'
+      );
+
+      for (const snippet of snippets) {
+        insertFragment.run(snippet.id, 'main', snippet.code || '', snippet.language || 'plaintext', 0);
+      }
+
+      // Remove language and code columns from snippets table
+      db.exec(`
+        CREATE TABLE snippets_new (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          title TEXT NOT NULL,
+          description TEXT,
+          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+
+        INSERT INTO snippets_new (id, title, description, updated_at)
+        SELECT id, title, description, updated_at FROM snippets;
+
+        DROP TABLE snippets;
+        ALTER TABLE snippets_new RENAME TO snippets;
+      `);
+    })();
+
+    console.log('Migration completed successfully');
+  } catch (error) {
+    console.error('Migration failed:', error);
+    throw error;
+  } finally {
+    db.pragma('foreign_keys = ON');
+  }
+}
+
 function initializeDatabase() {
   try {
     const dbPath = getDatabasePath();
     console.log(`Initializing SQLite database at: ${dbPath}`);
 
-    // Open database with WAL mode for better performance
     db = new Database(dbPath, { 
       verbose: console.log,
       fileMustExist: false
     });
 
-    // Enable foreign keys and WAL mode
     db.pragma('foreign_keys = ON');
     db.pragma('journal_mode = WAL');
 
-    // Create tables and index
+    const fragmentsTable = db.prepare(`
+      SELECT name FROM sqlite_master 
+      WHERE type='table' AND name='fragments'
+    `).get();
+
+    if (!fragmentsTable) {
+      console.log('Fragments table not found, running migration...');
+      migrateToFragments(db);
+    }
+
     db.exec(`
       CREATE TABLE IF NOT EXISTS snippets (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         title TEXT NOT NULL,
         language TEXT NOT NULL,
         description TEXT,
-        code TEXT NOT NULL,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
@@ -55,46 +132,23 @@ function initializeDatabase() {
         FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
       );
 
+      CREATE TABLE IF NOT EXISTS fragments (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        snippet_id INTEGER NOT NULL,
+        file_name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        position INTEGER NOT NULL,
+        FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+      );
+
       CREATE INDEX IF NOT EXISTS idx_categories_snippet_id ON categories(snippet_id);
+      CREATE INDEX IF NOT EXISTS idx_fragments_snippet_id ON fragments(snippet_id);
     `);
 
     console.log('Database initialized successfully');
     return db;
   } catch (error) {
     console.error('Database initialization error:', error);
-    throw error;
-  }
-}
-
-async function createBackup() {
-  try {
-    const dbPath = getDatabasePath();
-    const backupPath = getBackupPath();
-    
-    if (!fs.existsSync(dbPath)) {
-      throw new Error('Source database does not exist');
-    }
-
-    await new Promise((resolve, reject) => {
-      const readStream = fs.createReadStream(dbPath);
-      const writeStream = fs.createWriteStream(backupPath);
-      
-      readStream.on('error', reject);
-      writeStream.on('error', reject);
-      writeStream.on('finish', resolve);
-      
-      readStream.pipe(writeStream);
-    });
-
-    const backupStats = fs.statSync(backupPath);
-    if (backupStats.size === 0) {
-      throw new Error('Backup file was created but is empty');
-    }
-
-    console.log(`Database backup created successfully at: ${backupPath}`);
-    return backupPath;
-  } catch (error) {
-    console.error('Database backup error:', error);
     throw error;
   }
 }
@@ -108,5 +162,6 @@ function getDb() {
 
 module.exports = {
   initializeDatabase,
+  migrateToFragments,
   getDb
 };
