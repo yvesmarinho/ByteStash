@@ -1,8 +1,14 @@
 import React, { useRef, useEffect, useState } from 'react';
 import Editor, { OnMount } from '@monaco-editor/react';
-import { DynamicCodeEditorProps } from '../../types/types';
 import { getMonacoLanguage } from '../../utils/languageUtils';
 import * as Monaco from 'monaco-editor/esm/vs/editor/editor.api';
+
+export interface DynamicCodeEditorProps {
+  code: string;
+  language?: string;
+  onValueChange: (value?: string) => void;
+  showLineNumbers: boolean;
+}
 
 const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
   code,

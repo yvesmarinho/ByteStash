@@ -2,10 +2,25 @@ import React, { useState } from 'react';
 import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
-import { CodeFragment, SnippetCardProps } from '../../types/types';
+import { CodeFragment, Snippet } from '../../types/types';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import PreviewCodeBlock from './PreviewCodeBlock';
 import CategoryList from './categories/CategoryList';
+
+export interface SnippetCardProps {
+  snippet: Snippet;
+  viewMode: 'grid' | 'list';
+  onOpen: (snippet: Snippet) => void;
+  onDelete: (id: string) => void;
+  onEdit: (snippet: Snippet) => void;
+  onCategoryClick: (category: string) => void;
+  compactView: boolean;
+  showCodePreview: boolean;
+  previewLines: number;
+  showCategories: boolean;
+  expandCategories: boolean;
+  showLineNumbers: boolean;
+}
 
 const SnippetCard: React.FC<SnippetCardProps> = ({
   snippet,

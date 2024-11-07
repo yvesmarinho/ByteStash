@@ -4,7 +4,13 @@ import CopyButton from '../common/CopyButton';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { PreviewCodeBlockProps } from '@/types/types';
+
+export interface PreviewCodeBlockProps {
+  code: string;
+  language?: string;
+  previewLines?: number;
+  showLineNumbers?: boolean;
+}
 
 const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
   code,

@@ -1,6 +1,12 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { DeleteConfirmationModalProps } from '../../types/types';
+
+export interface DeleteConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+  snippetTitle: string;
+}
 
 const DeleteConfirmationModal: React.FC<DeleteConfirmationModalProps> = ({ isOpen, onClose, onConfirm, snippetTitle }) => {
   if (!isOpen) return null;

@@ -1,6 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import BaseDropdown from '../../common/BaseDropdown';
-import { CategorySuggestionsProps } from '../../../types/types';
+
+export interface CategorySuggestionsProps {
+  inputValue: string;
+  onInputChange: (value: string) => void;
+  onCategorySelect: (category: string) => void;
+  existingCategories: string[];
+  selectedCategories: string[];
+  placeholder?: string;
+  disabled?: boolean;
+  className?: string;
+  showAddText?: boolean;
+  maxCategories?: number;
+  handleHashtag: boolean;
+}
 
 const CategorySuggestions: React.FC<CategorySuggestionsProps> = ({
   inputValue,
