@@ -4,6 +4,7 @@ import { ModalProps } from '../../types/types';
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -15,6 +16,9 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
       document.addEventListener('mousedown', handleClickOutside);
+      if (contentRef.current) {
+        contentRef.current.scrollTop = 0;
+      }
     }
 
     return () => {
@@ -42,7 +46,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
             <X size={24} />
           </button>
         </div>
-        <div className="px-4 pb-4 overflow-y-auto flex-1 mt-4">
+        <div ref={contentRef} className="px-4 pb-4 overflow-y-auto flex-1 mt-4">
           {children}
         </div>
       </div>

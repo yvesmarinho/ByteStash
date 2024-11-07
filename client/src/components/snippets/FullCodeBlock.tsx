@@ -127,7 +127,7 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
               wrapLines={true}
               lineProps={{
                 style: { 
-                  whiteSpace: 'pre-wrap', 
+                  whiteSpace: 'pre',
                   wordBreak: 'break-all',
                   paddingLeft: 0,
                   textIndent: 0,

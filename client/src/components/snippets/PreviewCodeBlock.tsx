@@ -16,6 +16,8 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
   const LINE_HEIGHT = 19;
   const visibleHeight = (previewLines + 2) * LINE_HEIGHT;
 
+  const truncatedCode = code.split('\n').slice(0, previewLines + 5).join('\n');
+
   const customStyle = {
     ...vscDarkPlus,
     'pre[class*="language-"]': {
@@ -48,36 +50,6 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             overflow: hidden;
           }
 
-          .markdown-content-preview blockquote {
-            border-left: 3px solid #4a5568;
-            padding-left: 1rem;
-            margin: 1rem 0;
-            color: #a0aec0;
-          }
-
-          .markdown-content-preview table {
-            width: 100%;
-            border-collapse: collapse;
-            margin: 1rem 0;
-          }
-
-          .markdown-content-preview th,
-          .markdown-content-preview td {
-            border: 1px solid #4a5568;
-            padding: 0.5rem;
-            text-align: left;
-          }
-
-          .markdown-content-preview th {
-            background-color: #2d3748;
-          }
-
-          .markdown-content-preview hr {
-            border: 0;
-            border-top: 1px solid #4a5568;
-            margin: 1rem 0;
-          }
-
           /* Hide extra lines */
           .token-line:nth-child(n+${previewLines + 1}) {
             visibility: hidden;
@@ -94,7 +66,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
         {isMarkdown ? (
           <div className="markdown-content-preview">
             <ReactMarkdown className="text-sm text-gray-300 markdown">
-              {code}
+              {truncatedCode}
             </ReactMarkdown>
           </div>
         ) : (
@@ -106,7 +78,9 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
               wrapLines={true}
               lineProps={{
                 style: {
-                  display: 'flex'
+                  whiteSpace: 'pre',
+                  wordBreak: 'break-all',
+                  paddingLeft: 0
                 }
               }}
               customStyle={{
@@ -128,7 +102,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
                 }
               }}
             >
-              {code}
+              {truncatedCode}
             </SyntaxHighlighter>
             <div 
               className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1e1e1e] to-transparent pointer-events-none rounded-b-lg"
