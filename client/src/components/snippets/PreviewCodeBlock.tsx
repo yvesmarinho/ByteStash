@@ -89,7 +89,7 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
                 marginBottom: 0,
                 marginTop: 0,
                 textIndent: 0,
-                paddingLeft: showLineNumbers ? 0 : 20,
+                paddingLeft: showLineNumbers ? 10 : 20,
                 borderRadius: '0.5rem',
                 overflow: 'hidden'
               }}

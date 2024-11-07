@@ -94,7 +94,7 @@ const DynamicCodeEditor: React.FC<DynamicCodeEditorProps> = ({
           wrappingIndent: 'indent',
           automaticLayout: true,
           folding: false,
-          tabSize: 2,
+          tabSize: 4,
           formatOnPaste: true,
           formatOnType: true,
           padding: { top: 12, bottom: 12 },

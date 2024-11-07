@@ -140,7 +140,7 @@ const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
                 marginBottom: 0,
                 marginTop: 0,
                 textIndent: 0,
-                paddingLeft: showLineNumbers ? 0 : 20
+                paddingLeft: showLineNumbers ? 10 : 20
               }}
               useInlineStyles={true}
               codeTagProps={{
