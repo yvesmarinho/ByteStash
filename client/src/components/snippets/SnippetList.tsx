@@ -1,6 +1,21 @@
 import React from 'react';
 import SnippetCard from './SnippetCard';
-import { SnippetListProps } from '../../types/types';
+import { Snippet } from '@/types/types';
+
+export interface SnippetListProps {
+  snippets: Snippet[];
+  viewMode: 'grid' | 'list';
+  onOpen: (snippet: Snippet) => void;
+  onDelete: (id: string) => void;
+  onEdit: (snippet: Snippet) => void;
+  onCategoryClick: (category: string) => void;
+  compactView: boolean;
+  showCodePreview: boolean;
+  previewLines: number;
+  showCategories: boolean;
+  expandCategories: boolean;
+  showLineNumbers: boolean;
+}
 
 const SnippetList: React.FC<SnippetListProps> = ({ 
   snippets, 

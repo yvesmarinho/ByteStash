@@ -1,8 +1,24 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { X, Info, CheckCircle, AlertTriangle, AlertCircle } from 'lucide-react';
-import { ToastProviderProps, ToastContextType, ToastProps } from '../../types/types';
 
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
+
+export interface ToastProviderProps {
+  children: React.ReactNode;
+}
+
+export interface ToastContextType {
+  addToast: (message: string, type?: 'info' | 'success' | 'error' | 'warning', duration?: number) => void;
+  removeToast: (id: number) => void;
+}
+
+export interface ToastProps {
+  id: number;
+  message: string;
+  type: 'info' | 'success' | 'error' | 'warning';
+  duration: number;
+  onClose: () => void;
+}
 
 export const useToast = () => {
   const context = useContext(ToastContext);

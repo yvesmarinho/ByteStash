@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import Modal from '../common/Modal';
-import { SettingsModalProps } from '../../types/types';
 import { BookOpen, Clock } from 'lucide-react';
 import ChangelogModal from '../changelog/ChangelogModal';
 
@@ -8,6 +7,21 @@ const GITHUB_URL = "https://github.com/jordan-dalby/ByteStash";
 const DOCKER_URL = "https://github.com/jordan-dalby/ByteStash/pkgs/container/bytestash";
 const REDDIT_URL = "https://www.reddit.com/r/selfhosted/comments/1gb1ail/selfhosted_code_snippet_manager/";
 const WIKI_URL = "https://github.com/jordan-dalby/ByteStash/wiki";
+
+export interface SettingsModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  settings: {
+    compactView: boolean;
+    showCodePreview: boolean;
+    previewLines: number;
+    includeCodeInSearch: boolean;
+    showCategories: boolean;
+    expandCategories: boolean;
+    showLineNumbers: boolean;
+  };
+  onSettingsChange: (newSettings: SettingsModalProps['settings']) => void;
+}
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings, onSettingsChange }) => {
   const [compactView, setCompactView] = useState(settings.compactView);

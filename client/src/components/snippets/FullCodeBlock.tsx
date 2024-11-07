@@ -4,7 +4,12 @@ import CopyButton from '../common/CopyButton';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/cjs/styles/prism';
-import { FullCodeBlockProps } from '@/types/types';
+
+export interface FullCodeBlockProps {
+  code: string;
+  language?: string;
+  showLineNumbers?: boolean;
+}
 
 const FullCodeBlock: React.FC<FullCodeBlockProps> = ({ 
   code, 

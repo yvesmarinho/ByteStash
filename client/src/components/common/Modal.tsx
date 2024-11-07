@@ -1,6 +1,12 @@
 import React, { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
-import { ModalProps } from '../../types/types';
+
+export interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title?: React.ReactNode;
+  children: React.ReactNode;
+}
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children }) => {
   const modalRef = useRef<HTMLDivElement>(null);

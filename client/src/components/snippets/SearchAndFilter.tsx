@@ -1,6 +1,5 @@
 import React from 'react';
 import { ChevronDown, Grid, List, Settings, Plus } from 'lucide-react';
-import { SearchAndFilterProps, SortOrder } from '../../types/types';
 import EnhancedSearch from './EnhancedSearch';
 
 const sortOptions: { value: SortOrder; label: string }[] = [
@@ -9,6 +8,25 @@ const sortOptions: { value: SortOrder; label: string }[] = [
   { value: 'alpha-asc', label: 'Alphabetically A-Z' },
   { value: 'alpha-desc', label: 'Alphabetically Z-A' },
 ];
+
+export type SortOrder = 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc';
+
+export interface SearchAndFilterProps {
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
+  selectedLanguage: string;
+  setSelectedLanguage: (language: string) => void;
+  languages: string[];
+  sortOrder: 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc';
+  setSortOrder: (order: 'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc') => void;
+  viewMode: 'grid' | 'list';
+  setViewMode: (mode: 'grid' | 'list') => void;
+  openSettingsModal: () => void;
+  openNewSnippetModal: () => void;
+  allCategories: string[];
+  selectedCategories: string[];
+  onCategoryClick: (category: string) => void;
+}
 
 const SearchAndFilter: React.FC<SearchAndFilterProps> = ({ 
   searchTerm, 

@@ -3,12 +3,20 @@ import Modal from '../common/Modal';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
-import { CodeFragment, EditSnippetModalProps } from '../../types/types';
+import { CodeFragment, Snippet } from '../../types/types';
 import { useSnippets } from '../../hooks/useSnippets';
 import CategorySuggestions from './categories/CategorySuggestions';
 import CategoryList from './categories/CategoryList';
 import FragmentEditor from './FragmentEditor';
 import { Plus } from 'lucide-react';
+
+export interface EditSnippetModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => void;
+  snippetToEdit: Snippet | null;
+  showLineNumbers: boolean;
+}
 
 const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ 
   isOpen, 
