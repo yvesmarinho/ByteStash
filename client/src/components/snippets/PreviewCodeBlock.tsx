@@ -104,12 +104,13 @@ const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             >
               {truncatedCode}
             </SyntaxHighlighter>
-            <div 
-              className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1e1e1e] to-transparent pointer-events-none rounded-b-lg"
-              style={{ height: `${LINE_HEIGHT * 2}px` }}
-            />
           </div>
         )}
+
+        <div 
+          className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-[#1e1e1e] to-transparent pointer-events-none rounded-b-lg"
+          style={{ height: `${LINE_HEIGHT * 2}px` }}
+        />
 
         <div className="absolute" style={{ zIndex: 3, right: 0, top: 0 }}>
           <CopyButton text={code} />
