@@ -123,18 +123,17 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
             </div>
           </div>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              onShare(snippet);
-            }}
-            className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-            title="Share snippet"
-          >
-            <Share size={16} className="text-gray-400 hover:text-blue-500" />
-          </button>
-
           <div className="flex items-start gap-1.5">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onShare(snippet);
+              }}
+              className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+              title="Share snippet"
+            >
+              <Share size={16} className="text-gray-400 hover:text-blue-500" />
+            </button>
             <button
               onClick={handleEditClick}
               className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
