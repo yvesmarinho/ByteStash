@@ -11,6 +11,7 @@ import { useAuth } from '../../context/AuthContext';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import { Snippet } from '../../types/types';
 import { initializeMonaco } from '../../utils/languageUtils';
+import ShareMenu from './share/ShareMenu';
 
 const APP_VERSION = "1.4.0";
 
@@ -31,6 +32,8 @@ const SnippetStorage: React.FC = () => {
   const [snippetToEdit, setSnippetToEdit] = useState<Snippet | null>(null);
   const [sortOrder, setSortOrder] = useState<'newest' | 'oldest' | 'alpha-asc' | 'alpha-desc'>('newest');
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+  const [snippetToShare, setSnippetToShare] = useState<Snippet | null>(null);
 
   useEffect(() => {
     initializeMonaco();
@@ -52,6 +55,16 @@ const SnippetStorage: React.FC = () => {
   const handleLogout = () => {
     logout();
   };
+
+  const openShareMenu = useCallback((snippet: Snippet) => {
+    setSnippetToShare(snippet);
+    setIsShareMenuOpen(true);
+  }, []);
+  
+  const closeShareMenu = useCallback(() => {
+    setSnippetToShare(null);
+    setIsShareMenuOpen(false);
+  }, []);
 
   const languages = useMemo(() => {
     const langSet = new Set<string>();
@@ -211,6 +224,7 @@ const SnippetStorage: React.FC = () => {
         onDelete={handleDeleteSnippet}
         onEdit={openEditSnippetModal}
         onCategoryClick={handleCategoryClick}
+        onShare={openShareMenu}
         compactView={compactView}
         showCodePreview={showCodePreview}
         previewLines={previewLines}
@@ -249,6 +263,14 @@ const SnippetStorage: React.FC = () => {
         }}
         onSettingsChange={updateSettings}
       />
+
+      {snippetToShare && (
+        <ShareMenu
+          snippetId={snippetToShare.id}
+          isOpen={isShareMenuOpen}
+          onClose={closeShareMenu}
+        />
+      )}
     </div>
   );
 };

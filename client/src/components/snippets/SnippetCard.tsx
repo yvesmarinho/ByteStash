@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode } from 'lucide-react';
+import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode, Share } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { CodeFragment, Snippet } from '../../types/types';
@@ -14,6 +14,7 @@ export interface SnippetCardProps {
   onDelete: (id: string) => void;
   onEdit: (snippet: Snippet) => void;
   onCategoryClick: (category: string) => void;
+  onShare: (snippet: Snippet) => void;
   compactView: boolean;
   showCodePreview: boolean;
   previewLines: number;
@@ -29,6 +30,7 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   onDelete,
   onEdit,
   onCategoryClick,
+  onShare,
   compactView,
   showCodePreview,
   previewLines,
@@ -120,6 +122,17 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
               </div>
             </div>
           </div>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onShare(snippet);
+            }}
+            className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
+            title="Share snippet"
+          >
+            <Share size={16} className="text-gray-400 hover:text-blue-500" />
+          </button>
 
           <div className="flex items-start gap-1.5">
             <button

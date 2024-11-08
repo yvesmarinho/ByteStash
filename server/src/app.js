@@ -2,6 +2,7 @@ const express = require('express');
 const { initializeDatabase } = require('./config/database');
 const snippetRoutes = require('./routes/snippetRoutes');
 const authRoutes = require('./routes/authRoutes');
+const shareRoutes = require('./routes/shareRoutes')
 const { authenticateToken } = require('./middleware/auth');
 const { join } = require('path');
 const fs = require('fs');
@@ -17,6 +18,7 @@ const assetsPath = join(buildPath, 'assets');
 
 app.use(`${basePath}/api/auth`, authRoutes);
 app.use(`${basePath}/api/snippets`, authenticateToken, snippetRoutes);
+app.use(`${basePath}/api/share`, shareRoutes);
 
 app.use(`${basePath}/assets`, express.static(assetsPath));
 app.use(`${basePath}/monacoeditorwork`, express.static(join(buildPath, 'monacoeditorwork')));

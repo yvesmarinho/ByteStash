@@ -1,0 +1,170 @@
+import React, { useState, useEffect } from 'react';
+import { Share as ShareIcon, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Share, ShareSettings } from '../../../types/types';
+import { createShare, getSharesBySnippetId, deleteShare } from '../../../api/share';
+import { useToast } from '../../toast/Toast';
+import Modal from '../../common/Modal';
+import { basePath } from '../../../api/basePath';
+
+interface ShareMenuProps {
+  snippetId: string;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => {
+  const [shares, setShares] = useState<Share[]>([]);
+  const [requiresAuth, setRequiresAuth] = useState(false);
+  const [expiresIn, setExpiresIn] = useState<number>();
+  const { addToast } = useToast();
+  
+  useEffect(() => {
+    if (isOpen) {
+      loadShares();
+    }
+  }, [isOpen, snippetId]);
+
+  const loadShares = async () => {
+    try {
+      const loadedShares = await getSharesBySnippetId(snippetId);
+      setShares(loadedShares);
+    } catch (error) {
+      addToast('Failed to load shares', 'error');
+    }
+  };
+
+  const handleCreateShare = async () => {
+    try {
+      const settings: ShareSettings = {
+        requiresAuth,
+        expiresIn: expiresIn && expiresIn * 3600
+      };
+      
+      await createShare(snippetId, settings);
+      await loadShares();
+      addToast('Share link created', 'success');
+      
+      setRequiresAuth(false);
+      setExpiresIn(undefined);
+    } catch (error) {
+      addToast('Failed to create share link', 'error');
+    }
+  };
+
+  const handleDeleteShare = async (shareId: string) => {
+    try {
+      await deleteShare(shareId);
+      setShares(shares.filter(share => share.id !== shareId));
+      addToast('Share link deleted', 'success');
+    } catch (error) {
+      addToast('Failed to delete share link', 'error');
+    }
+  };
+
+  const copyShareLink = (shareId: string) => {
+    const url = `${window.location.origin}${basePath}/s/${shareId}`;
+    navigator.clipboard.writeText(url);
+    addToast('Share link copied to clipboard', 'success');
+  };
+
+  return (
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={
+        <div className="flex items-center gap-2">
+          <ShareIcon size={20} />
+          <h2 className="text-xl font-bold">Share Snippet</h2>
+        </div>
+      }
+    >
+      <div className="space-y-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Create New Share Link</h3>
+          
+          <div className="space-y-4">
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={requiresAuth}
+                onChange={e => setRequiresAuth(e.target.checked)}
+                className="form-checkbox h-4 w-4"
+              />
+              <span>Require authentication</span>
+            </label>
+
+            <div>
+              <label className="block text-sm mb-1">Expires in (hours)</label>
+              <input
+                type="number"
+                value={expiresIn || ''}
+                onChange={e => setExpiresIn(e.target.value ? parseInt(e.target.value) : undefined)}
+                min="1"
+                placeholder="Never"
+                className="w-full px-3 py-2 bg-gray-700 rounded-md"
+              />
+            </div>
+
+            <button
+              onClick={handleCreateShare}
+              className="w-full py-2 bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
+            >
+              Create Share Link
+            </button>
+          </div>
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-medium">Active Share Links</h3>
+          
+          {shares.length === 0 ? (
+            <p className="text-gray-400">No active share links</p>
+          ) : (
+            <div className="space-y-2">
+              {shares.map(share => (
+                <div
+                  key={share.id}
+                  className="flex items-center justify-between p-3 bg-gray-700 rounded-md"
+                >
+                  <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                      <span className="truncate">/{share.id}</span>
+                      {share.requiresAuth && (
+                        <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
+                          Auth Required
+                        </span>
+                      )}
+                      {share.expiresAt && (
+                        <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
+                          Expires {new Date(share.expiresAt).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => copyShareLink(share.id)}
+                      className="p-2 hover:bg-gray-600 rounded-md transition-colors"
+                      title="Copy link"
+                    >
+                      <LinkIcon size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteShare(share.id)}
+                      className="p-2 hover:bg-gray-600 rounded-md transition-colors text-red-400"
+                      title="Delete share link"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </Modal>
+  );
+};
+
+export default ShareMenu;
