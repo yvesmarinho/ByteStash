@@ -26,7 +26,7 @@ const AuthenticatedApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <Router basename={window.__BASE_PATH__}>
+    <Router basename={window.__BASE_PATH__} future={{ v7_relativeSplatPath: true }}>
       <AuthProvider>
         <ToastProvider>
           <Routes>

@@ -32,10 +32,11 @@ export interface ShareSettings {
 
 export interface Share {
   id: string;
-  snippetId: string;
-  requiresAuth: boolean;
-  viewCount: number;
-  expiresAt: string;
-  createdAt: string;
-  expired: boolean;
+  snippet_id: number;
+  requires_auth: number;
+  view_limit: number | null;
+  view_count: number;
+  expires_at: string;
+  created_at: string;
+  expired: number;
 }

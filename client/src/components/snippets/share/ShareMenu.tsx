@@ -156,14 +156,14 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate">/{share.id}</span>
-                      {share.requiresAuth && (
+                      {share.requires_auth === 1 && (
                         <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
                           Auth Required
                         </span>
                       )}
-                      {share.expiresAt && (
+                      {share.expires_at && (
                         <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
-                          Expires {new Date(share.expiresAt).toLocaleDateString()}
+                          Expires {new Date(share.expires_at).toLocaleDateString()}
                         </span>
                       )}
                     </div>
