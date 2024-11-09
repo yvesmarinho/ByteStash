@@ -286,12 +286,12 @@ export const normalizeLanguage = (lang: string): string => {
     }
   }
   
-  return 'plaintext';
+  return lang;
 };
 
 export const getMonacoLanguage = (lang: string): string => {
   const normalized = normalizeLanguage(lang);
-  return LANGUAGE_MAPPING[normalized]?.monacoAlias || 'plaintext';
+  return LANGUAGE_MAPPING[normalized]?.monacoAlias || lang;
 };
 
 export const getLanguageLabel = (lang: string): string => {
