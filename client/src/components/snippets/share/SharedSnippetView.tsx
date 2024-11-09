@@ -50,6 +50,14 @@ const SharedSnippetView: React.FC = () => {
     return <LoginPage />;
   }
 
+  if (errorCode === 410) {
+    return (
+      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+        <div className="text-white text-xl">Shared snippet has expired</div>
+      </div>
+    );
+  }
+
   if (error) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">

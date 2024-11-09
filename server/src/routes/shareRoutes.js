@@ -43,7 +43,7 @@ router.get('/:id', async (req, res) => {
       }
     }
 
-    if (share.expired) {
+    if (share.share?.expired) {
       return res.status(410).json({ error: 'Share has expired' });
     }
 

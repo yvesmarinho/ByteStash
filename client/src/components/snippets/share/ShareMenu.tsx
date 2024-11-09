@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Share as ShareIcon, Trash2, Link as LinkIcon, Check } from 'lucide-react';
+import { Share as ShareIcon, Trash2, Link as LinkIcon, Check, ShieldCheck, ShieldOff } from 'lucide-react';
 import { Share, ShareSettings } from '../../../types/types';
 import { createShare, getSharesBySnippetId, deleteShare } from '../../../api/share';
 import { useToast } from '../../toast/Toast';
 import Modal from '../../common/Modal';
 import { basePath } from '../../../api/basePath';
+import parseDuration from 'parse-duration';
+import { formatDistanceToNow } from 'date-fns';
 
 interface ShareMenuProps {
   snippetId: string;
@@ -15,7 +17,8 @@ interface ShareMenuProps {
 const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => {
   const [shares, setShares] = useState<Share[]>([]);
   const [requiresAuth, setRequiresAuth] = useState(false);
-  const [expiresIn, setExpiresIn] = useState<number>();
+  const [expiresIn, setExpiresIn] = useState<string>('');
+  const [durationError, setDurationError] = useState<string>('');
   const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   const { addToast } = useToast();
   
@@ -36,10 +39,19 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
   };
 
   const handleCreateShare = async () => {
+    if (expiresIn) {
+      const seconds = parseDuration(expiresIn, 's');
+      if (!seconds) {
+        setDurationError('Invalid duration format. Use 1h, 2d, 30m etc.');
+        return;
+      }
+      setDurationError('');
+    }
+
     try {
       const settings: ShareSettings = {
         requiresAuth,
-        expiresIn: expiresIn && expiresIn * 3600
+        expiresIn: expiresIn ? Math.floor(parseDuration(expiresIn, 's')!) : undefined
       };
       
       await createShare(snippetId, settings);
@@ -47,7 +59,7 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
       addToast('Share link created', 'success');
       
       setRequiresAuth(false);
-      setExpiresIn(undefined);
+      setExpiresIn('');
     } catch (error) {
       addToast('Failed to create share link', 'error');
     }
@@ -94,6 +106,16 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
     }
   };
 
+  const getRelativeExpiryTime = (expiresAt: string): string => {
+    try {
+      const expiryDate = new Date(expiresAt);
+      return `Expires in ${formatDistanceToNow(expiryDate)}`;
+    } catch (error) {
+      console.error('Error formatting expiry date:', error);
+      return 'Unknown expiry time';
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -121,15 +143,20 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
             </label>
 
             <div>
-              <label className="block text-sm mb-1">Expires in (hours)</label>
+              <label className="block text-sm mb-1">Expires in (e.g. 1h, 2d, 30m)</label>
               <input
-                type="number"
-                value={expiresIn || ''}
-                onChange={e => setExpiresIn(e.target.value ? parseInt(e.target.value) : undefined)}
-                min="1"
+                type="text"
+                value={expiresIn}
+                onChange={e => {
+                  setExpiresIn(e.target.value);
+                  setDurationError('');
+                }}
                 placeholder="Never"
                 className="w-full px-3 py-2 bg-gray-700 rounded-md"
               />
+              {durationError && (
+                <p className="text-red-400 text-sm mt-1">{durationError}</p>
+              )}
             </div>
 
             <button
@@ -157,13 +184,23 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
                     <div className="flex items-center gap-2">
                       <span className="truncate">/{share.id}</span>
                       {share.requires_auth === 1 && (
-                        <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
-                          Auth Required
+                        <span className="text-emerald-400" title="Protected - Authentication required">
+                          <ShieldCheck size={15} className="stroke-[2.5]" />
                         </span>
                       )}
-                      {share.expires_at && (
-                        <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
-                          Expires {new Date(share.expires_at).toLocaleDateString()}
+                      {share.requires_auth === 0 && (
+                        <span className="text-gray-500/70" title="Public access">
+                          <ShieldOff size={15} className="stroke-[2.5]" />
+                        </span>
+                      )}
+                      {share.expired && (
+                        <span className="px-2 py-0.5 bg-red-900/50 text-red-200 border border-red-700/50 rounded text-xs">
+                          Expired
+                        </span>
+                      )}
+                      {share.expires_at && !share.expired && (
+                        <span className="px-2 py-0.5 bg-blue-900/50 text-blue-200 border border-blue-700/50 rounded text-xs">
+                          {getRelativeExpiryTime(share.expires_at)}
                         </span>
                       )}
                     </div>
