@@ -143,6 +143,17 @@ function initializeDatabase() {
 
       CREATE INDEX IF NOT EXISTS idx_categories_snippet_id ON categories(snippet_id);
       CREATE INDEX IF NOT EXISTS idx_fragments_snippet_id ON fragments(snippet_id);
+
+      CREATE TABLE IF NOT EXISTS shared_snippets (
+        id TEXT PRIMARY KEY,
+        snippet_id INTEGER NOT NULL,
+        requires_auth BOOLEAN NOT NULL DEFAULT false,
+        expires_at DATETIME,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+      );
+    
+      CREATE INDEX IF NOT EXISTS idx_shared_snippets_snippet_id ON shared_snippets(snippet_id);
     `);
 
     console.log('Database initialized successfully');

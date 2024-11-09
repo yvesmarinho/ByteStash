@@ -24,3 +24,19 @@ export interface FragmentEditorProps {
   showLineNumbers: boolean;
   dragHandleProps?: any;
 }
+
+export interface ShareSettings {
+  requiresAuth: boolean;
+  expiresIn?: number;
+}
+
+export interface Share {
+  id: string;
+  snippet_id: number;
+  requires_auth: number;
+  view_limit: number | null;
+  view_count: number;
+  expires_at: string;
+  created_at: string;
+  expired: number;
+}

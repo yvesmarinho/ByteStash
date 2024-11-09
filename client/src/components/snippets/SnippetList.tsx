@@ -9,6 +9,7 @@ export interface SnippetListProps {
   onDelete: (id: string) => void;
   onEdit: (snippet: Snippet) => void;
   onCategoryClick: (category: string) => void;
+  onShare: (snippet: Snippet) => void;
   compactView: boolean;
   showCodePreview: boolean;
   previewLines: number;
@@ -24,6 +25,7 @@ const SnippetList: React.FC<SnippetListProps> = ({
   onDelete, 
   onEdit,
   onCategoryClick,
+  onShare,
   compactView, 
   showCodePreview, 
   previewLines,
@@ -53,6 +55,7 @@ const SnippetList: React.FC<SnippetListProps> = ({
           onDelete={onDelete}
           onEdit={onEdit}
           onCategoryClick={onCategoryClick}
+          onShare={onShare}
           compactView={compactView}
           showCodePreview={showCodePreview}
           previewLines={previewLines}

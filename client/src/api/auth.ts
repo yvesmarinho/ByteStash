@@ -1,3 +1,5 @@
+import { basePath } from "./basePath";
+
 interface AuthConfig {
   authRequired: boolean;
 }
@@ -6,7 +8,6 @@ interface LoginResponse {
   token: string;
 }
 
-export const basePath = (window as any).__BASE_PATH__ || '';
 export const AUTH_API_URL = `${basePath}/api/auth`;
 
 interface ApiError extends Error {

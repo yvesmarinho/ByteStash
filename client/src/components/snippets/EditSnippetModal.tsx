@@ -50,7 +50,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
     setFragments([{
       file_name: 'main',
       code: '',
-      language: 'plaintext',
+      language: '',
       position: 0
     }]);
     setCategories([]);
@@ -96,7 +96,7 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
       {
         file_name: `file${current.length + 1}`,
         code: '',
-        language: 'plaintext',
+        language: '',
         position: current.length
       }
     ]);

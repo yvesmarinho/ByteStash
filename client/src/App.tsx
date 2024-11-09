@@ -3,6 +3,8 @@ import SnippetStorage from './components/snippets/SnippetStorage';
 import { ToastProvider } from './components/toast/Toast';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/auth/LoginPage';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import SharedSnippetView from './components/snippets/share/SharedSnippetView';
 
 const AuthenticatedApp: React.FC = () => {
   const { isAuthenticated, isAuthRequired, isLoading } = useAuth();
@@ -24,13 +26,16 @@ const AuthenticatedApp: React.FC = () => {
 
 const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <ToastProvider>
-        <div className="min-h-screen bg-gray-900">
-          <AuthenticatedApp />
-        </div>
-      </ToastProvider>
-    </AuthProvider>
+    <Router basename={window.__BASE_PATH__} future={{ v7_relativeSplatPath: true }}>
+      <AuthProvider>
+        <ToastProvider>
+          <Routes>
+            <Route path="/s/:shareId" element={<SharedSnippetView />} />
+            <Route path="/" element={<AuthenticatedApp />} />
+          </Routes>
+        </ToastProvider>
+      </AuthProvider>
+    </Router>
   );
 };
 
