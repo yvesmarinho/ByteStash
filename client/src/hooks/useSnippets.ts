@@ -18,7 +18,7 @@ export const useSnippets = () => {
     }
   };
   
-  const loadSnippets = useCallback(async () => {
+  const loadSnippets = useCallback(async (force: boolean) => {
     if (!isLoading || hasLoadedRef.current) return;
     
     try {
@@ -29,7 +29,9 @@ export const useSnippets = () => {
       setSnippets(sortedSnippets);
       
       if (!hasLoadedRef.current) {
-        addToast('Snippets loaded successfully', 'success');
+        if (!force) {
+          addToast('Snippets loaded successfully', 'success');
+        }
         hasLoadedRef.current = true;
       }
     } catch (error: any) {
@@ -42,13 +44,13 @@ export const useSnippets = () => {
   }, [isLoading, addToast, logout]);
   
   useEffect(() => {
-    loadSnippets();
+    loadSnippets(false);
   }, [loadSnippets]);
 
   const reloadSnippets = useCallback(() => {
     hasLoadedRef.current = false;
     setIsLoading(true);
-    loadSnippets();
+    loadSnippets(true);
   }, [loadSnippets]);
 
   const addSnippet = async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {

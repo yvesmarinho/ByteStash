@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
-import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode, Share } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode, Share, Users } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { CodeFragment, Snippet } from '../../types/types';
 import { getLanguageLabel } from '../../utils/languageUtils';
 import PreviewCodeBlock from './PreviewCodeBlock';
 import CategoryList from './categories/CategoryList';
+import { getSharesBySnippetId } from '../../api/share';
 
 export interface SnippetCardProps {
   snippet: Snippet;
@@ -40,6 +41,21 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
 }) => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentFragmentIndex, setCurrentFragmentIndex] = useState(0);
+  const [activeShares, setActiveShares] = useState(0);
+
+  useEffect(() => {
+    const loadShareStatus = async () => {
+      try {
+        const shares = await getSharesBySnippetId(snippet.id);
+        const validShares = shares.filter(share => !share.expired);
+        setActiveShares(validShares.length);
+      } catch (error) {
+        console.error('Error loading share status:', error);
+      }
+    };
+
+    loadShareStatus();
+  }, [snippet]);
 
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -111,9 +127,20 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
       >
         <div className="flex justify-between items-start gap-4 mb-3">
           <div className="min-w-0 flex-1">
-            <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate`} title={snippet.title}>
-              {snippet.title}
-            </h3>
+            <div className="flex items-center gap-2">
+              <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate leading-none`} title={snippet.title}>
+                {snippet.title}
+              </h3>
+              {activeShares > 0 && (
+                <div 
+                  className="inline-flex items-center gap-1 px-2 bg-blue-900/40 text-blue-300 rounded text-xs border border-blue-700/30 leading-relaxed"
+                  title={`Shared with ${activeShares} active link${activeShares === 1 ? '' : 's'}`}
+                >
+                  <Users size={12} className="stroke-[2.5]" />
+                  <span>{activeShares}</span>
+                </div>
+              )}
+            </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
               <div className="truncate">{getUniqueLanguages(snippet.fragments)}</div>
               <div className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
