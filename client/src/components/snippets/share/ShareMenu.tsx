@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Share as ShareIcon, Trash2, Link as LinkIcon } from 'lucide-react';
+import { Share as ShareIcon, Trash2, Link as LinkIcon, Check } from 'lucide-react';
 import { Share, ShareSettings } from '../../../types/types';
 import { createShare, getSharesBySnippetId, deleteShare } from '../../../api/share';
 import { useToast } from '../../toast/Toast';
@@ -16,11 +16,13 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
   const [shares, setShares] = useState<Share[]>([]);
   const [requiresAuth, setRequiresAuth] = useState(false);
   const [expiresIn, setExpiresIn] = useState<number>();
+  const [copiedStates, setCopiedStates] = useState<Record<string, boolean>>({});
   const { addToast } = useToast();
   
   useEffect(() => {
     if (isOpen) {
       loadShares();
+      setCopiedStates({});
     }
   }, [isOpen, snippetId]);
 
@@ -61,10 +63,35 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
     }
   };
 
-  const copyShareLink = (shareId: string) => {
+  const copyShareLink = async (shareId: string) => {
     const url = `${window.location.origin}${basePath}/s/${shareId}`;
-    navigator.clipboard.writeText(url);
-    addToast('Share link copied to clipboard', 'success');
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(url);
+      } else {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        textArea.style.top = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        
+        try {
+          document.execCommand('copy');
+        } finally {
+          textArea.remove();
+        }
+      }
+
+      setCopiedStates(prev => ({ ...prev, [shareId]: true }));
+      setTimeout(() => {
+        setCopiedStates(prev => ({ ...prev, [shareId]: false }));
+      }, 2000);
+    } catch (err) {
+      console.error('Failed to copy text: ', err);
+    }
   };
 
   return (
@@ -127,7 +154,7 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
                   className="flex items-center justify-between p-3 bg-gray-700 rounded-md"
                 >
                   <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2">
                       <span className="truncate">/{share.id}</span>
                       {share.requiresAuth && (
                         <span className="px-2 py-0.5 bg-gray-600 rounded text-xs">
@@ -147,7 +174,11 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
                       className="p-2 hover:bg-gray-600 rounded-md transition-colors"
                       title="Copy link"
                     >
-                      <LinkIcon size={16} />
+                      {copiedStates[share.id] ? (
+                        <Check size={16} className="text-green-500" />
+                      ) : (
+                        <LinkIcon size={16} />
+                      )}
                     </button>
                     <button
                       onClick={() => handleDeleteShare(share.id)}
