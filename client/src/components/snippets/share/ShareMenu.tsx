@@ -193,16 +193,23 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
                           <ShieldOff size={15} className="stroke-[2.5]" />
                         </span>
                       )}
-                      {share.expired && (
-                        <span className="px-2 py-0.5 bg-red-900/50 text-red-200 border border-red-700/50 rounded text-xs">
-                          Expired
-                        </span>
-                      )}
-                      {share.expires_at && !share.expired && (
-                        <span className="px-2 py-0.5 bg-blue-900/50 text-blue-200 border border-blue-700/50 rounded text-xs">
-                          {getRelativeExpiryTime(share.expires_at)}
-                        </span>
-                      )}
+                      <div className="flex items-center">
+                        {share.expired === 1 && (
+                          <span className="px-2 py-0.5 bg-red-900/50 text-red-200 border border-red-700/50 rounded text-xs">
+                            Expired
+                          </span>
+                        )}
+                        {share.expires_at && share.expired === 0 && (
+                          <span className="px-2 py-0.5 bg-blue-900/50 text-blue-200 border border-blue-700/50 rounded text-xs">
+                            {getRelativeExpiryTime(share.expires_at)}
+                          </span>
+                        )}
+                        {share.expires_at === null && (
+                          <span className="px-2 py-0.5 bg-blue-900/50 text-blue-200 border border-blue-700/50 rounded text-xs">
+                            Never Expires
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
