@@ -49,7 +49,7 @@ function needsMigration(db) {
   return hasCodeColumn;
 }
 
-async function migrateToFragments(db) {
+async function migrateToV1_4_0(db) {
   console.log('Starting migration to fragments...');
   
   if (!needsMigration(db)) {
@@ -73,6 +73,17 @@ async function migrateToFragments(db) {
         );
 
         CREATE INDEX IF NOT EXISTS idx_fragments_snippet_id ON fragments(snippet_id);
+      
+        CREATE TABLE IF NOT EXISTS shared_snippets (
+          id TEXT PRIMARY KEY,
+          snippet_id INTEGER NOT NULL,
+          requires_auth BOOLEAN NOT NULL DEFAULT false,
+          expires_at DATETIME,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+          FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
+        );
+      
+        CREATE INDEX IF NOT EXISTS idx_shared_snippets_snippet_id ON shared_snippets(snippet_id);
       `);
 
       const snippets = db.prepare('SELECT id, code, language FROM snippets').all();
@@ -176,7 +187,7 @@ function initializeDatabase() {
         console.log('Database needs migration, creating backup...');
         if (backupDatabase(dbPath)) {
           console.log('Starting migration process...');
-          migrateToFragments(db);
+          migrateToV1_4_0(db);
         }
       } else {
         console.log('Database schema is up to date');
@@ -200,6 +211,6 @@ function getDb() {
 
 module.exports = {
   initializeDatabase,
-  migrateToFragments,
+  migrateToV1_4_0,
   getDb
 };
