@@ -125,7 +125,6 @@ function createInitialSchema(db) {
     CREATE TABLE IF NOT EXISTS snippets (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       title TEXT NOT NULL,
-      language TEXT NOT NULL,
       description TEXT,
       updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
@@ -142,6 +141,7 @@ function createInitialSchema(db) {
       snippet_id INTEGER NOT NULL,
       file_name TEXT NOT NULL,
       code TEXT NOT NULL,
+      language TEXT NOT NULL,
       position INTEGER NOT NULL,
       FOREIGN KEY (snippet_id) REFERENCES snippets(id) ON DELETE CASCADE
     );

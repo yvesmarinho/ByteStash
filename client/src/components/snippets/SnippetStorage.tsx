@@ -13,7 +13,7 @@ import { Snippet } from '../../types/types';
 import { initializeMonaco } from '../../utils/languageUtils';
 import ShareMenu from './share/ShareMenu';
 
-const APP_VERSION = "1.5.0";
+const APP_VERSION = "1.4.1";
 
 const SnippetStorage: React.FC = () => {
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet, reloadSnippets } = useSnippets();
