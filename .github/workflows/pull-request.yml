@@ -22,8 +22,8 @@ jobs:
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: jordan-dalby
+          password: ${{ secrets.DOCKER_PAT }}
 
       - name: Set Docker tag with PR number
         id: docker_tag
