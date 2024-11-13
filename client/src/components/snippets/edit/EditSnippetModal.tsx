@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import 'prismjs';
 import 'prismjs/components/prism-markup-templating.js';
 import 'prismjs/themes/prism.css';
 import { Plus } from 'lucide-react';
 import { CodeFragment, Snippet } from '../../../types/snippets';
-import { useSnippets } from '../../../hooks/useSnippets';
 import Modal from '../../common/modals/Modal';
 import CategoryList from '../../categories/CategoryList';
 import CategorySuggestions from '../../categories/CategorySuggestions';
@@ -16,6 +15,7 @@ export interface EditSnippetModalProps {
   onSubmit: (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => void;
   snippetToEdit: Snippet | null;
   showLineNumbers: boolean;
+  allCategories: string[];
 }
 
 const EditSnippetModal: React.FC<EditSnippetModalProps> = ({ 
@@ -23,9 +23,9 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
   onClose, 
   onSubmit, 
   snippetToEdit,
-  showLineNumbers = true
+  showLineNumbers,
+  allCategories
 }) => {
-  const { snippets, reloadSnippets } = useSnippets();
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [fragments, setFragments] = useState<CodeFragment[]>([]);
@@ -33,16 +33,6 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
   const [categoryInput, setCategoryInput] = useState('');
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const allCategories = useMemo(() => {
-    const uniqueCategories = new Set<string>();
-    snippets.forEach(snippet => {
-      snippet.categories?.forEach(category => {
-        uniqueCategories.add(category);
-      });
-    });
-    return Array.from(uniqueCategories).sort();
-  }, [snippets]);
 
   const resetForm = () => {
     setTitle('');
@@ -156,7 +146,6 @@ const EditSnippetModal: React.FC<EditSnippetModalProps> = ({
 
     try {
       await onSubmit(snippetData);
-      reloadSnippets();
       onClose();
     } catch (error) {
       setError('An error occurred while saving the snippet. Please try again.');

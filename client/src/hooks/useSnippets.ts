@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import { fetchSnippets, createSnippet, editSnippet, deleteSnippet } from '../utils/api/snippets';
 import { Snippet } from '../types/snippets';
 import { useToast } from './useToast';
@@ -11,74 +11,61 @@ export const useSnippets = () => {
   const { logout } = useAuth();
   const hasLoadedRef = useRef(false);
   const loadingPromiseRef = useRef<Promise<void> | null>(null);
-  
-  const handleAuthError = (error: any) => {
+  const mountedRef = useRef(false);
+
+  const handleAuthError = useCallback((error: any) => {
     if (error.status === 401 || error.status === 403) {
       logout();
       addToast('Session expired. Please login again.', 'error');
     }
-  };
-  
-  const loadSnippets = useCallback(async (force: boolean) => {
-    console.log('loadSnippets called with force:', force);
-    console.log('Current state - isLoading:', isLoading, 'hasLoadedRef:', hasLoadedRef.current);
+  }, [logout, addToast]);
 
-    if (loadingPromiseRef.current) {
-      console.log('Waiting for existing load to complete');
-      await loadingPromiseRef.current;
+  const loadSnippets = useCallback(async (force: boolean) => {
+    if ((!isLoading && !force) || (hasLoadedRef.current && !force)) {
       return;
     }
 
-    if (!isLoading || hasLoadedRef.current) {
-      console.log('loadSnippets early return - isLoading:', isLoading, 'hasLoadedRef:', hasLoadedRef.current);
+    if (loadingPromiseRef.current) {
+      await loadingPromiseRef.current;
       return;
     }
 
     const loadPromise = (async () => {
       try {
-        console.log('Fetching snippets...');
         const fetchedSnippets = await fetchSnippets();
-        const sortedSnippets = fetchedSnippets.sort((a, b) => 
-          new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-        );
-        setSnippets(sortedSnippets);
         
-        if (!hasLoadedRef.current) {
-          if (!force) {
-            console.log('Adding success toast');
+        if (mountedRef.current) {
+          const sortedSnippets = fetchedSnippets.sort((a, b) => 
+            new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          );
+          setSnippets(sortedSnippets);
+          
+          if (!hasLoadedRef.current && !force) {
             addToast('Snippets loaded successfully', 'success');
           }
           hasLoadedRef.current = true;
         }
       } catch (error: any) {
         console.error('Failed to fetch snippets:', error);
-        handleAuthError(error);
-        if (!hasLoadedRef.current) {
-          addToast('Failed to load snippets. Please try again.', 'error');
+        if (mountedRef.current) {
+          handleAuthError(error);
+          if (!hasLoadedRef.current) {
+            addToast('Failed to load snippets. Please try again.', 'error');
+          }
         }
       } finally {
-        setIsLoading(false);
+        if (mountedRef.current) {
+          setIsLoading(false);
+        }
         loadingPromiseRef.current = null;
       }
     })();
-  
+
     loadingPromiseRef.current = loadPromise;
     await loadPromise;
-  }, [addToast, logout]);
+  }, [addToast, handleAuthError, isLoading]);
 
-  useEffect(() => {
-    console.log('useEffect triggered for loadSnippets');
-    loadSnippets(false);
-  }, [loadSnippets]);
-
-  const reloadSnippets = useCallback(() => {
-    console.log('reloadSnippets called');
-    hasLoadedRef.current = false;
-    setIsLoading(true);
-    loadSnippets(true);
-  }, [loadSnippets]);
-
-  const addSnippet = async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
+  const addSnippet = useCallback(async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
     try {
       const newSnippet = await createSnippet(snippetData);
       setSnippets(prevSnippets => [...prevSnippets, newSnippet]);
@@ -90,9 +77,9 @@ export const useSnippets = () => {
       addToast('Failed to create snippet', 'error');
       throw error;
     }
-  };
+  }, [addToast, handleAuthError]);
 
-  const updateSnippet = async (id: string, snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
+  const updateSnippet = useCallback(async (id: string, snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
     try {
       const updatedSnippet = await editSnippet(id, snippetData);
       setSnippets(prevSnippets =>
@@ -106,15 +93,12 @@ export const useSnippets = () => {
       addToast('Failed to update snippet', 'error');
       throw error;
     }
-  };
+  }, [addToast, handleAuthError]);
 
-  const removeSnippet = async (id: string) => {
+  const removeSnippet = useCallback(async (id: string) => {
     try {
       await deleteSnippet(id);
-      setSnippets(prevSnippets => {
-        const updatedSnippets = prevSnippets.filter(snippet => snippet.id !== id);
-        return updatedSnippets;
-      });
+      setSnippets(prevSnippets => prevSnippets.filter(snippet => snippet.id !== id));
       addToast('Snippet deleted successfully', 'success');
     } catch (error: any) {
       console.error('Failed to delete snippet:', error);
@@ -122,14 +106,39 @@ export const useSnippets = () => {
       addToast('Failed to delete snippet. Please try again.', 'error');
       throw error;
     }
-  };
+  }, [addToast, handleAuthError]);
 
-  return {
+  const reloadSnippets = useCallback(() => {
+    hasLoadedRef.current = false;
+    setIsLoading(true);
+    loadSnippets(true);
+  }, [loadSnippets]);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    
+    if (!hasLoadedRef.current) {
+      loadSnippets(false);
+    }
+
+    return () => {
+      mountedRef.current = false;
+    };
+  }, [loadSnippets]);
+
+  return useMemo(() => ({
     snippets,
     isLoading,
     addSnippet,
     updateSnippet,
     removeSnippet,
     reloadSnippets
-  };
+  }), [
+    snippets,
+    isLoading,
+    addSnippet,
+    updateSnippet,
+    removeSnippet,
+    reloadSnippets
+  ]);
 };

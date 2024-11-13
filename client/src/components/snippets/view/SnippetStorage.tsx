@@ -15,7 +15,6 @@ import SnippetModal from './SnippetModal';
 const APP_VERSION = "1.4.1";
 
 const SnippetStorage: React.FC = () => {
-  console.log('SnippetStorage rendered');
   const { snippets, isLoading, addSnippet, updateSnippet, removeSnippet, reloadSnippets } = useSnippets();
   const { logout, isAuthRequired } = useAuth();
   const { 
@@ -135,21 +134,17 @@ const SnippetStorage: React.FC = () => {
   const handleSnippetSubmit = useCallback(async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
     try {
       if (snippetToEdit) {
-        const updatedSnippet = await updateSnippet(snippetToEdit.id, snippetData);
-        await reloadSnippets();
-        if (selectedSnippet?.id === snippetToEdit.id) {
-          setSelectedSnippet(updatedSnippet);
-        }
+        await updateSnippet(snippetToEdit.id, snippetData);
       } else {
         await addSnippet(snippetData);
-        await reloadSnippets();
       }
+      await reloadSnippets();
       closeEditSnippetModal();
     } catch (error) {
       console.error('Error saving snippet:', error);
       throw error;
     }
-  }, [snippetToEdit, updateSnippet, addSnippet, closeEditSnippetModal, selectedSnippet, reloadSnippets]);
+  }, [snippetToEdit, updateSnippet, addSnippet, closeEditSnippetModal, reloadSnippets]);
 
   const handleDeleteSnippet = useCallback(async (id: string) => {
     try {
@@ -247,6 +242,7 @@ const SnippetStorage: React.FC = () => {
         onSubmit={handleSnippetSubmit}
         snippetToEdit={snippetToEdit}
         showLineNumbers={showLineNumbers}
+        allCategories={allCategories}
       />
 
       <SettingsModal
