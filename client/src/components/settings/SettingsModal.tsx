@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import Modal from '../common/Modal';
 import { BookOpen, Clock } from 'lucide-react';
-import ChangelogModal from '../changelog/ChangelogModal';
+import Modal from '../common/modals/Modal';
+import ChangelogModal from '../common/modals/ChangelogModal';
 
 const GITHUB_URL = "https://github.com/jordan-dalby/ByteStash";
 const DOCKER_URL = "https://github.com/jordan-dalby/ByteStash/pkgs/container/bytestash";
@@ -208,7 +208,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, settings
           </button>
         </div>
       </div>
-      <ChangelogModal 
+      <ChangelogModal
         isOpen={showChangelog}
         onClose={() => setShowChangelog(false)}
       />

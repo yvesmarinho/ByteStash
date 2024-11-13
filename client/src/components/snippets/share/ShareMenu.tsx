@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Share as ShareIcon, Trash2, Link as LinkIcon, Check, ShieldCheck, ShieldOff } from 'lucide-react';
-import { Share, ShareSettings } from '../../../types/types';
-import { createShare, getSharesBySnippetId, deleteShare } from '../../../api/share';
-import { useToast } from '../../toast/Toast';
-import Modal from '../../common/Modal';
-import { basePath } from '../../../api/basePath';
 import parseDuration from 'parse-duration';
 import { formatDistanceToNow } from 'date-fns';
+import { Share, ShareSettings } from '../../../types/snippets';
+import { useToast } from '../../../hooks/useToast';
+import { createShare, deleteShare, getSharesBySnippetId } from '../../../utils/api/share';
+import { basePath } from '../../../utils/api/basePath';
+import Modal from '../../common/modals/Modal';
 
 interface ShareMenuProps {
   snippetId: string;
@@ -14,7 +14,7 @@ interface ShareMenuProps {
   onClose: () => void;
 }
 
-const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => {
+export const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => {
   const [shares, setShares] = useState<Share[]>([]);
   const [requiresAuth, setRequiresAuth] = useState(false);
   const [expiresIn, setExpiresIn] = useState<string>('');
@@ -241,5 +241,3 @@ const ShareMenu: React.FC<ShareMenuProps> = ({ snippetId, isOpen, onClose }) => 
     </Modal>
   );
 };
-
-export default ShareMenu;
