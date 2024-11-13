@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode, Share, Users } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Pencil, Trash2, Clock, ChevronLeft, ChevronRight, FileCode, Share, Users, MoreVertical, ExternalLink } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import DeleteConfirmationModal from './DeleteConfirmationModal';
 import { CodeFragment, Snippet } from '../../types/types';
@@ -42,6 +42,9 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [currentFragmentIndex, setCurrentFragmentIndex] = useState(0);
   const [activeShares, setActiveShares] = useState(0);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const loadShareStatus = async () => {
@@ -57,14 +60,38 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
     loadShareStatus();
   }, [snippet]);
 
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuRef.current && 
+        !menuRef.current.contains(event.target as Node) &&
+        buttonRef.current && 
+        !buttonRef.current.contains(event.target as Node)
+      ) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleDeleteClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsMenuOpen(false);
     setIsDeleteModalOpen(true);
   };
 
   const handleEditClick = (e: React.MouseEvent) => {
     e.stopPropagation();
+    setIsMenuOpen(false);
     onEdit(snippet);
+  };
+
+  const handleShareClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    onShare(snippet);
   };
 
   const handleDeleteConfirm = () => {
@@ -90,6 +117,17 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
     setCurrentFragmentIndex(prev => 
       prev < snippet.fragments.length - 1 ? prev + 1 : 0
     );
+  };
+
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleOpenInNewTab = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsMenuOpen(false);
+    window.open(`/snippets/${snippet.id}`, '_blank');
   };
 
   const getRelativeTime = (updatedAt: string): string => {
@@ -128,9 +166,6 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
         <div className="flex justify-between items-start gap-4 mb-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2">
-              <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate leading-none`} title={snippet.title}>
-                {snippet.title}
-              </h3>
               {activeShares > 0 && (
                 <div 
                   className="inline-flex items-center gap-1 px-2 bg-blue-900/40 text-blue-300 rounded text-xs border border-blue-700/30 leading-relaxed"
@@ -140,6 +175,9 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
                   <span>{activeShares}</span>
                 </div>
               )}
+              <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate leading-none`} title={snippet.title}>
+                {snippet.title}
+              </h3>
             </div>
             <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
               <div className="truncate">{getUniqueLanguages(snippet.fragments)}</div>
@@ -150,31 +188,50 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
             </div>
           </div>
 
-          <div className="flex items-start gap-1.5">
+          <div className="relative">
             <button
-              onClick={(e) => {
-                e.stopPropagation();
-                onShare(snippet);
-              }}
+              ref={buttonRef}
+              onClick={toggleMenu}
               className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-              title="Share snippet"
             >
-              <Share size={16} className="text-gray-400 hover:text-blue-500" />
+              <MoreVertical size={16} className="text-gray-400" />
             </button>
-            <button
-              onClick={handleEditClick}
-              className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-              title="Edit snippet"
-            >
-              <Pencil size={16} className="text-gray-400 hover:text-blue-500" />
-            </button>
-            <button
-              onClick={handleDeleteClick}
-              className="p-1.5 bg-gray-700 rounded-md hover:bg-gray-600 transition-colors opacity-0 group-hover:opacity-100"
-              title="Delete snippet"
-            >
-              <Trash2 size={16} className="text-gray-400 hover:text-red-500" />
-            </button>
+
+            {isMenuOpen && (
+              <div 
+                ref={menuRef}
+                className="absolute right-0 top-8 w-48 bg-gray-800 rounded-md shadow-lg border border-gray-700 py-1 z-50"
+              >
+                <button
+                  onClick={handleOpenInNewTab}
+                  className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <ExternalLink size={16} className="text-gray-400" />
+                  Open in new tab
+                </button>
+                <button
+                  onClick={handleShareClick}
+                  className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <Share size={16} className="text-gray-400" />
+                  Share
+                </button>
+                <button
+                  onClick={handleEditClick}
+                  className="w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <Pencil size={16} className="text-gray-400" />
+                  Edit
+                </button>
+                <button
+                  onClick={handleDeleteClick}
+                  className="w-full px-4 py-2 text-sm text-red-500 hover:bg-gray-700 flex items-center gap-2"
+                >
+                  <Trash2 size={16} />
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

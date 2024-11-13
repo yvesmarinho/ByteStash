@@ -226,6 +226,17 @@ class SnippetRepository {
       throw error;
     }
   }
+
+  findById(id) {
+    this.#initializeStatements();
+    try {
+      const snippet = this.selectByIdStmt.get(id);
+      return this.#processSnippet(snippet);
+    } catch (error) {
+      console.error('Error in findById:', error);
+      throw error;
+    }
+  }
 }
 
 module.exports = new SnippetRepository();
