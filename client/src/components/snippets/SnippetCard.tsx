@@ -175,7 +175,7 @@ const SnippetCard: React.FC<SnippetCardProps> = ({
                   <span>{activeShares}</span>
                 </div>
               )}
-              <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate leading-none`} title={snippet.title}>
+              <h3 className={`${compactView ? 'text-lg' : 'text-xl'} font-bold text-gray-200 truncate leading-normal`} title={snippet.title}>
                 {snippet.title}
               </h3>
             </div>
