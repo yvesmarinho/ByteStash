@@ -52,6 +52,19 @@ class SnippetService {
       throw error;
     }
   }
+
+  async findById(id) {
+    try {
+      console.log('Service: Getting snippet:', id);
+      const result = await snippetRepository.findById(id);
+      console.log('Service: Update operation result:', result ? 'Success' : 'Not Found');
+      return result;
+    } catch (error) {
+      console.error('Service Error - findById:', error);
+      console.error('Error stack:', error.stack);
+      throw error;
+    }
+  }
 }
 
 module.exports = new SnippetService();

@@ -81,4 +81,26 @@ router.put('/:id', async (req, res) => {
   }
 });
 
+router.get('/:id', async (req, res) => {
+  try {
+    console.log('Fetching snippet:', req.params.id);
+    const snippet = await snippetService.findById(req.params.id);
+    if (!snippet) {
+      console.log('Snippet not found:', req.params.id);
+      res.status(404).json({ error: 'Snippet not found' });
+    } else {
+      console.log('Successfully fetched snippet:', req.params.id);
+      res.json(snippet);
+    }
+  } catch (error) {
+    console.error('Error in GET /snippets/:id:', error);
+    console.error('Error stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Internal server error',
+      details: error.message,
+      stack: error.stack 
+    });
+  }
+});
+
 module.exports = router;

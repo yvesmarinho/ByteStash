@@ -1,34 +1,32 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { getSharedSnippet } from '../../../api/share';
-import { Snippet } from '../../../types/types';
-import { useAuth } from '../../../context/AuthContext';
-import LoginPage from '../../auth/LoginPage';
-import FullCodeView from '../FullCodeView';
+import { getSnippetById } from '../../api/snippets';
+import { Snippet } from '../../types/types';
+import FullCodeView from './FullCodeView';
+import { useAuth } from '../../context/AuthContext';
+import LoginPage from '../auth/LoginPage';
 
-const SharedSnippetView: React.FC = () => {
-  const { shareId } = useParams<{ shareId: string }>();
+const SnippetPage: React.FC = () => {
+  const { snippetId } = useParams<{ snippetId: string }>();
   const [snippet, setSnippet] = useState<Snippet | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [errorCode, setErrorCode] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
-    loadSharedSnippet();
-  }, [shareId, isAuthenticated]);
+    loadSnippet();
+  }, [snippetId, isAuthenticated]);
 
-  const loadSharedSnippet = async () => {
-    if (!shareId) return;
+  const loadSnippet = async () => {
+    if (!snippetId) return;
   
     try {
       setIsLoading(true);
-      const shared = await getSharedSnippet(shareId);
-      setSnippet(shared);
+      const data = await getSnippetById(snippetId);
+      setSnippet(data);
       setError(null);
     } catch (err: any) {
-      setErrorCode(err.errorCode);
-      setError(err.error);
+      setError(err.message || 'Failed to load snippet');
     } finally {
       setIsLoading(false);
     }
@@ -42,16 +40,8 @@ const SharedSnippetView: React.FC = () => {
     );
   }
 
-  if (errorCode === 401 && !isAuthenticated) {
+  if (!isAuthenticated) {
     return <LoginPage />;
-  }
-
-  if (errorCode === 410) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-white text-xl">Shared snippet has expired</div>
-      </div>
-    );
   }
 
   if (error) {
@@ -79,4 +69,4 @@ const SharedSnippetView: React.FC = () => {
   );
 };
 
-export default SharedSnippetView;
+export default SnippetPage;

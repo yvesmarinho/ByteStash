@@ -5,6 +5,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 import LoginPage from './components/auth/LoginPage';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import SharedSnippetView from './components/snippets/share/SharedSnippetView';
+import SnippetPage from './components/snippets/SnippetPage';
 
 const AuthenticatedApp: React.FC = () => {
   const { isAuthenticated, isAuthRequired, isLoading } = useAuth();
@@ -31,6 +32,7 @@ const App: React.FC = () => {
         <ToastProvider>
           <Routes>
             <Route path="/s/:shareId" element={<SharedSnippetView />} />
+            <Route path="/snippets/:snippetId" element={<SnippetPage />} />
             <Route path="/" element={<AuthenticatedApp />} />
           </Routes>
         </ToastProvider>
