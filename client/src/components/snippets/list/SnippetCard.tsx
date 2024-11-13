@@ -6,6 +6,8 @@ import { ConfirmationModal } from '../../common/modals/ConfirmationModal';
 import { Snippet } from '../../../types/snippets';
 import CategoryList from '../../categories/CategoryList';
 import { PreviewCodeBlock } from '../../editor/PreviewCodeBlock';
+import Linkify from 'linkify-react';
+import { linkifyOptions } from '../../../constants/linkify';
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -110,7 +112,9 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 
         {!compactView && (
           <p className="text-sm text-gray-300 mb-3 line-clamp-1">
-            {snippet.description || 'No description available'}
+            <Linkify options={linkifyOptions} >
+              {snippet.description || 'No description available'}
+            </Linkify>
           </p>
         )}
 
