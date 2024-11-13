@@ -46,6 +46,15 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
     <div className="relative select-none" style={{ height: visibleHeight }}>
       <style>
         {`
+          .markdown-content-preview {
+            color: white;
+            background-color: #1E1E1E;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            position: relative;
+            max-height: ${visibleHeight}px;
+            overflow: hidden;
+          }
           .token-line:nth-child(n+${previewLines + 1}) {
             visibility: hidden;
           }
@@ -57,8 +66,8 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
 
       <div className="relative">
         {isMarkdown ? (
-          <div className="markdown-content-preview">
-            <ReactMarkdown className="text-sm text-gray-300 markdown">
+          <div className="markdown-content markdown-content-preview bg-gray-800 rounded-lg overflow-hidden">
+            <ReactMarkdown className="markdown prose prose-invert max-w-none">
               {truncatedCode}
             </ReactMarkdown>
           </div>

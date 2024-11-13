@@ -1,84 +1,58 @@
-.markdown {
-  color: theme('colors.gray.100');
-  line-height: 1.6;
+.markdown-content {
+  color: white;
+  background-color: #1E1E1E;
+  padding: 1rem;
+  border-radius: 0.5rem;
+  position: relative;
 }
 
-.markdown h1 {
-  font-size: 2em;
-  margin-top: 0.67em;
-  margin-bottom: 0.67em;
-  font-weight: bold;
+.markdown-content > :first-child {
+  margin-top: 0 !important;
 }
 
-.markdown h2 {
-  font-size: 1.5em;
-  margin-top: 0.83em;
-  margin-bottom: 0.83em;
-  font-weight: bold;
+.markdown-content > :last-child {
+  margin-bottom: 0 !important;
 }
 
-.markdown h3 {
-  font-size: 1.17em;
-  margin-top: 1em;
-  margin-bottom: 1em;
-  font-weight: bold;
+.markdown-content blockquote {
+  border-left: 3px solid #4a5568;
+  padding-left: 1rem;
+  margin: 1rem 0;
+  color: #a0aec0;
 }
 
-.markdown p {
-  margin-top: 1em;
-  margin-bottom: 1em;
-}
-
-.markdown ul {
-  list-style-type: disc;
-  margin-left: 2em;
-}
-
-.markdown ol {
-  list-style-type: decimal;
-  margin-left: 2em;
-}
-
-.markdown code {
-  background-color: theme('colors.gray.800');
-  padding: 0.2em 0.4em;
-  border-radius: 0.25em;
-  font-family: theme('fontFamily.mono');
-}
-
-.markdown pre {
-  background-color: theme('colors.gray.800');
-  padding: 1em;
-  border-radius: 0.5em;
-  overflow-x: auto;
-  margin: 1em 0;
-}
-
-.markdown pre code {
-  background-color: transparent;
-  padding: 0;
-  border-radius: 0;
-}
-
-.markdown blockquote {
-  border-left: 4px solid theme('colors.gray.600');
-  padding-left: 1em;
-  margin: 1em 0;
-  color: theme('colors.gray.400');
-}
-
-.markdown table {
+.markdown-content table {
   width: 100%;
   border-collapse: collapse;
-  margin: 1em 0;
+  margin: 1rem 0;
 }
 
-.markdown th,
-.markdown td {
-  border: 1px solid theme('colors.gray.600');
-  padding: 0.5em;
+.markdown-content th,
+.markdown-content td {
+  border: 1px solid #4a5568;
+  padding: 0.5rem;
+  text-align: left;
 }
 
-.markdown th {
-  background-color: theme('colors.gray.800');
+.markdown-content th {
+  background-color: #2d3748;
+}
+
+.markdown-content hr {
+  border: 0;
+  border-top: 1px solid #4a5568;
+  margin: 1rem 0;
+}
+
+.markdown.prose > :first-child {
+  margin-top: 0 !important;
+}
+
+.markdown.prose > * {
+  margin-top: 1rem !important;
+  margin-bottom: 1rem !important;
+}
+
+.markdown.prose > :last-child {
+  margin-bottom: 0 !important;
 }
