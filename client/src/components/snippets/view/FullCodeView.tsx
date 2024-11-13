@@ -5,8 +5,11 @@ import { Snippet } from '../../../types/snippets';
 import CategoryList from '../../categories/CategoryList';
 import { getLanguageLabel } from '../../../utils/language/languageUtils';
 import { FullCodeBlock } from '../../editor/FullCodeBlock';
+import Linkify from 'linkify-react';
+import { linkifyOptions } from '../../../constants/linkify';
 
 interface FullCodeViewProps {
+  showTitle?: boolean;
   snippet: Snippet;
   onCategoryClick?: (category: string) => void;
   showLineNumbers?: boolean;
@@ -14,6 +17,7 @@ interface FullCodeViewProps {
 }
 
 export const FullCodeView: React.FC<FullCodeViewProps> = ({
+  showTitle = true,
   snippet,
   onCategoryClick,
   showLineNumbers = true,
@@ -27,8 +31,14 @@ export const FullCodeView: React.FC<FullCodeViewProps> = ({
   return (
     <div className={className}>
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-4">{snippet.title}</h1>
-        <p className="text-gray-300 mb-4">{snippet.description}</p>
+        {showTitle && (
+          <h1 className="text-3xl font-bold mb-4">{snippet.title}</h1>
+        )}
+        <p className="text-gray-300 mb-4">
+          <Linkify options={linkifyOptions}>
+            {snippet.description || 'No description available'}
+          </Linkify>
+        </p>
         
         <div className="flex items-center gap-4 text-sm text-gray-400">
           <div className="flex items-center gap-1">
@@ -37,15 +47,13 @@ export const FullCodeView: React.FC<FullCodeViewProps> = ({
           </div>
         </div>
 
-        {snippet.categories?.length > 0 && (
-          <CategoryList
-            categories={snippet.categories}
-            onCategoryClick={handleCategoryClick}
-            className="mt-4"
-            variant="clickable"
-            showAll={true}
-          />
-        )}
+        <CategoryList
+          categories={snippet.categories}
+          onCategoryClick={handleCategoryClick}
+          className="mt-4"
+          variant="clickable"
+          showAll={true}
+        />
       </div>
 
       <div className="space-y-6">
