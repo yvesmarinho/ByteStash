@@ -1,1 +1,0 @@
-export const basePath = (window as any).__BASE_PATH__ || '';
