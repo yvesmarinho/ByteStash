@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { Clock, Users, FileCode, ChevronLeft, ChevronRight } from 'lucide-react';
-import { dateUtils } from '../../../utils/helpers/dateUtils';
-import { SnippetCardMenu } from './SnippetCardMenu';
+import SnippetCardMenu from './SnippetCardMenu';
 import { ConfirmationModal } from '../../common/modals/ConfirmationModal';
 import { Snippet } from '../../../types/snippets';
 import CategoryList from '../../categories/CategoryList';
 import { PreviewCodeBlock } from '../../editor/PreviewCodeBlock';
 import Linkify from 'linkify-react';
 import { linkifyOptions } from '../../../constants/linkify';
+import { formatDistanceToNow } from 'date-fns';
 
 interface SnippetCardProps {
   snippet: Snippet;
@@ -42,6 +42,16 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
 }) => {
   const [currentFragmentIndex, setCurrentFragmentIndex] = useState(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+
+  const getRelativeUpdateTime = (updatedAt: string): string => {
+    try {
+      const updateDate = new Date(updatedAt);
+      return `Updated ${formatDistanceToNow(updateDate)} ago`;
+    } catch (error) {
+      console.error('Error formatting update date:', error);
+      return 'Unknown update time';
+    }
+  };
 
   const handleDeleteConfirm = () => {
     onDelete(snippet.id);
@@ -91,7 +101,7 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
             <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
               <div className="flex items-center gap-1 text-xs text-gray-500 whitespace-nowrap">
                 <Clock size={12} />
-                <span>Updated {dateUtils.formatRelativeTime(snippet.updated_at)}</span>
+                <span>{getRelativeUpdateTime(snippet.updated_at)}</span>
               </div>
               {(snippet.share_count || 0) > 0 && (
                 <div className="flex items-center gap-1 text-xs text-blue-400">
@@ -102,12 +112,14 @@ export const SnippetCard: React.FC<SnippetCardProps> = ({
             </div>
           </div>
 
-          <SnippetCardMenu
-            onEdit={() => onEdit(snippet)}
-            onDelete={() => setIsDeleteModalOpen(true)}
-            onShare={() => onShare(snippet)}
-            onOpenInNewTab={handleOpenInNewTab}
-          />
+          <div className="opacity-0 group-hover:opacity-100 transition-opacity">
+            <SnippetCardMenu
+              onEdit={() => onEdit(snippet)}
+              onDelete={() => setIsDeleteModalOpen(true)}
+              onShare={() => onShare(snippet)}
+              onOpenInNewTab={handleOpenInNewTab}
+            />
+          </div>
         </div>
 
         {!compactView && (
