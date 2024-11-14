@@ -271,7 +271,7 @@ const SnippetStorage: React.FC = () => {
           showLineNumbers 
         }}
         onSettingsChange={updateSettings}
-        snippets={snippets}
+        snippets={filteredSnippets}
         addSnippet={addSnippet}
         reloadSnippets={reloadSnippets}
       />
