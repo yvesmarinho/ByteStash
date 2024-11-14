@@ -30,18 +30,18 @@ export const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={title}>
-      <div className="p-6">
-        <p className="text-gray-300 mb-6">{message}</p>
-        <div className="flex justify-end space-x-4">
+      <div className="px-0.5 pt-1 pb-3">
+        <p className="text-gray-300 mb-4">{message}</p>
+        <div className="flex justify-end gap-2">
           <button
             onClick={onClose}
-            className="px-4 py-2 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
+            className="px-3 py-1.5 bg-gray-700 text-white rounded-md hover:bg-gray-600 transition-colors"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
-            className={`px-4 py-2 text-white rounded-md transition-colors ${variantClasses[variant]}`}
+            className={`px-3 py-1.5 text-white rounded-md transition-colors ${variantClasses[variant]}`}
           >
             {confirmLabel}
           </button>
