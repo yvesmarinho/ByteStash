@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import { LogOut } from 'lucide-react';
+import { Loader2, LogOut } from 'lucide-react';
 import { useAuth } from '../../../hooks/useAuth';
 import { useSnippets } from '../../../hooks/useSnippets';
 import { useSettings } from '../../../hooks/useSettings';
@@ -11,6 +11,7 @@ import EditSnippetModal from '../edit/EditSnippetModal';
 import SettingsModal from '../../settings/SettingsModal';
 import { ShareMenu } from '../share/ShareMenu';
 import SnippetModal from './SnippetModal';
+import { PageContainer } from '../../common/layout/PageContainer';
 
 const APP_VERSION = "1.4.1";
 
@@ -158,7 +159,19 @@ const SnippetStorage: React.FC = () => {
   }, [removeSnippet, selectedSnippet, closeSnippet]);
 
   if (isLoading) {
-    return <div className="text-center py-12">Loading snippets...</div>;
+    return (
+      <PageContainer>
+        <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center justify-center">
+          <div className="relative">
+            <h1 className="text-4xl font-bold mb-4">ByteStash</h1>
+            <div className="flex items-center justify-center gap-3">
+              <Loader2 className="w-5 h-5 text-gray-400 animate-spin" />
+              <span className="text-gray-400">Loading snippets...</span>
+            </div>
+          </div>
+        </div>
+      </PageContainer>
+    );
   }
 
   return (
@@ -258,6 +271,9 @@ const SnippetStorage: React.FC = () => {
           showLineNumbers 
         }}
         onSettingsChange={updateSettings}
+        snippets={filteredSnippets}
+        addSnippet={addSnippet}
+        reloadSnippets={reloadSnippets}
       />
 
       {snippetToShare && (

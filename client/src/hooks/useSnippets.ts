@@ -65,11 +65,13 @@ export const useSnippets = () => {
     await loadPromise;
   }, [addToast, handleAuthError, isLoading]);
 
-  const addSnippet = useCallback(async (snippetData: Omit<Snippet, 'id' | 'updated_at'>) => {
+  const addSnippet = useCallback(async (snippetData: Omit<Snippet, 'id' | 'updated_at'>, toast: boolean = true) => {
     try {
       const newSnippet = await createSnippet(snippetData);
       setSnippets(prevSnippets => [...prevSnippets, newSnippet]);
-      addToast('New snippet created successfully', 'success');
+      if (toast) {
+        addToast('New snippet created successfully', 'success');
+      }
       return newSnippet;
     } catch (error: any) {
       console.error('Error creating snippet:', error);
