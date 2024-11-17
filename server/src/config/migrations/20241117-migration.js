@@ -64,14 +64,14 @@ async function up_v1_5_0(db) {
 
   try {
     db.exec(`
-      CREATE TABLE users (
+      CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT UNIQUE NOT NULL,
         password_hash TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );
 
-      CREATE INDEX idx_users_username ON users(username);
+      CREATE INDEX IF NOT EXISTS idx_users_username ON users(username);
     `);
 
     db.exec(`
