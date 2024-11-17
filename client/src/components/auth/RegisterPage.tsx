@@ -1,32 +1,53 @@
 import React, { useState } from 'react';
-import { Link, Navigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { register } from '../../utils/api/auth';
 import { PageContainer } from '../common/layout/PageContainer';
-import { login as loginApi } from '../../utils/api/auth';
 
-export const LoginPage: React.FC = () => {
+export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated, authConfig } = useAuth();
+  const { login, authConfig } = useAuth();
 
-  if (isAuthenticated) {
-    return <Navigate to="/" replace />;
+  if (!authConfig?.allowNewAccounts) {
+    return (
+      <PageContainer className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-4">Registration Disabled</h2>
+          <p className="text-gray-400 mb-4">New account registration is currently disabled.</p>
+          <Link 
+            to="/login" 
+            className="text-blue-400 hover:text-blue-300 underline"
+          >
+            Return to Login
+          </Link>
+        </div>
+      </PageContainer>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError('');
+    setIsLoading(true);
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setIsLoading(false);
+      return;
+    }
 
     try {
-      const { token, user } = await loginApi(username, password);
-      if (token && user) {
-        login(token, user);
+      const response = await register(username, password);
+      if (response.token && response.user) {
+        login(response.token, response.user);
       }
     } catch (err: any) {
-      setError('Invalid username or password');
+      const errorMessage = err.message || 'Failed to register';
+      setError(errorMessage);
     } finally {
       setIsLoading(false);
     }
@@ -37,18 +58,13 @@ export const LoginPage: React.FC = () => {
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-bold text-white">
-            ByteStash
+            Create Account
           </h2>
           <p className="mt-2 text-center text-sm text-gray-400">
-            Please sign in to continue
-            {authConfig?.allowNewAccounts && (
-              <>
-                {' or '}
-                <Link to="/register" className="text-blue-400 hover:text-blue-300">
-                  create an account
-                </Link>
-              </>
-            )}
+            Or{' '}
+            <Link to="/login" className="text-blue-400 hover:text-blue-300">
+              sign in to your account
+            </Link>
           </p>
         </div>
 
@@ -61,7 +77,9 @@ export const LoginPage: React.FC = () => {
 
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
+              <label htmlFor="username" className="sr-only">Username</label>
               <input
+                id="username"
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border 
@@ -74,15 +92,32 @@ export const LoginPage: React.FC = () => {
               />
             </div>
             <div>
+              <label htmlFor="password" className="sr-only">Password</label>
               <input
+                id="password"
                 type="password"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border 
-                  border-gray-700 placeholder-gray-500 text-white bg-gray-800 rounded-b-md 
+                  border-gray-700 placeholder-gray-500 text-white bg-gray-800
                   focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <label htmlFor="confirm-password" className="sr-only">Confirm Password</label>
+              <input
+                id="confirm-password"
+                type="password"
+                required
+                className="appearance-none rounded-none relative block w-full px-3 py-2 border 
+                  border-gray-700 placeholder-gray-500 text-white bg-gray-800 rounded-b-md
+                  focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
+                placeholder="Confirm Password"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
               />
             </div>
@@ -103,10 +138,10 @@ export const LoginPage: React.FC = () => {
                     <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                     <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                   </svg>
-                  Signing in...
+                  Creating Account...
                 </span>
               ) : (
-                'Sign in'
+                'Create Account'
               )}
             </button>
           </div>
