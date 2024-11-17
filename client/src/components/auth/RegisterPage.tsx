@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { register } from '../../utils/api/auth';
 import { PageContainer } from '../common/layout/PageContainer';
@@ -10,8 +10,12 @@ export const RegisterPage: React.FC = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { login, authConfig } = useAuth();
+  const { login, authConfig, isAuthenticated } = useAuth();
   const { addToast } = useToast();
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />;
+  }
 
   if (!authConfig?.allowNewAccounts) {
     return (
