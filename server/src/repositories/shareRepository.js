@@ -99,7 +99,12 @@ class ShareRepository {
   async createShare({ snippetId, requiresAuth, expiresIn }, userId) {
     this.#initializeStatements();
     
-    const owner = this.getSnippetOwnerStmt.get(snippetId);
+    const snippetIdInt = parseInt(snippetId, 10);
+    if (isNaN(snippetIdInt)) {
+      throw new Error('Invalid snippet ID');
+    }
+    
+    const owner = this.getSnippetOwnerStmt.get(snippetIdInt);
     if (!owner || owner.user_id !== userId) {
       throw new Error('Unauthorized');
     }
@@ -109,14 +114,14 @@ class ShareRepository {
     try {
       this.createShareStmt.run(
         shareId,
-        snippetId,
+        snippetIdInt,
         requiresAuth ? 1 : 0,
         expiresIn
       );
       
       return {
         id: shareId,
-        snippetId,
+        snippetId: snippetIdInt,
         requiresAuth,
         expiresIn
       };
@@ -140,7 +145,11 @@ class ShareRepository {
   async getSharesBySnippetId(snippetId, userId) {
     this.#initializeStatements();
     try {
-      return this.getSharesBySnippetIdStmt.all(snippetId, userId);
+      const snippetIdInt = parseInt(snippetId, 10);
+      if (isNaN(snippetIdInt)) {
+        throw new Error('Invalid snippet ID');
+      }
+      return this.getSharesBySnippetIdStmt.all(snippetIdInt, userId);
     } catch (error) {
       console.error('Error in getSharesBySnippetId:', error);
       throw error;
