@@ -3,13 +3,14 @@ import { Link, Navigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { PageContainer } from '../common/layout/PageContainer';
 import { login as loginApi } from '../../utils/api/auth';
+import { useToast } from '../../hooks/useToast';
 
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, isAuthenticated, authConfig } = useAuth();
+  const { addToast } = useToast();
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -18,15 +19,12 @@ export const LoginPage: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
 
     try {
       const { token, user } = await loginApi(username, password);
-      if (token && user) {
-        login(token, user);
-      }
+      login(token, user);
     } catch (err: any) {
-      setError('Invalid username or password');
+      addToast('Invalid username or password', 'error');
     } finally {
       setIsLoading(false);
     }
@@ -53,12 +51,6 @@ export const LoginPage: React.FC = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 px-4 rounded-md border border-red-500/20">
-              {error}
-            </div>
-          )}
-
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <input

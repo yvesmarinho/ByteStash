@@ -3,14 +3,15 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { register } from '../../utils/api/auth';
 import { PageContainer } from '../common/layout/PageContainer';
+import { useToast } from '../../hooks/useToast';
 
 export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { login, authConfig } = useAuth();
+  const { addToast } = useToast();
 
   if (!authConfig?.allowNewAccounts) {
     return (
@@ -31,11 +32,10 @@ export const RegisterPage: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
     setIsLoading(true);
 
     if (password !== confirmPassword) {
-      setError('Passwords do not match');
+      addToast('Passwords do not match', 'error');
       setIsLoading(false);
       return;
     }
@@ -46,8 +46,8 @@ export const RegisterPage: React.FC = () => {
         login(response.token, response.user);
       }
     } catch (err: any) {
-      const errorMessage = err.message || 'Failed to register';
-      setError(errorMessage);
+      const errorMessage = err.error || 'Failed to register';
+      addToast(errorMessage, 'error');
     } finally {
       setIsLoading(false);
     }
@@ -69,12 +69,6 @@ export const RegisterPage: React.FC = () => {
         </div>
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && (
-            <div className="text-red-500 text-sm text-center bg-red-500/10 py-2 px-4 rounded-md border border-red-500/20">
-              {error}
-            </div>
-          )}
-
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="username" className="sr-only">Username</label>

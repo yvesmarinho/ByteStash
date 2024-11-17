@@ -31,7 +31,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       localStorage.removeItem('token');
       setIsAuthenticated(false);
       setUser(null);
-      addToast('Session expired. Please login again.', 'warning');
     };
 
     window.addEventListener(EVENTS.AUTH_ERROR, handleAuthError);
