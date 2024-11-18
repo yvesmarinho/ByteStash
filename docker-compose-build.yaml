@@ -1,6 +1,8 @@
 services:
   server:
-    image: enterprise/code-store:1.4.2
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "5001:5000"
     environment:
