@@ -119,9 +119,8 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             style={{ backgroundColor }}
           >
             <MarkdownRenderer
-              className={`markdown prose ${
-                isDark ? "prose-invert" : ""
-              } max-w-none`}
+              className={`markdown prose ${isDark ? "prose-invert" : ""
+                } max-w-none`}
             >
               {code}
             </MarkdownRenderer>
@@ -136,7 +135,7 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
               lineProps={{
                 style: {
                   whiteSpace: "pre",
-                  wordBreak: "break-all",
+                  wordBreak: "normal",
                   paddingLeft: 0,
                 },
               }}
@@ -149,6 +148,7 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
                 paddingLeft: showLineNumbers ? 10 : 20,
                 borderRadius: "0.5rem",
                 background: backgroundColor,
+                overflowX: "auto",
               }}
             >
               {code}

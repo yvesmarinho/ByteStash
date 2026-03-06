@@ -112,8 +112,7 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
           .token-line:nth-child(n+${previewLines + 1}) {
             visibility: hidden;
           }
-          .react-syntax-highlighter-line-number:nth-child(n+${
-            previewLines + 1
+          .react-syntax-highlighter-line-number:nth-child(n+${previewLines + 1
           }) {
             visibility: hidden;
           }
@@ -130,9 +129,8 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
             style={{ backgroundColor }}
           >
             <MarkdownRenderer
-              className={`markdown prose ${
-                isDark ? "prose-invert" : ""
-              } max-w-none`}
+              className={`markdown prose ${isDark ? "prose-invert" : ""
+                } max-w-none`}
               disableMermaid
             >
               {truncatedCode}
@@ -148,7 +146,7 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
               lineProps={{
                 style: {
                   whiteSpace: "pre",
-                  wordBreak: "break-all",
+                  wordBreak: "normal",
                   paddingLeft: 0,
                 },
               }}
@@ -160,7 +158,8 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
                 textIndent: 0,
                 paddingLeft: showLineNumbers ? 10 : 20,
                 borderRadius: "0.5rem",
-                overflow: "hidden",
+                overflowX: "auto",
+                overflowY: "hidden",
                 background: backgroundColor,
               }}
             >
