@@ -16,6 +16,7 @@
     "minimize": "Minimize",
     "restore": "Restore",
     "save": "Save",
+    "saving": "Saving...",
     "showPassword": "Show password",
     "signIn": "Sign in"
   },

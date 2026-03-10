@@ -1,10 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import MarkdownRenderer from "../common/markdown/MarkdownRenderer";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import {
-  vscDarkPlus,
-  oneLight,
-} from "react-syntax-highlighter/dist/cjs/styles/prism";
+import Editor from "@monaco-editor/react";
 import {
   getLanguageLabel,
   getMonacoLanguage,
@@ -75,26 +71,7 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
     const newHeight = Math.min(500, Math.max(100, contentHeight));
     setHighlighterHeight(`${newHeight}px`);
   };
-
-  const baseTheme = isDark ? vscDarkPlus : oneLight;
   const backgroundColor = isDark ? "#1E1E1E" : "#ffffff";
-  const customStyle = {
-    ...baseTheme,
-    'pre[class*="language-"]': {
-      ...baseTheme['pre[class*="language-"]'],
-      margin: 0,
-      fontSize: "13px",
-      background: backgroundColor,
-      padding: "1rem",
-    },
-    'code[class*="language-"]': {
-      ...baseTheme['code[class*="language-"]'],
-      fontSize: "13px",
-      background: backgroundColor,
-      display: "block",
-      textIndent: 0,
-    },
-  };
 
   return (
     <div className="relative">
@@ -126,33 +103,32 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
             </MarkdownRenderer>
           </div>
         ) : (
-          <div ref={containerRef} style={{ maxHeight: "500px" }}>
-            <SyntaxHighlighter
+          <div ref={containerRef} style={{ 
+            maxHeight: "500px", 
+            borderRadius: "0.5rem", 
+            overflow: "hidden", 
+            background: backgroundColor,
+            border: isDark ? '1px solid #333' : '1px solid #e5e7eb'
+          }}>
+            <Editor
+              height={highlighterHeight}
               language={getMonacoLanguage(language)}
-              style={customStyle}
-              showLineNumbers={showLineNumbers}
-              wrapLines={true}
-              lineProps={{
-                style: {
-                  whiteSpace: "pre",
-                  wordBreak: "normal",
-                  paddingLeft: 0,
-                },
+              theme={isDark ? "vs-dark" : "light"}
+              value={code}
+              options={{
+                readOnly: true,
+                minimap: { enabled: false },
+                scrollBeyondLastLine: false,
+                wordWrap: "off",
+                padding: { top: 16, bottom: 16 },
+                lineNumbers: showLineNumbers ? "on" : "off",
+                renderLineHighlight: "none",
+                scrollbar: {
+                  vertical: "visible",
+                  horizontal: "visible"
+                }
               }}
-              customStyle={{
-                height: highlighterHeight,
-                minHeight: "100px",
-                marginBottom: 0,
-                marginTop: 0,
-                textIndent: 0,
-                paddingLeft: showLineNumbers ? 10 : 20,
-                borderRadius: "0.5rem",
-                background: backgroundColor,
-                overflowX: "auto",
-              }}
-            >
-              {code}
-            </SyntaxHighlighter>
+            />
           </div>
         )}
 
