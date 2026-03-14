@@ -152,17 +152,19 @@ export const PreviewCodeBlock: React.FC<PreviewCodeBlockProps> = ({
           }}
         />
 
-        <CopyButton text={code} />
-        {!isRecycleView &&
-          isPublicView !== undefined &&
-          snippetId !== undefined &&
-          fragmentId !== undefined && (
-            <RawButton
-              isPublicView={isPublicView}
-              snippetId={snippetId}
-              fragmentId={fragmentId}
-            />
-          )}
+        <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+          <CopyButton text={code} />
+          {!isRecycleView &&
+            isPublicView !== undefined &&
+            snippetId !== undefined &&
+            fragmentId !== undefined && (
+              <RawButton
+                isPublicView={isPublicView}
+                snippetId={snippetId}
+                fragmentId={fragmentId}
+              />
+            )}
+        </div>
       </div>
     </div>
   );

@@ -26,6 +26,20 @@
       "nothing": "ダウンロードするものがありません"
     }
   },
+  "exportButton": {
+    "tooltip": "エクスポート"
+  },
+  "exportModal": {
+    "copyClipboard": "コピー",
+    "downloadPng": "PNGをダウンロード",
+    "downloadSvg": "SVGをダウンロード",
+    "errorCopy": "画像のコピーに失敗しました",
+    "errorGenerate": "画像の生成に失敗しました",
+    "shareLinkedIn": "LinkedInで共有",
+    "shareTwitter": "Xで共有",
+    "successCopy": "画像がクリップボードにコピーされました！",
+    "title": "コードをエクスポート"
+  },
   "fileUploadButton": {
     "error": {
       "unknown": "不明なエラー"

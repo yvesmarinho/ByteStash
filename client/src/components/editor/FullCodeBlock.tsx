@@ -8,6 +8,8 @@ import {
 import CopyButton from "../common/buttons/CopyButton";
 import { useTheme } from "../../contexts/ThemeContext";
 import RawButton from "../common/buttons/RawButton";
+import ExportImageButton from "./export/ExportImageButton";
+import ExportImageModal from "./export/ExportImageModal";
 
 export interface FullCodeBlockProps {
   code: string;
@@ -34,6 +36,8 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
         : "light"
       : theme
   );
+  
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   useEffect(() => {
     if (theme === "system") {
@@ -132,17 +136,27 @@ export const FullCodeBlock: React.FC<FullCodeBlockProps> = ({
           </div>
         )}
 
-        <CopyButton text={code} />
-        {isPublicView !== undefined &&
-          snippetId !== undefined &&
-          fragmentId !== undefined && (
-            <RawButton
-              isPublicView={isPublicView}
-              snippetId={snippetId}
-              fragmentId={fragmentId}
-            />
-          )}
+        <div className="absolute top-2 right-2 flex items-center gap-2 z-10">
+          <CopyButton text={code} />
+          <ExportImageButton onClick={() => setIsExportModalOpen(true)} />
+          {isPublicView !== undefined &&
+            snippetId !== undefined &&
+            fragmentId !== undefined && (
+              <RawButton
+                isPublicView={isPublicView}
+                snippetId={snippetId}
+                fragmentId={fragmentId}
+              />
+            )}
+        </div>
       </div>
+
+      <ExportImageModal
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        code={code}
+        language={language}
+      />
     </div>
   );
 };
